@@ -65,7 +65,8 @@ These entries establish Development source implementation only. They do not esta
 - Meson/Ninja build.
 - GLib unit tests for context, onboarding state, and paste-safety helpers.
 - Xvfb-backed GTK/VTE workspace integration tests, including clipboard-versus-primary paste-source routing.
-- GitHub Actions build/test/install validation on Ubuntu 24.04.
+- GitHub Actions build/test/install validation on Ubuntu 24.04 and Debian 13.
+- VTE 0.78+ term-property compatibility for working-directory/title tracking while preserving the VTE >=0.76 baseline.
 - Repository-governance validation.
 
 ## Glaze UI Boundary

@@ -531,3 +531,62 @@ This event does not establish:
 
 Trustworthy command-boundary navigation remains gated on shell integration that does not infer privileged state from spoofable prompt or terminal-output text. Repository protection and the blank GitHub Description remain separately unresolved in issue #3.
 
+
+## 2026-09-27 — Debian 13 Compatibility Validation Integrated
+
+### Event
+
+Owner-supplied Debian 13.7 x86_64 VPS validation established a second real Development build/test environment in addition to Ubuntu 24.04. Pull request #14 then integrated modern-VTE compatibility cleanup and permanent Debian 13 CI coverage without raising the existing VTE >=0.76 minimum.
+
+### Owner-Supplied VPS Evidence
+
+The representative server environment reported:
+
+- Debian GNU/Linux 13.7 (Trixie), x86_64;
+- GTK 4.18.6;
+- VTE GTK4 0.80.1;
+- GLib 2.84.4;
+- Meson 1.7.0; and
+- Ninja 1.12.1.
+
+On prior authoritative main `3b1df0a55cbef99349605d01a056965c3968b391`, that environment completed repository-governance validation, native compilation, all five Meson tests, and staged install-layout validation successfully. The same run exposed product-owned compatibility warnings from deprecated VTE 0.78+ working-directory/title accessors and positional `GActionEntry` initialization.
+
+### Exact Source Evidence
+
+- authoritative base: `3b1df0a55cbef99349605d01a056965c3968b391`;
+- first combined compatibility/CI candidate: `4aed73b632bfa890cb6475044b106f5518b7e3ed`;
+- corrected exact accepted candidate: `92b804cd58d2b67bb84e10538e6aafefb6964633`;
+- pull request: #14, **Harden Debian 13 and modern VTE compatibility**;
+- merge method: squash; and
+- authoritative merged commit: `5b9c9e476ed1b3151129aa7826e14ce8da6ec22a`.
+
+### Corrective and Validation Evidence
+
+The first combined candidate preserved Ubuntu 24.04 success but failed the new Debian 13 compile path because the VTE 0.78+ string term-property accessor was called with the wrong signature. The failing Debian path was retained and corrected rather than bypassed.
+
+The correction:
+
+- uses VTE's owned string term-property accessor with its required length argument;
+- uses the VTE term-property URI API for current-directory tracking on VTE 0.78+;
+- defers higher-level application/UI notification out of VTE's restricted term-property-change callback;
+- retains legacy current-directory/title access only when building against VTE older than 0.78; and
+- switches action registration to designated `GActionEntry` initializers.
+
+The exact accepted head passed:
+
+- Native Foundation run `36357727261` — push — success on both Ubuntu 24.04 and Debian 13 jobs; and
+- Native Foundation run `36357729538` — pull request — success on both Ubuntu 24.04 and Debian 13 jobs.
+
+After merge, authoritative `main` commit `5b9c9e476ed1b3151129aa7826e14ce8da6ec22a` passed:
+
+- Native Foundation run `36357820385` — push on `main` — success on both Ubuntu 24.04 and Debian 13 jobs.
+
+Both jobs verify repository governance, dependency setup, Meson configuration, native compilation, the full Meson test suite, and staged install layout. The Debian job also records dependency versions.
+
+### Compatibility Boundary
+
+The Development minimum remains GTK 4.12 or newer, VTE GTK4 0.76 or newer, and GLib/GIO 2.76 or newer. VTE 0.78+ uses the term-property path; older supported VTE uses the legacy compatibility path.
+
+This event establishes Debian 13 build/test/install validation. It does not establish representative graphical desktop acceptance, performance claims, release qualification, production readiness, complete Glaze UI 1.6.0 acceptance, or Stable/Anchor status.
+
+Repository branch protection and the blank GitHub Description remain separately unresolved in issue #3.
