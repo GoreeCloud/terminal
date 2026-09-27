@@ -306,3 +306,76 @@ This event does not establish:
 
 Repository protection and the blank GitHub Description remain separately unresolved and are tracked in GitHub issue #3.
 
+## 2026-09-27 — Scrollback Search and Guarded Clipboard Paste Integrated
+
+### Event
+
+Pull request #8 integrated the next bounded Development slice: active-pane scrollback search plus explicit review before multiline clipboard paste is delivered to a local shell.
+
+### Exact Source Evidence
+
+- authoritative base: `528ed4f4f7e6e6dbbb7a1967df9d0f7864db886d`;
+- accepted exact candidate: `738bc4f80c9086aa4bd5965fac98107d01fe0a6f`;
+- pull request: #8, **Add scrollback search and guarded clipboard paste**;
+- merge method: squash;
+- authoritative merged commit: `4f2114917eec6e6850eb6ddfd95ef3ecb3581201`;
+- merged tree: `795ea5d686a55764f1f852dee882e3062c9bd154`; and
+- GitHub reports the merged commit signature as verified.
+
+### Validation Evidence
+
+The accepted exact candidate passed:
+
+- Native Foundation run `36354142044` — push — success;
+- Native Foundation run `36354144379` — pull request — success.
+
+The merged authoritative revision then passed:
+
+- Native Foundation run `36354208767` — push on `main` — success.
+
+The workflow verified repository governance, Ubuntu 24.04 dependency setup, Meson configuration, native compilation, context tests, onboarding-state tests, paste-safety tests, the Xvfb-backed workspace test, and install layout.
+
+Earlier candidate revisions were superseded and are not acceptance evidence for the merged head.
+
+### Implemented Development Boundary
+
+Verified source now adds:
+
+- active-pane scrollback search opened with `Ctrl+Shift+F`;
+- literal search by default with optional regular-expression and case-sensitive modes;
+- wrap-around next/previous match navigation with `Ctrl+G` and `Ctrl+Shift+G`;
+- inline invalid-expression and no-match feedback;
+- guarded GTK clipboard reads for an explicit paste request;
+- interception of VTE's clipboard-paste route so Shift+Insert uses the same review path;
+- mandatory modal review whenever clipboard text contains a carriage return or line feed;
+- exact paste text plus line and character counts in the review;
+- explicit Cancel / Paste anyway choice; and
+- VTE paste-text delivery after confirmation so VTE paste processing, including bracketed-paste behavior where applicable, remains available.
+
+### Security and Privacy Boundary
+
+Clipboard text is read only after an explicit clipboard-paste request. GoreeCloud Terminal does not persist the reviewed clipboard content. Search patterns are process-local and are not persisted or transmitted.
+
+The review is a deliberate-execution guard, not a determination that reviewed commands are safe.
+
+Primary-selection middle-click paste is **not** intercepted by this slice and remains explicitly outside the claimed protection boundary. Search and paste handling add no remote transport, reusable credentials, telemetry, analytics, or network reporting.
+
+### Remaining Product Boundary
+
+This event does not establish:
+
+- primary-selection multiline-paste review;
+- command-boundary navigation;
+- URL/path interaction;
+- profiles or general settings;
+- persistent workspace/session restoration;
+- robust shell command-start/completion/exit-status/process integration;
+- SSH/remote administration;
+- container workflows;
+- representative Linux desktop runtime acceptance;
+- complete Glaze UI 1.6.0 consumer conformance;
+- production packaging or release acceptance; or
+- Stable/Anchor status.
+
+Repository protection and the blank GitHub Description remain separately unresolved and are tracked in GitHub issue #3.
+
