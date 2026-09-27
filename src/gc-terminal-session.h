@@ -1,6 +1,6 @@
 #pragma once
 
-#include <gtk/gtk.h>
+#include <gtk/gtk.h>\n\n#include "gc-link-utils.h"
 
 G_BEGIN_DECLS
 
@@ -16,10 +16,18 @@ typedef void (*GcTerminalSessionPasteRequestedFunc)(
     gpointer user_data
 );
 
+typedef void (*GcTerminalSessionOpenRequestedFunc)(
+    GcTerminalSession *session,
+    GcLinkTargetKind kind,
+    const char *target,
+    gpointer user_data
+);
+
 GcTerminalSession *gc_terminal_session_new(
     const char *working_directory,
     GcTerminalSessionChangedFunc changed,
     GcTerminalSessionPasteRequestedFunc paste_requested,
+    GcTerminalSessionOpenRequestedFunc open_requested,
     gpointer user_data
 );
 

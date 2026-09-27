@@ -3,6 +3,7 @@ executable(
   [
     'main.c',
     'gc-context.c',
+    'gc-link-utils.c',
     'gc-paste-safety.c',
     'gc-onboarding-state.c',
     'gc-onboarding.c',

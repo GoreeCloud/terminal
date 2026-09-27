@@ -19,9 +19,18 @@ typedef void (*GcWorkspacePasteRequestedFunc)(
     gpointer user_data
 );
 
+typedef void (*GcWorkspaceOpenRequestedFunc)(
+    GcWorkspace *workspace,
+    GcTerminalSession *session,
+    GcLinkTargetKind kind,
+    const char *target,
+    gpointer user_data
+);
+
 GcWorkspace *gc_workspace_new(
     GcWorkspaceChangedFunc changed,
     GcWorkspacePasteRequestedFunc paste_requested,
+    GcWorkspaceOpenRequestedFunc open_requested,
     gpointer user_data
 );
 void gc_workspace_free(GcWorkspace *workspace);

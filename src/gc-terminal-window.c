@@ -2,6 +2,7 @@
 
 #include "gc-context.h"
 #include "gc-onboarding.h"
+#include "gc-link-utils.h"
 #include "gc-paste-safety.h"
 #include "gc-workspace.h"
 
@@ -492,6 +493,48 @@ on_workspace_paste_requested(
 }
 
 static void
+on_workspace_open_requested(
+    GcWorkspace *workspace,
+    GcTerminalSession *session,
+    GcLinkTargetKind kind,
+    const char *target,
+    gpointer user_data
+)
+{
+    TerminalWindowState *state = user_data;
+    g_autofree char *working_directory =
+        gc_terminal_session_dup_working_directory(session);
+    g_autofree char *uri = NULL;
+    GError *error = NULL;
+    (void) workspace;
+
+    uri = gc_link_target_to_uri(
+        kind,
+        target,
+        working_directory,
+        &error
+    );
+
+    if (uri == NULL) {
+        g_warning(
+            "Refusing terminal link target '%s': %s",
+            target,
+            error != NULL ? error->message : "invalid target"
+        );
+        g_clear_error(&error);
+        return;
+    }
+
+    if (!g_app_info_launch_default_for_uri(uri, NULL, &error)) {
+        g_warning(
+            "Unable to open terminal link target: %s",
+            error != NULL ? error->message : "desktop handler failed"
+        );
+        g_clear_error(&error);
+    }
+}
+
+static void
 paste_action(GSimpleAction *action, GVariant *parameter, gpointer user_data)
 {
     TerminalWindowState *state = user_data;
@@ -835,6 +878,7 @@ gc_terminal_window_new(GtkApplication *application)
     state->workspace = gc_workspace_new(
         on_workspace_changed,
         on_workspace_paste_requested,
+        on_workspace_open_requested,
         state
     );
 
