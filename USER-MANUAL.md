@@ -12,54 +12,46 @@ The application starts the shell specified by `$SHELL`, falling back to `/bin/sh
 
 ## First Run and Help
 
-On first run, GoreeCloud Terminal presents a four-step Development guide covering:
+The first-run guide covers local-shell behavior, execution context, tabs, panes, search, clipboard-paste review, shortcuts, and current Development limitations. If closed before completion, the current onboarding step is stored locally and resumed later. Help replays the guide without clearing completion state.
 
-- local-shell behavior;
-- the execution-context ribbon;
-- tab and clipboard shortcuts; and
-- current safety and feature limitations.
-
-If the guide is closed before completion, the current step is stored locally and resumed later. The Help button in the header replays the guide without clearing completion state.
-
-## Tabs
+## Tabs and Split Panes
 
 - New tab: `Ctrl+Shift+T`
 - Close active tab: `Ctrl+Shift+W`
-- Next tab: `Ctrl+PageDown`
-- Previous tab: `Ctrl+PageUp`
-
-A new tab attempts to start in the active tab's current working directory. Tabs can be reordered with the pointer.
-
-Closing the final tab closes the window.
-
-## Split Panes
-
+- Next/previous tab: `Ctrl+PageDown` / `Ctrl+PageUp`
 - Split left/right: `Ctrl+Shift+E`
 - Split top/bottom: `Ctrl+Shift+O`
 - Close active pane: `Ctrl+Shift+X`
-- Focus previous pane: `Alt+Left`
-- Focus next pane: `Alt+Right`
+- Focus previous/next pane: `Alt+Left` / `Alt+Right`
 
-A new pane attempts to start in the active pane's current working directory. Dividers can be dragged with the pointer to resize panes. Pane focus navigation currently cycles through the active tab's panes; it is not geometric directional navigation.
+New tabs and panes attempt to inherit the active pane's current working directory. Pane dividers can be dragged to resize them. Pane focus navigation currently cycles rather than performing geometric directional selection.
 
-Closing a pane collapses its surrounding split. If a tab has only one pane, Close Pane follows the existing close-tab/window fallback.
+## Search
 
-Pane layouts are not persisted or restored yet.
+Press `Ctrl+Shift+F` to show search for the active pane.
+
+- Text is treated literally by default.
+- Enable **Regex** for regular-expression search.
+- Enable **Case** for case-sensitive matching.
+- `Ctrl+G` moves to the next match.
+- `Ctrl+Shift+G` moves to the previous match.
+- Search wraps through terminal content.
+- Escape closes the search bar and clears the active pane's search expression.
+
+Invalid regular expressions are shown inline and are not applied.
+
+## Clipboard Paste Review
+
+`Ctrl+Shift+V` and Shift+Insert use the guarded clipboard path.
+
+Single-line text is pasted directly. If the clipboard text contains a newline or carriage return, GoreeCloud Terminal opens a modal review that shows the exact text plus line and character counts. Choose **Paste anyway** to send the text or **Cancel** to discard it.
+
+Primary-selection middle-click paste is not yet intercepted by this review path. Treat that as a current Development limitation when working with sensitive shells.
 
 ## Context Ribbon
 
-The ribbon shows:
-
-- **Local** or **Elevated local**;
-- **user@host**;
-- the active session's working directory; and
-- the active shell session state.
-
-## Clipboard
-
-- Copy selected terminal text: `Ctrl+Shift+C`
-- Paste clipboard text: `Ctrl+Shift+V`
+The ribbon shows local/elevated privilege state, `user@host`, the active pane's working directory, and active shell state.
 
 ## Current Limitations
 
-The Development build does not yet provide SSH, profiles, workspace/session restoration, search, safe multiline-paste review, container workflows, or production-grade Glaze UI acceptance.
+The Development build does not yet provide command-boundary navigation, URL/path actions, primary-selection paste review, SSH, profiles, workspace/session restoration, container workflows, or production-grade Glaze UI acceptance.

@@ -5,7 +5,7 @@
 static void
 test_split_and_close(void)
 {
-    GcWorkspace *workspace = gc_workspace_new(NULL, NULL);
+    GcWorkspace *workspace = gc_workspace_new(NULL, NULL, NULL);
     GtkWidget *widget = gc_workspace_get_widget(workspace);
 
     g_object_ref_sink(widget);

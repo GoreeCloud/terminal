@@ -2,10 +2,11 @@
 
 The following remain planned or materially incomplete:
 
+- command-boundary navigation;
+- URL/path detection and interaction;
+- primary-selection middle-click multiline-paste review;
 - profiles for shell, working directory, environment, startup command, shortcuts, and appearance;
-- searchable/regex scrollback and command-boundary navigation;
-- shell integration for exit status, command boundaries, process context, and reliable CWD;
-- URL/path interaction and safe multiline-paste review;
+- robust shell integration for exit status, command boundaries, process context, and reliable CWD;
 - persistent workspace/session restoration;
 - settings beyond the bounded onboarding state;
 - SSH host profiles, host verification, reconnection, and secure key/credential handling;

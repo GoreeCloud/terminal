@@ -12,6 +12,7 @@ typedef struct {
 struct _GcWorkspace {
     GtkNotebook *notebook;
     GcWorkspaceChangedFunc changed;
+    GcWorkspacePasteRequestedFunc paste_requested;
     gpointer user_data;
 };
 
@@ -152,6 +153,16 @@ on_session_changed(GcTerminalSession *session, gpointer user_data)
 }
 
 static void
+on_session_paste_requested(GcTerminalSession *session, gpointer user_data)
+{
+    GcWorkspace *workspace = user_data;
+
+    if (workspace->paste_requested != NULL) {
+        workspace->paste_requested(workspace, session, workspace->user_data);
+    }
+}
+
+static void
 on_switch_page(
     GtkNotebook *notebook,
     GtkWidget *page_widget,
@@ -172,13 +183,18 @@ on_switch_page(
 }
 
 GcWorkspace *
-gc_workspace_new(GcWorkspaceChangedFunc changed, gpointer user_data)
+gc_workspace_new(
+    GcWorkspaceChangedFunc changed,
+    GcWorkspacePasteRequestedFunc paste_requested,
+    gpointer user_data
+)
 {
     GcWorkspace *workspace = g_new0(GcWorkspace, 1);
     GtkWidget *notebook = gtk_notebook_new();
 
     workspace->notebook = GTK_NOTEBOOK(notebook);
     workspace->changed = changed;
+    workspace->paste_requested = paste_requested;
     workspace->user_data = user_data;
 
     gtk_notebook_set_scrollable(workspace->notebook, TRUE);
@@ -238,6 +254,7 @@ gc_workspace_add_tab(GcWorkspace *workspace, const char *working_directory)
     GcTerminalSession *session = gc_terminal_session_new(
         working_directory,
         on_session_changed,
+        on_session_paste_requested,
         workspace
     );
     GtkWidget *root = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
@@ -341,6 +358,7 @@ gc_workspace_split_current(
     created = gc_terminal_session_new(
         working_directory,
         on_session_changed,
+        on_session_paste_requested,
         workspace
     );
     created_widget = gc_terminal_session_get_widget(created);

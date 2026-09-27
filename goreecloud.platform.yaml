@@ -25,13 +25,13 @@ platform_systems:
   privacy_shield:
     result: applicable-blocked
     version: null
-    evidence: ["PRIVACY POLICY.md"]
-    notes: Local-only behavior is privacy-minimized, but accepted Privacy Shield integration is not established.
+    evidence: ["PRIVACY POLICY.md", src/gc-paste-safety.c]
+    notes: Local-only search and guarded clipboard review are privacy-minimized, but accepted Privacy Shield integration is not established.
   wardveil_security:
     result: applicable-blocked
     version: null
-    evidence: [SECURITY.md]
-    notes: Accepted Wardveil runtime integration and protection acceptance are not established.
+    evidence: [SECURITY.md, src/gc-paste-safety.c]
+    notes: Guarded multiline clipboard paste is source-implemented; accepted Wardveil runtime integration and protection acceptance are not established.
   everkeep:
     result: applicable-blocked
     version: null
@@ -95,7 +95,7 @@ external_dependencies:
     required: true
     version_constraint: ">=4.12"
   - name: GNOME VTE GTK4
-    purpose: Terminal emulation and PTY supporting component.
+    purpose: Terminal emulation, PTY, search, and paste-processing supporting component.
     required: true
     version_constraint: ">=0.76"
   - name: GLib/GIO
@@ -115,6 +115,8 @@ compatibility:
     - goreecloud-terminal-local-session-dev-v1
     - goreecloud-terminal-tabs-dev-v1
     - goreecloud-terminal-split-panes-dev-v1
+    - goreecloud-terminal-search-dev-v1
+    - goreecloud-terminal-guarded-paste-dev-v1
     - goreecloud-terminal-onboarding-state-dev-v1
 
 evidence:
@@ -135,5 +137,5 @@ conformance:
   blockers:
     - Glaze UI 1.6.0 consumer acceptance is incomplete.
     - Privacy Shield, Wardveil, Everkeep, Manager, Mesh, Identity, Policy, and Observability integration/acceptance are not established.
-    - Remote administration, profiles, workspace/session persistence, containers, automation, protocol validation, performance validation, and representative Linux runtime acceptance remain incomplete.
+    - Command-boundary navigation, URL/path interaction, primary-selection paste review, remote administration, profiles, workspace/session persistence, containers, automation, protocol validation, performance validation, and representative Linux runtime acceptance remain incomplete.
     - Production packaging, signed releases, rollback evidence, release approval, and lifecycle promotion remain incomplete.

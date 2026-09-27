@@ -4,7 +4,7 @@ The Development implementation is an original GoreeCloud Linux application using
 
 GoreeCloud owns product behavior, session/workspace design, context/safety, profiles, remote administration, shell awareness, containers, automation, notifications, platform integration, and Glaze UI presentation.
 
-VTE is a bounded supporting dependency for terminal emulation and PTY primitives.
+VTE is a bounded supporting dependency for terminal emulation, PTY, search, and paste-processing primitives.
 
 ## Current Source Boundaries
 
@@ -12,16 +12,19 @@ VTE is a bounded supporting dependency for terminal emulation and PTY primitives
 main.c
   -> gc-terminal-window.c
        -> application actions + presentation
-       -> active-session context ribbon
+       -> context ribbon
+       -> search UI + clipboard-paste review
        -> onboarding launch/replay
        -> gc-workspace.c
             -> tab membership + active pane selection
             -> ephemeral nested GtkPaned layout trees
-            -> working-directory-aware tab/pane creation
+            -> paste-request routing
             -> gc-terminal-session.c
                  -> VTE widget + PTY shell lifecycle
                  -> session title/CWD/status
-                 -> copy/paste/focus
+                 -> VTE search + paste-text primitives
+       -> gc-paste-safety.c
+            -> pure multiline-review detection + line counting
   -> gc-onboarding.c
        -> first-run/replay presentation
        -> gc-onboarding-state.c
@@ -32,14 +35,18 @@ main.c
        -> privilege label
 ```
 
-## State Boundary
+## Clipboard Safety Boundary
 
-The only GoreeCloud-owned persistent state in this slice is onboarding progress:
+VTE's clipboard-paste signal is intercepted and routed to the GoreeCloud review path. Single-line clipboard text is sent directly; text containing `\n` or `\r` requires modal confirmation. Confirmed text is sent with VTE's paste-text API so bracketed-paste handling remains available.
 
-`$XDG_CONFIG_HOME/goreecloud-terminal/state.ini`
+Primary-selection middle-click paste remains outside this bounded interception path and is explicitly not represented as protected.
 
-It contains only `completed` and `step`. It is not a workspace/session-restore schema, profile store, command-history store, credential store, or authorization source.
+## Search Boundary
 
-## Future Separation
+Search is active-pane-local and ephemeral. GoreeCloud Terminal compiles either escaped literal text or user-supplied regex into VTE's search engine, enables wrap-around navigation, and does not persist or transmit the expression.
 
-Pane layout is currently ephemeral and intentionally has no persistence contract. Profiles, shell integration, remote transport, container context, persistent workspace recovery, automation, and platform adapters remain separate future modules rather than being folded back into the window layer.
+## Persistent State Boundary
+
+The only GoreeCloud-owned persistent state remains onboarding progress at `$XDG_CONFIG_HOME/goreecloud-terminal/state.ini`, containing only `completed` and `step`.
+
+Profiles, search history, clipboard history, pane layout, shell command history, and workspace/session restore remain outside this state contract.

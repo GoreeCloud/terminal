@@ -12,6 +12,7 @@ struct _GcTerminalSession {
     char *title;
     char *status;
     GcTerminalSessionChangedFunc changed;
+    GcTerminalSessionPasteRequestedFunc paste_requested;
     gpointer user_data;
 };
 
@@ -69,6 +70,18 @@ on_focus_changed(GObject *object, GParamSpec *pspec, gpointer user_data)
 }
 
 static void
+on_paste_clipboard(VteTerminal *terminal, gpointer user_data)
+{
+    GcTerminalSession *session = user_data;
+
+    g_signal_stop_emission_by_name(terminal, "paste-clipboard");
+
+    if (session->paste_requested != NULL) {
+        session->paste_requested(session, session->user_data);
+    }
+}
+
+static void
 on_child_exited(VteTerminal *terminal, gint status, gpointer user_data)
 {
     GcTerminalSession *session = user_data;
@@ -111,6 +124,7 @@ GcTerminalSession *
 gc_terminal_session_new(
     const char *working_directory,
     GcTerminalSessionChangedFunc changed,
+    GcTerminalSessionPasteRequestedFunc paste_requested,
     gpointer user_data
 )
 {
@@ -133,6 +147,7 @@ gc_terminal_session_new(
     session->title = g_strdup("Terminal");
     session->status = g_strdup("Starting shell");
     session->changed = changed;
+    session->paste_requested = paste_requested;
     session->user_data = user_data;
 
     g_object_set_data_full(
@@ -159,6 +174,7 @@ gc_terminal_session_new(
     vte_terminal_set_allow_hyperlink(session->terminal, TRUE);
     vte_terminal_set_bold_is_bright(session->terminal, TRUE);
     vte_terminal_set_cursor_blink_mode(session->terminal, VTE_CURSOR_BLINK_SYSTEM);
+    vte_terminal_search_set_wrap_around(session->terminal, TRUE);
 
     font = pango_font_description_from_string("Monospace 11");
     vte_terminal_set_font(session->terminal, font);
@@ -180,6 +196,12 @@ gc_terminal_session_new(
         session->terminal,
         "notify::has-focus",
         G_CALLBACK(on_focus_changed),
+        session
+    );
+    g_signal_connect(
+        session->terminal,
+        "paste-clipboard",
+        G_CALLBACK(on_paste_clipboard),
         session
     );
     g_signal_connect(
@@ -269,7 +291,72 @@ gc_terminal_session_paste(GcTerminalSession *session)
 }
 
 void
+gc_terminal_session_paste_text(GcTerminalSession *session, const char *text)
+{
+    if (text == NULL || *text == '\0') {
+        return;
+    }
+
+    vte_terminal_paste_text(session->terminal, text);
+}
+
+void
 gc_terminal_session_focus(GcTerminalSession *session)
 {
     gtk_widget_grab_focus(GTK_WIDGET(session->terminal));
+}
+
+gboolean
+gc_terminal_session_set_search(
+    GcTerminalSession *session,
+    const char *pattern,
+    gboolean regex_enabled,
+    gboolean case_sensitive,
+    GError **error
+)
+{
+    g_autofree char *escaped = NULL;
+    g_autofree char *compiled_pattern = NULL;
+    VteRegex *regex;
+
+    if (pattern == NULL || *pattern == '\0') {
+        gc_terminal_session_clear_search(session);
+        return TRUE;
+    }
+
+    escaped = regex_enabled
+        ? g_strdup(pattern)
+        : g_regex_escape_string(pattern, -1);
+
+    compiled_pattern = g_strdup_printf(
+        case_sensitive ? "(?m:%s)" : "(?im:%s)",
+        escaped
+    );
+
+    regex = vte_regex_new_for_search(compiled_pattern, -1, 0, error);
+    if (regex == NULL) {
+        return FALSE;
+    }
+
+    vte_terminal_search_set_regex(session->terminal, regex, 0);
+    vte_regex_unref(regex);
+    return TRUE;
+}
+
+void
+gc_terminal_session_clear_search(GcTerminalSession *session)
+{
+    vte_terminal_search_set_regex(session->terminal, NULL, 0);
+}
+
+gboolean
+gc_terminal_session_search_next(GcTerminalSession *session)
+{
+    return vte_terminal_search_find_next(session->terminal);
+}
+
+gboolean
+gc_terminal_session_search_previous(GcTerminalSession *session)
+{
+    return vte_terminal_search_find_previous(session->terminal);
 }

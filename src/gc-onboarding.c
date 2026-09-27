@@ -18,6 +18,7 @@ static const char *page_titles[] = {
     "Welcome to GoreeCloud Terminal",
     "Know where commands will run",
     "Work quickly with tabs and panes",
+    "Search and review risky pastes",
     "Current Development safety boundary",
 };
 
@@ -25,7 +26,8 @@ static const char *page_bodies[] = {
     "GoreeCloud Terminal currently opens local shell sessions only. The app is still in Development, so planned remote, persistence, profile, and container features are not implied by this build.",
     "The context ribbon keeps privilege state, user@host, the active working directory, and session status visible. Treat these indicators as execution context, not as a substitute for reviewing commands before you run them.",
     "Open a new tab with Ctrl+Shift+T. Split left/right with Ctrl+Shift+E or top/bottom with Ctrl+Shift+O. Cycle pane focus with Alt+Left and Alt+Right; close the active pane with Ctrl+Shift+X. Tab navigation remains Ctrl+PageUp and Ctrl+PageDown.",
-    "New tabs and panes inherit the active pane's working directory when possible. SSH, persistent sessions, safe multiline-paste review, profiles, and production-grade Glaze UI acceptance are still planned. You can replay this guide from Help at any time.",
+    "Search the active pane with Ctrl+Shift+F; Regex and Case options are available in the search bar. Clipboard paste through Ctrl+Shift+V or Shift+Insert reads the text first and requires confirmation when it contains a line break.",
+    "New tabs and panes inherit the active pane's working directory when possible. Primary-selection middle-click paste, command-boundary navigation, URL/path actions, SSH, persistent sessions, profiles, and production-grade Glaze UI acceptance are still incomplete. You can replay this guide from Help at any time.",
 };
 
 static const guint page_count = G_N_ELEMENTS(page_titles);
@@ -146,7 +148,7 @@ show_onboarding(GtkWindow *parent, gboolean replay, guint start_step)
     );
 
     gtk_window_set_title(view->window, "Welcome — GoreeCloud Terminal");
-    gtk_window_set_default_size(view->window, 560, 360);
+    gtk_window_set_default_size(view->window, 600, 390);
     gtk_window_set_resizable(view->window, FALSE);
     gtk_window_set_modal(view->window, TRUE);
     gtk_window_set_transient_for(view->window, parent);
