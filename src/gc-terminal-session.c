@@ -37,11 +37,47 @@ set_text(char **target, const char *value)
     *target = g_strdup(value != NULL ? value : "");
 }
 
+static char *
+dup_current_directory_uri(VteTerminal *terminal)
+{
+#if VTE_CHECK_VERSION(0, 78, 0)
+    GUri *uri = vte_terminal_ref_termprop_uri(
+        terminal,
+        VTE_TERMPROP_CURRENT_DIRECTORY_URI
+    );
+    char *value = NULL;
+
+    if (uri != NULL) {
+        value = g_uri_to_string(uri);
+        g_uri_unref(uri);
+    }
+
+    return value;
+#else
+    return g_strdup(vte_terminal_get_current_directory_uri(terminal));
+#endif
+}
+
+static char *
+dup_window_title(VteTerminal *terminal)
+{
+#if VTE_CHECK_VERSION(0, 78, 0)
+    return g_strdup(
+        vte_terminal_get_termprop_string(
+            terminal,
+            VTE_TERMPROP_XTERM_TITLE
+        )
+    );
+#else
+    return g_strdup(vte_terminal_get_window_title(terminal));
+#endif
+}
+
 static void
 update_working_directory(VteTerminal *terminal, gpointer user_data)
 {
     GcTerminalSession *session = user_data;
-    const char *uri = vte_terminal_get_current_directory_uri(terminal);
+    g_autofree char *uri = dup_current_directory_uri(terminal);
     g_autofree char *path = NULL;
 
     if (uri != NULL) {
@@ -59,11 +95,27 @@ static void
 update_window_title(VteTerminal *terminal, gpointer user_data)
 {
     GcTerminalSession *session = user_data;
-    const char *title = vte_terminal_get_window_title(terminal);
+    g_autofree char *title = dup_window_title(terminal);
 
     set_text(&session->title, title != NULL && *title != '\0' ? title : "Terminal");
     notify_changed(session);
 }
+
+#if VTE_CHECK_VERSION(0, 78, 0)
+static void
+on_termprop_changed(
+    VteTerminal *terminal,
+    const char *property,
+    gpointer user_data
+)
+{
+    if (g_strcmp0(property, VTE_TERMPROP_CURRENT_DIRECTORY_URI) == 0) {
+        update_working_directory(terminal, user_data);
+    } else if (g_strcmp0(property, VTE_TERMPROP_XTERM_TITLE) == 0) {
+        update_window_title(terminal, user_data);
+    }
+}
+#endif
 
 static void
 on_focus_changed(GObject *object, GParamSpec *pspec, gpointer user_data)
@@ -351,6 +403,14 @@ gc_terminal_session_new(
         );
     }
 
+#if VTE_CHECK_VERSION(0, 78, 0)
+    g_signal_connect(
+        session->terminal,
+        "termprop-changed",
+        G_CALLBACK(on_termprop_changed),
+        session
+    );
+#else
     g_signal_connect(
         session->terminal,
         "current-directory-uri-changed",
@@ -363,6 +423,7 @@ gc_terminal_session_new(
         G_CALLBACK(update_window_title),
         session
     );
+#endif
     g_signal_connect(
         session->terminal,
         "notify::has-focus",
