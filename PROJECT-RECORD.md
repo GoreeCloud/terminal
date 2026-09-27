@@ -161,3 +161,75 @@ This integration does not establish:
 
 Those capabilities remain subject to the applicable planned-feature, validation, release, and production-acceptance gates.
 
+## 2026-09-27 — Session/Workspace, Multi-Tab, and Onboarding Slice Integrated
+
+### Event
+
+Pull request #4 integrated the next bounded Development slice: explicit terminal-session/workspace modules, multiple local tabs, working-directory-aware tab creation, and first-run onboarding with durable progress and Help replay.
+
+### Exact Source Evidence
+
+- authoritative base: `89ea64c8d536f5698a9e56c2362831f7a3bfd3f3`;
+- exact merge candidate: `7f93d9207369e72df2c4e7ef71deace0f2d894c7`;
+- pull request: #4, **Add session workspace, tabs, and onboarding**;
+- merge method: squash;
+- authoritative merged commit: `575801a8ebe34bf3f22d5868771ad9283d1e2896`;
+- merged tree: `e2e8db43be300b7fec63e6b1a328aec0a612cb19`; and
+- GitHub reports the merged commit signature as verified.
+
+### Validation Evidence
+
+The exact candidate passed:
+
+- Native Foundation run `36351979966` — push — success;
+- Native Foundation run `36351982244` — pull request — success.
+
+The merged authoritative revision then passed:
+
+- Native Foundation run `36352065673` — push on `main` — success.
+
+The workflow verified repository governance, Meson configuration, native compilation, context tests, onboarding-state tests, and install layout on Ubuntu 24.04.
+
+### Implemented Development Boundary
+
+Verified source now adds:
+
+- explicit `GcTerminalSession` and `GcWorkspace` modules;
+- multiple reorderable local shell tabs;
+- active-session context and window-title synchronization;
+- working-directory-aware new-tab creation when the active shell reports a directory;
+- `Ctrl+Shift+T` and `Ctrl+Shift+W` tab creation/closing;
+- `Ctrl+PageDown` and `Ctrl+PageUp` tab navigation;
+- first-run onboarding for local-shell behavior, context indicators, keyboard shortcuts, and Development limits;
+- durable onboarding completion/current-step state;
+- interruption/resume behavior for incomplete onboarding; and
+- Help replay without clearing saved completion state.
+
+### Data, Security, and Privacy Boundary
+
+The only new GoreeCloud-owned persistent state is the onboarding file at:
+
+`$XDG_CONFIG_HOME/goreecloud-terminal/state.ini`
+
+It stores only onboarding completion and current step. It is not a command-history store, session-restore format, credential store, remote-host store, policy source, or authorization signal.
+
+The integrated slice adds no SSH/remote transport, reusable credentials, telemetry, analytics, hidden network reporting, or automatic privilege escalation. Tab labels and context indicators remain informational.
+
+### Remaining Product Boundary
+
+This event does not establish:
+
+- split panes;
+- searchable scrollback or safe multiline-paste review;
+- profiles or general settings;
+- workspace/session persistence;
+- robust shell command-boundary integration;
+- SSH/remote administration;
+- container workflows;
+- representative Linux desktop runtime acceptance;
+- complete Glaze UI 1.6.0 consumer conformance;
+- production packaging or release acceptance; or
+- Stable/Anchor status.
+
+Repository protection and the blank GitHub Description also remain separately unresolved and are tracked in GitHub issue #3.
+
