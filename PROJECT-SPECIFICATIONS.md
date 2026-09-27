@@ -507,6 +507,8 @@ The Development source must keep local terminal-session behavior separate from w
 
 The first-run experience may persist only minimal onboarding progress in the user's XDG configuration directory. That state is not a session-restore format, profile format, command-history store, credential store, or authorization source.
 
+Terminal link/path interaction must require deliberate user intent, validate untrusted terminal-provided targets before opening, avoid arbitrary URI schemes, resolve local paths from explicit active-session context, and never execute detected terminal text as a shell command. Command-boundary navigation remains dependent on trustworthy shell integration rather than prompt-text inference.
+
 ### 7.3 Component Boundaries
 
 The implementation must preserve clear boundaries among:

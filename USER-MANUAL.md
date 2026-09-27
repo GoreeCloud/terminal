@@ -40,6 +40,21 @@ Press `Ctrl+Shift+F` to show search for the active pane.
 
 Invalid regular expressions are shown inline and are not applied.
 
+## Links and Local Paths
+
+Ctrl+click a recognized target in the active pane to request opening it with the desktop default handler.
+
+Supported targets in this Development slice are:
+
+- explicit OSC 8 hyperlinks after validation;
+- `http://` and `https://` URLs;
+- `mailto:` links;
+- local `file://` URIs;
+- existing absolute paths; and
+- existing `~/`, `./`, and `../` paths resolved from the active pane working directory.
+
+Other URI schemes are rejected. Local paths must exist before they are opened. Detected text is not executed through the shell. Opening an HTTP/HTTPS or mail link hands it to the configured external application, which may perform network activity under that application's policies.
+
 ## Clipboard Paste Review
 
 `Ctrl+Shift+V` and Shift+Insert use the guarded clipboard path.
@@ -54,4 +69,4 @@ The ribbon shows local/elevated privilege state, `user@host`, the active pane's 
 
 ## Current Limitations
 
-The Development build does not yet provide command-boundary navigation, URL/path actions, primary-selection paste review, SSH, profiles, workspace/session restoration, container workflows, or production-grade Glaze UI acceptance.
+The Development build does not yet provide command-boundary navigation, primary-selection paste review, SSH, profiles, workspace/session restoration, container workflows, or production-grade Glaze UI acceptance.

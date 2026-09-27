@@ -10,6 +10,8 @@ Clipboard paste through GoreeCloud Terminal's clipboard action and VTE's paste-c
 
 Search patterns remain local to the active terminal process and are not transmitted externally.
 
+Ctrl+click link/path interaction uses an allowlist of HTTP, HTTPS, mailto, and local file URI schemes. Local paths must exist before launch, remote file URI hosts are rejected, and detected terminal text is never executed as a shell command. OSC 8 hyperlink targets are treated as untrusted input and pass through the same validation boundary before the desktop handler is invoked.
+
 The onboarding state file stores only completion/current-step state and must never become a credential, policy, authorization, command-history, or session-secret store.
 
 Future remote administration and saved profiles must use explicit host identity, least privilege, protected key/credential handling, fail-closed verification, and clear local/remote/elevated/container differentiation.

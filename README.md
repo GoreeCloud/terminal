@@ -18,14 +18,15 @@ The current source provides:
 - searchable active-pane scrollback with literal or regular-expression matching;
 - case-sensitive or case-insensitive search and wrap-around navigation;
 - clipboard paste review when pasted text contains line breaks;
-- keyboard-driven tabs, panes, search, copy, and paste;
+- explicit Ctrl+click opening for validated hyperlinks and existing local paths;
+- keyboard-driven tabs, panes, search, copy, paste, and link/path interaction;
 - first-run onboarding with durable step progress and Help replay;
 - 10,000-line default scrollback per session;
 - a restrained Glaze-inspired Development presentation;
 - Meson/Ninja build and install plumbing; and
 - GitHub Actions compile/test/install validation.
 
-This is Development source evidence only. Command-boundary navigation, URL/path interaction, primary-selection paste review, profiles, SSH, workspace/session persistence, containers, automation, protocol qualification, representative runtime acceptance, performance claims, full Glaze conformance, release qualification, and Stable/Anchor status remain incomplete.
+This is Development source evidence only. Command-boundary navigation, primary-selection paste review, profiles, SSH, workspace/session persistence, containers, automation, protocol qualification, representative runtime acceptance, performance claims, full Glaze conformance, release qualification, and Stable/Anchor status remain incomplete.
 
 ## Keyboard Shortcuts
 
@@ -43,8 +44,11 @@ This is Development source evidence only. Command-boundary navigation, URL/path 
 - Previous search match: `Ctrl+Shift+G`
 - Copy: `Ctrl+Shift+C`
 - Paste clipboard: `Ctrl+Shift+V`
+- Open a detected link or existing path: `Ctrl+click`
 
 Clipboard paste through GoreeCloud Terminal's paste action and VTE's Shift+Insert route is read before delivery. Text containing any line break opens a modal review instead of being sent immediately. Primary-selection middle-click paste is not yet routed through this review and remains a Development limitation.
+
+Ctrl+click may open explicit OSC 8 hyperlinks, detected HTTP/HTTPS/mailto/file targets, or existing absolute/`~/`/`./`/`../` local paths with the desktop default handler. URI schemes are allowlisted and local paths must exist; GoreeCloud Terminal does not execute detected text as a shell command.
 
 ## Build
 
@@ -52,7 +56,7 @@ Ubuntu 24.04 dependencies:
 
 ```bash
 sudo apt update
-sudo apt install -y build-essential meson ninja-build pkg-config libgtk-4-dev libvte-2.91-gtk4-dev xvfb
+sudo apt install -y build-essential meson ninja-build pkg-config libgtk-4-dev libvte-2.91-gtk4-dev libpcre2-dev xvfb
 ```
 
 Build and run:

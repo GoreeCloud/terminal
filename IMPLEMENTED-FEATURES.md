@@ -33,6 +33,15 @@ These entries establish Development source implementation only. They do not esta
 - `Ctrl+G` and `Ctrl+Shift+G` navigate next/previous matches.
 - Invalid expressions surface an inline search error rather than being silently accepted.
 
+## Links and Local Paths
+
+- Ctrl+click is required before GoreeCloud Terminal requests an external open.
+- Explicit OSC 8 hyperlinks are validated before launch.
+- Detected HTTP/HTTPS/mailto/file targets use an allowlisted URI boundary.
+- Existing absolute, `~/`, `./`, and `../` local paths can be resolved against the active pane working directory and opened as local file URIs.
+- Local paths must exist before an open request is handed to the desktop.
+- Detected text is never executed as a shell command by this interaction path.
+
 ## Clipboard Paste Review
 
 - GoreeCloud's clipboard paste action reads clipboard text before it is sent to the shell.

@@ -3,6 +3,9 @@
 #include "gc-context.h"
 
 #include <pango/pango.h>
+
+#define PCRE2_CODE_UNIT_WIDTH 8
+#include <pcre2.h>
 #include <vte/vte.h>
 
 struct _GcTerminalSession {
@@ -13,6 +16,9 @@ struct _GcTerminalSession {
     char *status;
     GcTerminalSessionChangedFunc changed;
     GcTerminalSessionPasteRequestedFunc paste_requested;
+    GcTerminalSessionOpenRequestedFunc open_requested;
+    gint url_match_tag;
+    gint path_match_tag;
     gpointer user_data;
 };
 
@@ -81,6 +87,84 @@ on_paste_clipboard(VteTerminal *terminal, gpointer user_data)
     }
 }
 
+static gint
+add_match_regex(VteTerminal *terminal, const char *pattern)
+{
+    GError *error = NULL;
+    VteRegex *regex = vte_regex_new_for_match(
+        pattern,
+        -1,
+        VTE_REGEX_FLAGS_DEFAULT | PCRE2_MULTILINE,
+        &error
+    );
+    gint tag;
+
+    if (regex == NULL) {
+        g_warning("Unable to compile terminal match regex: %s", error->message);
+        g_clear_error(&error);
+        return -1;
+    }
+
+    tag = vte_terminal_match_add_regex(terminal, regex, 0);
+    vte_regex_unref(regex);
+
+    if (tag >= 0) {
+        vte_terminal_match_set_cursor_name(terminal, tag, "pointer");
+    }
+
+    return tag;
+}
+
+static void
+on_terminal_pressed(
+    GtkGestureClick *gesture,
+    gint n_press,
+    gdouble x,
+    gdouble y,
+    gpointer user_data
+)
+{
+    GcTerminalSession *session = user_data;
+    GdkModifierType modifiers;
+    GcLinkTargetKind kind = GC_LINK_TARGET_URI;
+    gint tag = -1;
+    char *target;
+
+    if (n_press != 1 || session->open_requested == NULL) {
+        return;
+    }
+
+    modifiers = gtk_event_controller_get_current_event_state(
+        GTK_EVENT_CONTROLLER(gesture)
+    );
+    if ((modifiers & GDK_CONTROL_MASK) == 0) {
+        return;
+    }
+
+    target = vte_terminal_check_hyperlink_at(session->terminal, x, y);
+
+    if (target == NULL) {
+        target = vte_terminal_check_match_at(session->terminal, x, y, &tag);
+
+        if (target == NULL) {
+            return;
+        }
+
+        if (tag == session->url_match_tag) {
+            kind = GC_LINK_TARGET_URI;
+        } else if (tag == session->path_match_tag) {
+            kind = GC_LINK_TARGET_PATH;
+        } else {
+            g_free(target);
+            return;
+        }
+    }
+
+    session->open_requested(session, kind, target, session->user_data);
+    gtk_gesture_set_state(GTK_GESTURE(gesture), GTK_EVENT_SEQUENCE_CLAIMED);
+    g_free(target);
+}
+
 static void
 on_child_exited(VteTerminal *terminal, gint status, gpointer user_data)
 {
@@ -125,6 +209,7 @@ gc_terminal_session_new(
     const char *working_directory,
     GcTerminalSessionChangedFunc changed,
     GcTerminalSessionPasteRequestedFunc paste_requested,
+    GcTerminalSessionOpenRequestedFunc open_requested,
     gpointer user_data
 )
 {
@@ -148,6 +233,9 @@ gc_terminal_session_new(
     session->status = g_strdup("Starting shell");
     session->changed = changed;
     session->paste_requested = paste_requested;
+    session->open_requested = open_requested;
+    session->url_match_tag = -1;
+    session->path_match_tag = -1;
     session->user_data = user_data;
 
     g_object_set_data_full(
@@ -179,6 +267,38 @@ gc_terminal_session_new(
     font = pango_font_description_from_string("Monospace 11");
     vte_terminal_set_font(session->terminal, font);
     pango_font_description_free(font);
+
+    session->url_match_tag = add_match_regex(
+        session->terminal,
+        "(?:https?://|mailto:|file://)[^[:space:]<>\\\"']+"
+    );
+    session->path_match_tag = add_match_regex(
+        session->terminal,
+        "(?<![[:alnum:]:/])(?:~|\\.{1,2})?/[^[:space:]<>\\\"']+"
+    );
+
+    {
+        GtkGesture *click = gtk_gesture_click_new();
+
+        gtk_gesture_single_set_button(
+            GTK_GESTURE_SINGLE(click),
+            GDK_BUTTON_PRIMARY
+        );
+        gtk_event_controller_set_propagation_phase(
+            GTK_EVENT_CONTROLLER(click),
+            GTK_PHASE_CAPTURE
+        );
+        g_signal_connect(
+            click,
+            "pressed",
+            G_CALLBACK(on_terminal_pressed),
+            session
+        );
+        gtk_widget_add_controller(
+            GTK_WIDGET(session->terminal),
+            GTK_EVENT_CONTROLLER(click)
+        );
+    }
 
     g_signal_connect(
         session->terminal,

@@ -8,6 +8,8 @@ Clipboard text is read locally only when the user initiates a guarded clipboard 
 
 Search expressions are held in process memory for the active search interaction and are not persisted by this slice.
 
+Detected link/path text is not persisted by GoreeCloud Terminal. Ctrl+click hands a validated target to the desktop default handler. External applications may perform network or other activity according to their own behavior after the user explicitly requests the open.
+
 The first-run guide persists only two local onboarding fields — completion state and current step — at `$XDG_CONFIG_HOME/goreecloud-terminal/state.ini`. This file does not contain terminal content, command history, credentials, host secrets, remote identities, clipboard content, search content, or session-restore data.
 
 Future remote, synchronization, diagnostics, observability, or account-aware features require separate privacy review before activation.
