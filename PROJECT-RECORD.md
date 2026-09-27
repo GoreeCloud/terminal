@@ -590,3 +590,83 @@ The Development minimum remains GTK 4.12 or newer, VTE GTK4 0.76 or newer, and G
 This event establishes Debian 13 build/test/install validation. It does not establish representative graphical desktop acceptance, performance claims, release qualification, production readiness, complete Glaze UI 1.6.0 acceptance, or Stable/Anchor status.
 
 Repository branch protection and the blank GitHub Description remain separately unresolved in issue #3.
+
+## 2026-09-27 — Protocol-Derived Shell Lifecycle Awareness Integrated
+
+### Event
+
+Pull request #16 integrated a bounded shell-awareness prerequisite for future command-aware features. GoreeCloud Terminal now consumes VTE 0.78+ shell lifecycle terminal properties when compatible shell integration emits them, while retaining the existing VTE 0.76 compatibility path.
+
+This slice intentionally does not implement command-boundary navigation and does not infer command state from prompt text.
+
+### Exact Source Evidence
+
+- authoritative base: `7ef4221150f51ae018cfd7810241a9e6bf91642b`;
+- first integrated source/onboarding candidate: `ec3f7d5955f988e2a6d4da9e6057b555e1875ebd`;
+- test-linkage correction: `355521f158cc8bedd6413c5ba2ed658b6011c925`;
+- exact accepted candidate: `11226b10671a9a6c8a198f963a6afabda8738be8`;
+- pull request: #16, **Add protocol-derived shell lifecycle awareness**;
+- merge method: squash;
+- authoritative merged commit: `c23a7878966573851647f61a2c182eaa783e2a56`;
+- merged tree: `403cac8163f8d13e6f19ab755d26181bcf39ed47`; and
+- GitHub reports the merged commit signature as verified.
+
+### Corrective and Validation Evidence
+
+The first source/onboarding candidate reached compilation on Ubuntu 24.04 but failed while linking the workspace integration test because that test target compiled `gc-terminal-session.c` without also linking the new `gc-shell-state.c` module:
+
+- Native Foundation run `36358818076` — push — failed in compile/link.
+
+The product code was not weakened. The test target was corrected so workspace coverage links the same shell-state dependency used by the application, and a VTE-0.76-only unused-helper warning was removed with a compile-time guard.
+
+The exact accepted candidate then passed:
+
+- Native Foundation run `36358889306` — push — success on both Ubuntu 24.04 and Debian 13 jobs; and
+- Native Foundation run `36358891750` — pull request — success on both Ubuntu 24.04 and Debian 13 jobs.
+
+After merge, authoritative `main` commit `c23a7878966573851647f61a2c182eaa783e2a56` passed:
+
+- Native Foundation run `36358999857` — push on `main` — success on both Ubuntu 24.04 and Debian 13 jobs.
+
+The passing jobs verify repository governance, dependency setup, Meson configuration, native compilation, the full Meson test suite including the new shell-state unit tests, and staged install layout.
+
+### Implemented Development Boundary
+
+Verified source now adds:
+
+- a pure GLib shell lifecycle state model for unknown, prompt-ready, running, and completed phases;
+- focused state-transition tests, including exit-status retention and completion without a valid status;
+- VTE 0.78+ consumption of `VTE_TERMPROP_SHELL_PRECMD`, `VTE_TERMPROP_SHELL_PREEXEC`, and `VTE_TERMPROP_SHELL_POSTEXEC`;
+- active-session status presentation for shell-ready state, command-running state, command completion, and the last validated exit status;
+- validation that post-execution status is present and within `0..255` before it is presented as a shell exit status;
+- rejection of term-property reset notifications as lifecycle events;
+- VTE legacy OSC 777 translation on the VTE 0.78+ path for compatible existing shell integration;
+- session accessors for later command-aware work; and
+- updated first-run/Help onboarding that explains the capability and its fallback behavior.
+
+Ubuntu 24.04's VTE 0.76 path remains supported and continues to show generic session status because the shell lifecycle term-property API begins with VTE 0.78.
+
+### Security and Privacy Boundary
+
+Shell lifecycle properties are protocol-derived metadata from terminal-session output. They are useful execution context but are not treated as proof of identity, privilege, authorization, remote-host identity, or command safety. This slice therefore does not use them to make security-sensitive decisions.
+
+The implementation does not persist command text, command history, lifecycle events, exit status, or terminal contents. It adds no telemetry, analytics, network reporting, remote transport, credential handling, or prompt-text parsing.
+
+### Remaining Product Boundary
+
+This event does not establish:
+
+- command-boundary navigation;
+- a complete trustworthy shell-integration model across supported VTE baselines;
+- foreground-process identity or robust process context;
+- persistent command/session history;
+- SSH or remote administration;
+- profiles or general settings;
+- workspace/session restoration;
+- container workflows;
+- representative graphical desktop runtime acceptance;
+- complete Glaze UI 1.6.0 consumer conformance;
+- production packaging or release acceptance; or
+- Stable/Anchor status.
+
+Repository protection and the blank GitHub Description remain separately unresolved in issue #3.
