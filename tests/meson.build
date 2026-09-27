@@ -18,5 +18,18 @@ onboarding_state_test = executable(
   dependencies: [glib_dep],
 )
 
+workspace_test = executable(
+  'test-workspace',
+  [
+    'test-workspace.c',
+    '../src/gc-workspace.c',
+    '../src/gc-terminal-session.c',
+    '../src/gc-context.c',
+  ],
+  include_directories: include_directories('../src'),
+  dependencies: [gtk_dep, vte_dep, glib_dep, gio_dep],
+)
+
 test('context helpers', context_test)
 test('onboarding state', onboarding_state_test)
+test('workspace panes', workspace_test)

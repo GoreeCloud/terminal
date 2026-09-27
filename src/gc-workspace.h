@@ -22,10 +22,18 @@ void gc_workspace_free(GcWorkspace *workspace);
 GtkWidget *gc_workspace_get_widget(GcWorkspace *workspace);
 GcTerminalSession *gc_workspace_get_current_session(GcWorkspace *workspace);
 guint gc_workspace_get_count(GcWorkspace *workspace);
+guint gc_workspace_get_current_pane_count(GcWorkspace *workspace);
 
 void gc_workspace_add_tab(GcWorkspace *workspace, const char *working_directory);
 gboolean gc_workspace_close_current(GcWorkspace *workspace);
 void gc_workspace_select_relative(GcWorkspace *workspace, gint delta);
 char *gc_workspace_dup_current_working_directory(GcWorkspace *workspace);
+
+gboolean gc_workspace_split_current(
+    GcWorkspace *workspace,
+    GtkOrientation orientation
+);
+gboolean gc_workspace_close_current_pane(GcWorkspace *workspace);
+void gc_workspace_focus_relative_pane(GcWorkspace *workspace, gint delta);
 
 G_END_DECLS

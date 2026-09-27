@@ -23,6 +23,18 @@ These entries establish Development source implementation only. They do not esta
 - `Ctrl+Shift+W` closes the active tab or closes the window when it is the final tab.
 - `Ctrl+PageDown` and `Ctrl+PageUp` navigate tabs.
 
+## Split Panes
+
+- Nested left/right and top/bottom split panes inside each tab.
+- New panes inherit the active pane working directory when available.
+- GTK paned dividers provide pointer resizing.
+- Active pane drives the context ribbon and tab/window title.
+- `Ctrl+Shift+E` splits left/right.
+- `Ctrl+Shift+O` splits top/bottom.
+- `Ctrl+Shift+X` closes the active pane; when only one pane remains, the existing tab/window close behavior is used.
+- `Alt+Left` and `Alt+Right` cycle focus through panes in the active tab.
+- Pane layout is ephemeral Development state and is not restored after restart.
+
 ## First-Run Onboarding
 
 - Automatic first-run guide for current local-shell behavior, execution-context indicators, keyboard shortcuts, and Development safety boundaries.

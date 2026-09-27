@@ -24,10 +24,10 @@ static const char *development_css =
     ".context-chip-elevated { background: rgba(244, 114, 182, 0.12); border-color: rgba(244, 114, 182, 0.28); }"
     ".context-path { color: rgba(226, 232, 240, 0.78); }"
     ".terminal-frame { padding: 8px; }"
-    ".onboarding-card { background: rgba(15, 23, 34, 0.98); }"
+    ".onboarding-card { background: rgba(15, 23, 34, 0.98); color: #e6edf3; }"
     ".onboarding-kicker { color: rgba(122, 162, 247, 0.82); font-size: 0.82em; font-weight: 700; letter-spacing: 0.06em; }"
-    ".onboarding-title { font-size: 1.55em; font-weight: 700; }"
-    ".onboarding-body { color: rgba(226, 232, 240, 0.82); line-height: 1.35; }";
+    ".onboarding-title { color: #e6edf3; font-size: 1.55em; font-weight: 700; }"
+    ".onboarding-body { color: rgba(226, 232, 240, 0.82); }";
 
 static void
 install_development_style(void)
@@ -62,7 +62,8 @@ static void
 update_context(TerminalWindowState *state)
 {
     GcTerminalSession *session = gc_workspace_get_current_session(state->workspace);
-    guint count = gc_workspace_get_count(state->workspace);
+    guint tabs = gc_workspace_get_count(state->workspace);
+    guint panes = gc_workspace_get_current_pane_count(state->workspace);
 
     if (session == NULL) {
         gtk_label_set_text(state->cwd_label, g_get_home_dir());
@@ -73,14 +74,13 @@ update_context(TerminalWindowState *state)
 
     g_autofree char *cwd = gc_terminal_session_dup_working_directory(session);
     g_autofree char *title = gc_terminal_session_dup_display_title(session);
-    g_autofree char *window_title = g_strdup_printf(
-        "%s — GoreeCloud Terminal",
-        title
-    );
+    g_autofree char *window_title = g_strdup_printf("%s — GoreeCloud Terminal", title);
     g_autofree char *subtitle = g_strdup_printf(
-        "Development · %u local tab%s",
-        count,
-        count == 1 ? "" : "s"
+        "Development · %u tab%s · %u pane%s",
+        tabs,
+        tabs == 1 ? "" : "s",
+        panes,
+        panes == 1 ? "" : "s"
     );
 
     gtk_label_set_text(state->cwd_label, cwd);
@@ -94,7 +94,6 @@ on_workspace_changed(GcWorkspace *workspace, gpointer user_data)
 {
     TerminalWindowState *state = user_data;
     (void) workspace;
-
     update_context(state);
 }
 
@@ -105,7 +104,6 @@ new_tab_action(GSimpleAction *action, GVariant *parameter, gpointer user_data)
     g_autofree char *cwd = gc_workspace_dup_current_working_directory(state->workspace);
     (void) action;
     (void) parameter;
-
     gc_workspace_add_tab(state->workspace, cwd);
 }
 
@@ -122,12 +120,59 @@ close_tab_action(GSimpleAction *action, GVariant *parameter, gpointer user_data)
 }
 
 static void
-next_tab_action(GSimpleAction *action, GVariant *parameter, gpointer user_data)
+split_horizontal_action(GSimpleAction *action, GVariant *parameter, gpointer user_data)
+{
+    TerminalWindowState *state = user_data;
+    (void) action;
+    (void) parameter;
+    gc_workspace_split_current(state->workspace, GTK_ORIENTATION_HORIZONTAL);
+}
+
+static void
+split_vertical_action(GSimpleAction *action, GVariant *parameter, gpointer user_data)
+{
+    TerminalWindowState *state = user_data;
+    (void) action;
+    (void) parameter;
+    gc_workspace_split_current(state->workspace, GTK_ORIENTATION_VERTICAL);
+}
+
+static void
+close_pane_action(GSimpleAction *action, GVariant *parameter, gpointer user_data)
 {
     TerminalWindowState *state = user_data;
     (void) action;
     (void) parameter;
 
+    if (!gc_workspace_close_current_pane(state->workspace)) {
+        close_tab_action(NULL, NULL, state);
+    }
+}
+
+static void
+next_pane_action(GSimpleAction *action, GVariant *parameter, gpointer user_data)
+{
+    TerminalWindowState *state = user_data;
+    (void) action;
+    (void) parameter;
+    gc_workspace_focus_relative_pane(state->workspace, 1);
+}
+
+static void
+previous_pane_action(GSimpleAction *action, GVariant *parameter, gpointer user_data)
+{
+    TerminalWindowState *state = user_data;
+    (void) action;
+    (void) parameter;
+    gc_workspace_focus_relative_pane(state->workspace, -1);
+}
+
+static void
+next_tab_action(GSimpleAction *action, GVariant *parameter, gpointer user_data)
+{
+    TerminalWindowState *state = user_data;
+    (void) action;
+    (void) parameter;
     gc_workspace_select_relative(state->workspace, 1);
 }
 
@@ -137,7 +182,6 @@ previous_tab_action(GSimpleAction *action, GVariant *parameter, gpointer user_da
     TerminalWindowState *state = user_data;
     (void) action;
     (void) parameter;
-
     gc_workspace_select_relative(state->workspace, -1);
 }
 
@@ -173,7 +217,6 @@ help_action(GSimpleAction *action, GVariant *parameter, gpointer user_data)
     TerminalWindowState *state = user_data;
     (void) action;
     (void) parameter;
-
     gc_onboarding_show_replay(state->window);
 }
 
@@ -185,11 +228,18 @@ build_header(GtkApplication *application, GtkWindow *window, TerminalWindowState
     GtkWidget *title = gtk_label_new("GoreeCloud Terminal");
     GtkWidget *new_button = gtk_button_new_from_icon_name("list-add-symbolic");
     GtkWidget *close_button = gtk_button_new_from_icon_name("window-close-symbolic");
+    GtkWidget *split_horizontal_button = gtk_button_new_with_label("↔");
+    GtkWidget *split_vertical_button = gtk_button_new_with_label("↕");
     GtkWidget *copy_button = gtk_button_new_from_icon_name("edit-copy-symbolic");
     GtkWidget *paste_button = gtk_button_new_from_icon_name("edit-paste-symbolic");
     GtkWidget *help_button = gtk_button_new_from_icon_name("help-about-symbolic");
     const char *new_accels[] = {"<Control><Shift>t", NULL};
     const char *close_accels[] = {"<Control><Shift>w", NULL};
+    const char *split_horizontal_accels[] = {"<Control><Shift>e", NULL};
+    const char *split_vertical_accels[] = {"<Control><Shift>o", NULL};
+    const char *close_pane_accels[] = {"<Control><Shift>x", NULL};
+    const char *next_pane_accels[] = {"<Alt>Right", NULL};
+    const char *previous_pane_accels[] = {"<Alt>Left", NULL};
     const char *next_accels[] = {"<Control>Page_Down", NULL};
     const char *previous_accels[] = {"<Control>Page_Up", NULL};
     const char *copy_accels[] = {"<Control><Shift>c", NULL};
@@ -197,6 +247,11 @@ build_header(GtkApplication *application, GtkWindow *window, TerminalWindowState
     const GActionEntry actions[] = {
         {"new-tab", new_tab_action, NULL, NULL, NULL},
         {"close-tab", close_tab_action, NULL, NULL, NULL},
+        {"split-horizontal", split_horizontal_action, NULL, NULL, NULL},
+        {"split-vertical", split_vertical_action, NULL, NULL, NULL},
+        {"close-pane", close_pane_action, NULL, NULL, NULL},
+        {"next-pane", next_pane_action, NULL, NULL, NULL},
+        {"previous-pane", previous_pane_action, NULL, NULL, NULL},
         {"next-tab", next_tab_action, NULL, NULL, NULL},
         {"previous-tab", previous_tab_action, NULL, NULL, NULL},
         {"copy", copy_action, NULL, NULL, NULL},
@@ -204,7 +259,7 @@ build_header(GtkApplication *application, GtkWindow *window, TerminalWindowState
         {"help", help_action, NULL, NULL, NULL},
     };
 
-    state->subtitle_label = GTK_LABEL(gtk_label_new("Development · 1 local tab"));
+    state->subtitle_label = GTK_LABEL(gtk_label_new("Development · 1 tab · 1 pane"));
 
     gtk_widget_add_css_class(header, "gc-header");
     gtk_widget_add_css_class(title, "gc-title");
@@ -216,18 +271,24 @@ build_header(GtkApplication *application, GtkWindow *window, TerminalWindowState
 
     gtk_widget_set_tooltip_text(new_button, "New tab");
     gtk_widget_set_tooltip_text(close_button, "Close active tab");
+    gtk_widget_set_tooltip_text(split_horizontal_button, "Split left/right");
+    gtk_widget_set_tooltip_text(split_vertical_button, "Split top/bottom");
     gtk_widget_set_tooltip_text(copy_button, "Copy selection");
     gtk_widget_set_tooltip_text(paste_button, "Paste clipboard");
     gtk_widget_set_tooltip_text(help_button, "Replay onboarding");
 
     gtk_actionable_set_action_name(GTK_ACTIONABLE(new_button), "win.new-tab");
     gtk_actionable_set_action_name(GTK_ACTIONABLE(close_button), "win.close-tab");
+    gtk_actionable_set_action_name(GTK_ACTIONABLE(split_horizontal_button), "win.split-horizontal");
+    gtk_actionable_set_action_name(GTK_ACTIONABLE(split_vertical_button), "win.split-vertical");
     gtk_actionable_set_action_name(GTK_ACTIONABLE(copy_button), "win.copy");
     gtk_actionable_set_action_name(GTK_ACTIONABLE(paste_button), "win.paste");
     gtk_actionable_set_action_name(GTK_ACTIONABLE(help_button), "win.help");
 
     gtk_header_bar_pack_start(GTK_HEADER_BAR(header), new_button);
     gtk_header_bar_pack_start(GTK_HEADER_BAR(header), close_button);
+    gtk_header_bar_pack_start(GTK_HEADER_BAR(header), split_horizontal_button);
+    gtk_header_bar_pack_start(GTK_HEADER_BAR(header), split_vertical_button);
     gtk_header_bar_pack_end(GTK_HEADER_BAR(header), help_button);
     gtk_header_bar_pack_end(GTK_HEADER_BAR(header), paste_button);
     gtk_header_bar_pack_end(GTK_HEADER_BAR(header), copy_button);
@@ -241,6 +302,11 @@ build_header(GtkApplication *application, GtkWindow *window, TerminalWindowState
 
     gtk_application_set_accels_for_action(application, "win.new-tab", new_accels);
     gtk_application_set_accels_for_action(application, "win.close-tab", close_accels);
+    gtk_application_set_accels_for_action(application, "win.split-horizontal", split_horizontal_accels);
+    gtk_application_set_accels_for_action(application, "win.split-vertical", split_vertical_accels);
+    gtk_application_set_accels_for_action(application, "win.close-pane", close_pane_accels);
+    gtk_application_set_accels_for_action(application, "win.next-pane", next_pane_accels);
+    gtk_application_set_accels_for_action(application, "win.previous-pane", previous_pane_accels);
     gtk_application_set_accels_for_action(application, "win.next-tab", next_accels);
     gtk_application_set_accels_for_action(application, "win.previous-tab", previous_accels);
     gtk_application_set_accels_for_action(application, "win.copy", copy_accels);
