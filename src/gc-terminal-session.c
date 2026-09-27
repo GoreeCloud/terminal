@@ -19,6 +19,7 @@ struct _GcTerminalSession {
     GcTerminalSessionOpenRequestedFunc open_requested;
     gint url_match_tag;
     gint path_match_tag;
+    guint notify_idle_id;
     gpointer user_data;
 };
 
@@ -35,6 +36,24 @@ set_text(char **target, const char *value)
 {
     g_free(*target);
     *target = g_strdup(value != NULL ? value : "");
+}
+
+static gboolean
+notify_changed_idle(gpointer user_data)
+{
+    GcTerminalSession *session = user_data;
+
+    session->notify_idle_id = 0;
+    notify_changed(session);
+    return G_SOURCE_REMOVE;
+}
+
+static void
+queue_notify_changed(GcTerminalSession *session)
+{
+    if (session->notify_idle_id == 0) {
+        session->notify_idle_id = g_idle_add(notify_changed_idle, session);
+    }
 }
 
 static char *
@@ -62,11 +81,10 @@ static char *
 dup_window_title(VteTerminal *terminal)
 {
 #if VTE_CHECK_VERSION(0, 78, 0)
-    return g_strdup(
-        vte_terminal_get_termprop_string(
-            terminal,
-            VTE_TERMPROP_XTERM_TITLE
-        )
+    return vte_terminal_dup_termprop_string(
+        terminal,
+        VTE_TERMPROP_XTERM_TITLE,
+        NULL
     );
 #else
     return g_strdup(vte_terminal_get_window_title(terminal));
@@ -109,10 +127,29 @@ on_termprop_changed(
     gpointer user_data
 )
 {
+    GcTerminalSession *session = user_data;
+
     if (g_strcmp0(property, VTE_TERMPROP_CURRENT_DIRECTORY_URI) == 0) {
-        update_working_directory(terminal, user_data);
+        g_autofree char *uri = dup_current_directory_uri(terminal);
+        g_autofree char *path = NULL;
+
+        if (uri != NULL) {
+            path = g_filename_from_uri(uri, NULL, NULL);
+        }
+
+        if (path != NULL && *path != '\0') {
+            set_text(&session->working_directory, path);
+        }
+
+        queue_notify_changed(session);
     } else if (g_strcmp0(property, VTE_TERMPROP_XTERM_TITLE) == 0) {
-        update_window_title(terminal, user_data);
+        g_autofree char *title = dup_window_title(terminal);
+
+        set_text(
+            &session->title,
+            title != NULL && *title != '\0' ? title : "Terminal"
+        );
+        queue_notify_changed(session);
     }
 }
 #endif
@@ -277,6 +314,10 @@ static void
 session_free(gpointer data)
 {
     GcTerminalSession *session = data;
+
+    if (session->notify_idle_id != 0) {
+        g_source_remove(session->notify_idle_id);
+    }
 
     g_free(session->working_directory);
     g_free(session->title);
