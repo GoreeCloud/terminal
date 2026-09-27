@@ -15,6 +15,7 @@ The current source provides:
 - GNOME VTE-backed local terminal sessions and asynchronous PTY shell startup;
 - multiple reorderable local tabs and nested split panes;
 - active-session execution context and working-directory-aware tab/pane creation;
+- protocol-derived shell ready/running/last-exit status on VTE 0.78+ when compatible shell integration emits lifecycle metadata;
 - searchable active-pane scrollback with literal or regular-expression matching;
 - case-sensitive or case-insensitive search and wrap-around navigation;
 - guarded clipboard and primary-selection paste review when pasted text contains line breaks;
@@ -26,7 +27,9 @@ The current source provides:
 - Meson/Ninja build and install plumbing; and
 - GitHub Actions compile/test/install validation on Ubuntu 24.04 and Debian 13.
 
-This is Development source evidence only. Command-boundary navigation, profiles, SSH, workspace/session persistence, containers, automation, protocol qualification, representative runtime acceptance, performance claims, full Glaze conformance, release qualification, and Stable/Anchor status remain incomplete.
+This is Development source evidence only. Command-boundary navigation, complete cross-baseline shell integration, profiles, SSH, workspace/session persistence, containers, automation, protocol qualification, representative runtime acceptance, performance claims, full Glaze conformance, release qualification, and Stable/Anchor status remain incomplete.
+
+On VTE 0.78+ (including Debian 13), compatible shell integration can drive advisory `Shell ready`, `Command running`, and last-exit-code status. Ubuntu 24.04's VTE 0.76 path retains generic session status. GoreeCloud Terminal does not infer command lifecycle from prompt text, and lifecycle metadata is not treated as a privilege or authorization signal.
 
 Validated Development build/test environments are Ubuntu 24.04 and Debian 13 (Trixie). An owner-supplied Debian 13.7 x86_64 VPS also passed the repository build, all Meson tests, and staged install-layout validation on 2026-09-27. This evidence does not establish representative graphical desktop acceptance.
 
