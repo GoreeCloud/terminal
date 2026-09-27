@@ -467,3 +467,67 @@ This event does not establish:
 
 Command-boundary navigation remains gated on trustworthy shell integration rather than prompt-text inference. Repository protection and the blank GitHub Description remain separately unresolved in issue #3.
 
+## 2026-09-27 — Guarded Primary-Selection Paste Integrated
+
+### Event
+
+Pull request #12 closed the remaining guarded-paste source gap by routing primary-selection middle-click paste through the same GoreeCloud review path used for clipboard paste.
+
+### Exact Source Evidence
+
+- authoritative base: `c3ecdd631ee1b42cbfd591c8ee325e0c42f67528`;
+- source/test candidate: `105990381ef6ef6bcce3d2892ac17b674a9eb74a`;
+- exact accepted candidate: `acac82544cb346a0247467e61028f7fc4ef982cb`;
+- pull request: #12, **Guard primary-selection middle-click paste**;
+- merge method: squash;
+- authoritative merged commit: `9ee3a2bd35b7ffbdf2cf1734ea06f8a3619f6b2b`;
+- merged tree: `579777d563afcee46705a70e4a3643c6394e7619`; and
+- GitHub reports the merged commit signature as verified.
+
+### Validation Evidence
+
+The exact accepted candidate passed:
+
+- Native Foundation run `36356183353` — push — success;
+- Native Foundation run `36356199632` — pull request — success.
+
+After merge, authoritative `main` commit `9ee3a2bd35b7ffbdf2cf1734ea06f8a3619f6b2b` passed:
+
+- Native Foundation run `36356436836` — push on `main` — success.
+
+The workflow verified repository governance, Ubuntu 24.04 dependency setup, Meson configuration, native compilation, context tests, onboarding-state tests, link-target tests, paste-safety tests, the Xvfb workspace integration test including paste-source routing, and install layout.
+
+### Implemented Development Boundary
+
+Verified source now adds:
+
+- an explicit clipboard-versus-primary paste-source model;
+- capture-phase middle-button routing for primary-selection paste;
+- GTK primary-clipboard reads for that source;
+- reuse of the existing active-session validation, asynchronous text read, multiline-review modal, and VTE paste-text delivery path;
+- preservation of ordinary terminal text selection because only middle-button paste is claimed; and
+- Xvfb-backed routing coverage for both clipboard and primary-selection paste sources.
+
+### Security and Privacy Boundary
+
+Single-line primary-selection text remains direct paste through the same VTE paste-text delivery path used for accepted clipboard text. Text containing a carriage return or line feed requires explicit review before delivery to the shell.
+
+The review remains a deliberate-execution guardrail, not a determination that confirmed commands are safe. Primary-selection contents are not persisted by GoreeCloud Terminal. This slice adds no telemetry, remote transport, credential handling, command analysis, or command-boundary inference.
+
+### Remaining Product Boundary
+
+This event does not establish:
+
+- trustworthy shell command-boundary navigation;
+- a general shell-integration protocol;
+- SSH/remote administration;
+- profiles or general settings;
+- persistent workspace/session restoration;
+- container workflows;
+- representative Linux desktop runtime acceptance;
+- complete Glaze UI 1.6.0 consumer conformance;
+- production packaging or release acceptance; or
+- Stable/Anchor status.
+
+Trustworthy command-boundary navigation remains gated on shell integration that does not infer privileged state from spoofable prompt or terminal-output text. Repository protection and the blank GitHub Description remain separately unresolved in issue #3.
+
