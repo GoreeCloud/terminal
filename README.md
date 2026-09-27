@@ -24,9 +24,9 @@ The current source provides:
 - 10,000-line default scrollback per session;
 - a restrained Glaze-inspired Development presentation;
 - Meson/Ninja build and install plumbing; and
-- GitHub Actions compile/test/install validation.
+- GitHub Actions compile/test/install validation on Ubuntu 24.04 and Debian 13.
 
-This is Development source evidence only. Command-boundary navigation, profiles, SSH, workspace/session persistence, containers, automation, protocol qualification, representative runtime acceptance, performance claims, full Glaze conformance, release qualification, and Stable/Anchor status remain incomplete.
+This is Development source evidence only. Command-boundary navigation, profiles, SSH, workspace/session persistence, containers, automation, protocol qualification, representative runtime acceptance, performance claims, full Glaze conformance, release qualification, and Stable/Anchor status remain incomplete.\n\nValidated Development build/test environments are Ubuntu 24.04 and Debian 13 (Trixie). An owner-supplied Debian 13.7 x86_64 VPS also passed the repository build, all Meson tests, and staged install-layout validation on 2026-09-27. This evidence does not establish representative graphical desktop acceptance.
 
 ## Keyboard Shortcuts
 
@@ -52,7 +52,7 @@ Ctrl+click may open explicit OSC 8 hyperlinks, detected HTTP/HTTPS/mailto/file t
 
 ## Build
 
-Ubuntu 24.04 dependencies:
+Ubuntu 24.04 or Debian 13 dependencies:
 
 ```bash
 sudo apt update
