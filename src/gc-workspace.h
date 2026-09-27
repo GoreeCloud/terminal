@@ -13,8 +13,15 @@ typedef void (*GcWorkspaceChangedFunc)(
     gpointer user_data
 );
 
+typedef void (*GcWorkspacePasteRequestedFunc)(
+    GcWorkspace *workspace,
+    GcTerminalSession *session,
+    gpointer user_data
+);
+
 GcWorkspace *gc_workspace_new(
     GcWorkspaceChangedFunc changed,
+    GcWorkspacePasteRequestedFunc paste_requested,
     gpointer user_data
 );
 void gc_workspace_free(GcWorkspace *workspace);

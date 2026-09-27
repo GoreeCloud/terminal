@@ -18,6 +18,16 @@ onboarding_state_test = executable(
   dependencies: [glib_dep],
 )
 
+paste_safety_test = executable(
+  'test-paste-safety',
+  [
+    'test-paste-safety.c',
+    '../src/gc-paste-safety.c',
+  ],
+  include_directories: include_directories('../src'),
+  dependencies: [glib_dep],
+)
+
 workspace_test = executable(
   'test-workspace',
   [
@@ -36,4 +46,5 @@ workspace_test_env.set('GSK_RENDERER', 'cairo')
 
 test('context helpers', context_test)
 test('onboarding state', onboarding_state_test)
+test('paste safety', paste_safety_test)
 test('workspace panes', workspace_test, env: workspace_test_env)

@@ -11,23 +11,21 @@ GoreeCloud Terminal is a native Linux terminal and administration application fo
 
 The current source provides:
 
-- a native GTK 4 Linux window;
+- native GTK 4 Linux application/window integration;
 - GNOME VTE-backed local terminal sessions and asynchronous PTY shell startup;
-- an explicit session/workspace source boundary;
-- multiple reorderable local tabs;
-- working-directory-aware new-tab and split-pane creation;
-- nested left/right and top/bottom split panes with draggable dividers;
-- keyboard pane focus cycling and active-pane closing;
-- visible local/elevated, user@host, working-directory, and active-session state;
-- keyboard-driven tab creation, closing, and navigation;
-- copy/paste header actions and shortcuts;
+- multiple reorderable local tabs and nested split panes;
+- active-session execution context and working-directory-aware tab/pane creation;
+- searchable active-pane scrollback with literal or regular-expression matching;
+- case-sensitive or case-insensitive search and wrap-around navigation;
+- clipboard paste review when pasted text contains line breaks;
+- keyboard-driven tabs, panes, search, copy, and paste;
 - first-run onboarding with durable step progress and Help replay;
 - 10,000-line default scrollback per session;
 - a restrained Glaze-inspired Development presentation;
 - Meson/Ninja build and install plumbing; and
 - GitHub Actions compile/test/install validation.
 
-This is Development source evidence only. Profiles, SSH, workspace/session persistence, search, safe multiline-paste review, containers, automation, protocol qualification, representative runtime acceptance, performance claims, full Glaze conformance, release qualification, and Stable/Anchor status remain unverified or planned.
+This is Development source evidence only. Command-boundary navigation, URL/path interaction, primary-selection paste review, profiles, SSH, workspace/session persistence, containers, automation, protocol qualification, representative runtime acceptance, performance claims, full Glaze conformance, release qualification, and Stable/Anchor status remain incomplete.
 
 ## Keyboard Shortcuts
 
@@ -40,8 +38,13 @@ This is Development source evidence only. Profiles, SSH, workspace/session persi
 - Close active pane: `Ctrl+Shift+X`
 - Focus previous pane: `Alt+Left`
 - Focus next pane: `Alt+Right`
+- Search active pane: `Ctrl+Shift+F`
+- Next search match: `Ctrl+G`
+- Previous search match: `Ctrl+Shift+G`
 - Copy: `Ctrl+Shift+C`
-- Paste: `Ctrl+Shift+V`
+- Paste clipboard: `Ctrl+Shift+V`
+
+Clipboard paste through GoreeCloud Terminal's paste action and VTE's Shift+Insert route is read before delivery. Text containing any line break opens a modal review instead of being sent immediately. Primary-selection middle-click paste is not yet routed through this review and remains a Development limitation.
 
 ## Build
 
@@ -49,7 +52,7 @@ Ubuntu 24.04 dependencies:
 
 ```bash
 sudo apt update
-sudo apt install -y build-essential meson ninja-build pkg-config libgtk-4-dev libvte-2.91-gtk4-dev
+sudo apt install -y build-essential meson ninja-build pkg-config libgtk-4-dev libvte-2.91-gtk4-dev xvfb
 ```
 
 Build and run:
@@ -64,7 +67,7 @@ Validate:
 
 ```bash
 python3 scripts/validate_repository.py
-meson test -C build --print-errorlogs
+xvfb-run -a meson test -C build --print-errorlogs
 ```
 
 ## Documentation
