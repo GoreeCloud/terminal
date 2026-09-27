@@ -30,6 +30,10 @@ workspace_test = executable(
   dependencies: [gtk_dep, vte_dep, glib_dep, gio_dep],
 )
 
+workspace_test_env = environment()
+workspace_test_env.set('GTK_A11Y', 'none')
+workspace_test_env.set('GSK_RENDERER', 'cairo')
+
 test('context helpers', context_test)
 test('onboarding state', onboarding_state_test)
-test('workspace panes', workspace_test)
+test('workspace panes', workspace_test, env: workspace_test_env)
