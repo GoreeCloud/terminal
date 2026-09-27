@@ -117,6 +117,7 @@ compatibility:
     - goreecloud-terminal-split-panes-dev-v1
     - goreecloud-terminal-search-dev-v1
     - goreecloud-terminal-guarded-paste-dev-v1
+    - goreecloud-terminal-url-path-interaction-dev-v1
     - goreecloud-terminal-onboarding-state-dev-v1
 
 evidence:
@@ -137,5 +138,5 @@ conformance:
   blockers:
     - Glaze UI 1.6.0 consumer acceptance is incomplete.
     - Privacy Shield, Wardveil, Everkeep, Manager, Mesh, Identity, Policy, and Observability integration/acceptance are not established.
-    - Command-boundary navigation, URL/path interaction, primary-selection paste review, remote administration, profiles, workspace/session persistence, containers, automation, protocol validation, performance validation, and representative Linux runtime acceptance remain incomplete.
+    - Command-boundary navigation, primary-selection paste review, remote administration, profiles, workspace/session persistence, containers, automation, protocol validation, performance validation, and representative Linux runtime acceptance remain incomplete.
     - Production packaging, signed releases, rollback evidence, release approval, and lifecycle promotion remain incomplete.

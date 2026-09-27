@@ -3,7 +3,6 @@
 The following remain planned or materially incomplete:
 
 - command-boundary navigation;
-- URL/path detection and interaction;
 - primary-selection middle-click multiline-paste review;
 - profiles for shell, working directory, environment, startup command, shortcuts, and appearance;
 - robust shell integration for exit status, command boundaries, process context, and reliable CWD;
