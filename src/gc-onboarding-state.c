@@ -1,5 +1,6 @@
 #include "gc-onboarding-state.h"
 
+#include <errno.h>
 #include <glib/gstdio.h>
 
 void
