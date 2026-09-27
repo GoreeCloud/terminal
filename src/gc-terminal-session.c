@@ -19,6 +19,7 @@ struct _GcTerminalSession {
     GcTerminalSessionOpenRequestedFunc open_requested;
     gint url_match_tag;
     gint path_match_tag;
+    guint notify_idle_id;
     gpointer user_data;
 };
 
@@ -37,11 +38,64 @@ set_text(char **target, const char *value)
     *target = g_strdup(value != NULL ? value : "");
 }
 
+static gboolean
+notify_changed_idle(gpointer user_data)
+{
+    GcTerminalSession *session = user_data;
+
+    session->notify_idle_id = 0;
+    notify_changed(session);
+    return G_SOURCE_REMOVE;
+}
+
+static void
+queue_notify_changed(GcTerminalSession *session)
+{
+    if (session->notify_idle_id == 0) {
+        session->notify_idle_id = g_idle_add(notify_changed_idle, session);
+    }
+}
+
+static char *
+dup_current_directory_uri(VteTerminal *terminal)
+{
+#if VTE_CHECK_VERSION(0, 78, 0)
+    GUri *uri = vte_terminal_ref_termprop_uri(
+        terminal,
+        VTE_TERMPROP_CURRENT_DIRECTORY_URI
+    );
+    char *value = NULL;
+
+    if (uri != NULL) {
+        value = g_uri_to_string(uri);
+        g_uri_unref(uri);
+    }
+
+    return value;
+#else
+    return g_strdup(vte_terminal_get_current_directory_uri(terminal));
+#endif
+}
+
+static char *
+dup_window_title(VteTerminal *terminal)
+{
+#if VTE_CHECK_VERSION(0, 78, 0)
+    return vte_terminal_dup_termprop_string(
+        terminal,
+        VTE_TERMPROP_XTERM_TITLE,
+        NULL
+    );
+#else
+    return g_strdup(vte_terminal_get_window_title(terminal));
+#endif
+}
+
 static void
 update_working_directory(VteTerminal *terminal, gpointer user_data)
 {
     GcTerminalSession *session = user_data;
-    const char *uri = vte_terminal_get_current_directory_uri(terminal);
+    g_autofree char *uri = dup_current_directory_uri(terminal);
     g_autofree char *path = NULL;
 
     if (uri != NULL) {
@@ -59,11 +113,46 @@ static void
 update_window_title(VteTerminal *terminal, gpointer user_data)
 {
     GcTerminalSession *session = user_data;
-    const char *title = vte_terminal_get_window_title(terminal);
+    g_autofree char *title = dup_window_title(terminal);
 
     set_text(&session->title, title != NULL && *title != '\0' ? title : "Terminal");
     notify_changed(session);
 }
+
+#if VTE_CHECK_VERSION(0, 78, 0)
+static void
+on_termprop_changed(
+    VteTerminal *terminal,
+    const char *property,
+    gpointer user_data
+)
+{
+    GcTerminalSession *session = user_data;
+
+    if (g_strcmp0(property, VTE_TERMPROP_CURRENT_DIRECTORY_URI) == 0) {
+        g_autofree char *uri = dup_current_directory_uri(terminal);
+        g_autofree char *path = NULL;
+
+        if (uri != NULL) {
+            path = g_filename_from_uri(uri, NULL, NULL);
+        }
+
+        if (path != NULL && *path != '\0') {
+            set_text(&session->working_directory, path);
+        }
+
+        queue_notify_changed(session);
+    } else if (g_strcmp0(property, VTE_TERMPROP_XTERM_TITLE) == 0) {
+        g_autofree char *title = dup_window_title(terminal);
+
+        set_text(
+            &session->title,
+            title != NULL && *title != '\0' ? title : "Terminal"
+        );
+        queue_notify_changed(session);
+    }
+}
+#endif
 
 static void
 on_focus_changed(GObject *object, GParamSpec *pspec, gpointer user_data)
@@ -226,6 +315,10 @@ session_free(gpointer data)
 {
     GcTerminalSession *session = data;
 
+    if (session->notify_idle_id != 0) {
+        g_source_remove(session->notify_idle_id);
+    }
+
     g_free(session->working_directory);
     g_free(session->title);
     g_free(session->status);
@@ -351,6 +444,14 @@ gc_terminal_session_new(
         );
     }
 
+#if VTE_CHECK_VERSION(0, 78, 0)
+    g_signal_connect(
+        session->terminal,
+        "termprop-changed",
+        G_CALLBACK(on_termprop_changed),
+        session
+    );
+#else
     g_signal_connect(
         session->terminal,
         "current-directory-uri-changed",
@@ -363,6 +464,7 @@ gc_terminal_session_new(
         G_CALLBACK(update_window_title),
         session
     );
+#endif
     g_signal_connect(
         session->terminal,
         "notify::has-focus",
