@@ -233,3 +233,76 @@ This event does not establish:
 
 Repository protection and the blank GitHub Description also remain separately unresolved and are tracked in GitHub issue #3.
 
+## 2026-09-27 — Nested Split Panes Integrated
+
+### Event
+
+Pull request #6 integrated nested local split panes into the Development workspace model.
+
+### Exact Source Evidence
+
+- authoritative base: `e2c58c5ce9e55400e8f5d87c5f9dd6a4ee623a42`;
+- initial pane candidate: `e03926a811e69d4fc5e28f05e2bfa0dceab1208d`;
+- exact accepted candidate: `03ac28ba2a6db46ef11bdaa7483606e40b4c35ec`;
+- pull request: #6, **Add nested split panes**;
+- merge method: squash;
+- authoritative merged commit: `003a9c3fd2b90f72f11646c9236950cbd85db081`;
+- merged tree: `9ad0424f0f9d1dd3734f4e60e379b592780550b9`; and
+- GitHub reports the merged commit signature as verified.
+
+### Validation and Corrective Evidence
+
+The first pane candidate compiled, but its new Xvfb-backed workspace test was terminated before assertions because GTK emitted an accessibility-bus warning that GLib's test harness treated as fatal:
+
+- Native Foundation run `36352823241` — push — failed in test;
+- Native Foundation run `36352849933` — pull request — failed in test.
+
+The runtime test was preserved. The candidate was corrected by isolating the headless GUI test environment with `GTK_A11Y=none` and the Cairo renderer rather than weakening or deleting the test.
+
+The corrected exact candidate then passed:
+
+- Native Foundation run `36352934513` — push — success;
+- Native Foundation run `36352938087` — pull request — success.
+
+The merged authoritative revision passed:
+
+- Native Foundation run `36353011758` — push on `main` — success.
+
+The passing workflow verified repository governance, Meson configuration, native compilation, context tests, onboarding-state tests, the Xvfb workspace split/collapse test, and install layout.
+
+### Implemented Development Boundary
+
+Verified source now adds:
+
+- nested `GtkPaned` layout trees inside tabs;
+- left/right and top/bottom pane splitting;
+- working-directory-aware pane creation;
+- draggable split dividers;
+- active-pane synchronization for tab label, window title, working-directory context, and session status;
+- previous/next pane focus cycling;
+- active-pane closing with surrounding split collapse; and
+- onboarding/help and keyboard-shortcut updates for the pane model.
+
+Pane-layout and focus state remain ephemeral and are intentionally not a workspace/session persistence format.
+
+### Security and Privacy Boundary
+
+Every pane remains a local shell session. This slice adds no SSH/remote transport, credentials, telemetry, analytics, network reporting, or persistent pane/session metadata. Pane labels, layout, focus, and context indicators remain informational and are not authorization signals.
+
+### Remaining Product Boundary
+
+This event does not establish:
+
+- persistent workspace/session restoration;
+- profiles or general settings;
+- searchable/regex scrollback or command-boundary navigation;
+- safe multiline-paste review;
+- SSH/remote administration;
+- container workflows;
+- representative Linux desktop runtime acceptance;
+- complete Glaze UI 1.6.0 consumer conformance;
+- production packaging or release acceptance; or
+- Stable/Anchor status.
+
+Repository protection and the blank GitHub Description remain separately unresolved and are tracked in GitHub issue #3.
+
