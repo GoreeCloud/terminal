@@ -58,6 +58,7 @@ queue_notify_changed(GcTerminalSession *session)
     }
 }
 
+#if VTE_CHECK_VERSION(0, 78, 0)
 static void
 sync_shell_status(GcTerminalSession *session)
 {
@@ -66,6 +67,7 @@ sync_shell_status(GcTerminalSession *session)
     set_text(&session->status, status);
     queue_notify_changed(session);
 }
+#endif
 
 static char *
 dup_current_directory_uri(VteTerminal *terminal)
