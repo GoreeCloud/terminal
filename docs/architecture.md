@@ -13,13 +13,13 @@ main.c
   -> gc-terminal-window.c
        -> application actions + presentation
        -> context ribbon
-       -> search UI + clipboard-paste review
+       -> search UI + guarded clipboard/primary-selection paste review
        -> validated link/path open requests
        -> onboarding launch/replay
        -> gc-workspace.c
             -> tab membership + active pane selection
             -> ephemeral nested GtkPaned layout trees
-            -> paste-request routing
+            -> paste-source routing (clipboard / primary selection)
             -> gc-terminal-session.c
                  -> VTE widget + PTY shell lifecycle
                  -> session title/CWD/status
@@ -41,9 +41,7 @@ main.c
 
 ## Clipboard Safety Boundary
 
-VTE's clipboard-paste signal is intercepted and routed to the GoreeCloud review path. Single-line clipboard text is sent directly; text containing `\n` or `\r` requires modal confirmation. Confirmed text is sent with VTE's paste-text API so bracketed-paste handling remains available.
-
-Primary-selection middle-click paste remains outside this bounded interception path and is explicitly not represented as protected.
+VTE's clipboard-paste signal is intercepted and routed to the GoreeCloud review path. A capture-phase GTK middle-click gesture claims primary-selection paste before VTE's default handler and routes GTK's primary clipboard through the same path. Single-line text is sent directly; text containing `\n` or `\r` requires modal confirmation. Confirmed text is sent with VTE's paste-text API so bracketed-paste handling remains available.
 
 ## Search Boundary
 

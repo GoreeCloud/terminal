@@ -42,15 +42,15 @@ These entries establish Development source implementation only. They do not esta
 - Local paths must exist before an open request is handed to the desktop.
 - Detected text is never executed as a shell command by this interaction path.
 
-## Clipboard Paste Review
+## Guarded Paste Review
 
 - GoreeCloud's clipboard paste action reads clipboard text before it is sent to the shell.
 - VTE's `paste-clipboard` route, including Shift+Insert, is intercepted and routed through the same review path.
-- Any clipboard text containing `\n` or `\r` requires a modal review.
+- Primary-selection middle-click paste is claimed in GTK's capture phase before VTE's default primary-selection paste and routed through GTK's primary clipboard.
+- Any clipboard or primary-selection text containing `\n` or `\r` requires a modal review.
 - Review shows exact text plus line and character counts.
 - Confirmed text uses VTE's paste-text API so terminal paste processing such as bracketed paste remains available.
-- Single-line clipboard text pastes directly.
-- Primary-selection middle-click paste is not yet intercepted and remains an explicit Development limitation.
+- Single-line clipboard or primary-selection text pastes directly.
 - Pure GLib tests cover line-break review detection and line counting.
 
 ## First-Run Onboarding
@@ -64,7 +64,7 @@ These entries establish Development source implementation only. They do not esta
 
 - Meson/Ninja build.
 - GLib unit tests for context, onboarding state, and paste-safety helpers.
-- Xvfb-backed GTK/VTE workspace integration test.
+- Xvfb-backed GTK/VTE workspace integration tests, including clipboard-versus-primary paste-source routing.
 - GitHub Actions build/test/install validation on Ubuntu 24.04.
 - Repository-governance validation.
 

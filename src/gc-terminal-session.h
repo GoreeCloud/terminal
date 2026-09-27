@@ -13,8 +13,14 @@ typedef void (*GcTerminalSessionChangedFunc)(
     gpointer user_data
 );
 
+typedef enum {
+    GC_TERMINAL_PASTE_CLIPBOARD,
+    GC_TERMINAL_PASTE_PRIMARY,
+} GcTerminalPasteSource;
+
 typedef void (*GcTerminalSessionPasteRequestedFunc)(
     GcTerminalSession *session,
+    GcTerminalPasteSource source,
     gpointer user_data
 );
 
@@ -41,6 +47,10 @@ gboolean gc_terminal_session_has_focus(GcTerminalSession *session);
 
 void gc_terminal_session_copy(GcTerminalSession *session);
 void gc_terminal_session_paste(GcTerminalSession *session);
+void gc_terminal_session_request_paste(
+    GcTerminalSession *session,
+    GcTerminalPasteSource source
+);
 void gc_terminal_session_paste_text(
     GcTerminalSession *session,
     const char *text

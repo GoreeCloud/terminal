@@ -16,6 +16,7 @@ typedef void (*GcWorkspaceChangedFunc)(
 typedef void (*GcWorkspacePasteRequestedFunc)(
     GcWorkspace *workspace,
     GcTerminalSession *session,
+    GcTerminalPasteSource source,
     gpointer user_data
 );
 

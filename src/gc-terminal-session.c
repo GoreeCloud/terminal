@@ -82,9 +82,37 @@ on_paste_clipboard(VteTerminal *terminal, gpointer user_data)
 
     g_signal_stop_emission_by_name(terminal, "paste-clipboard");
 
-    if (session->paste_requested != NULL) {
-        session->paste_requested(session, session->user_data);
+    gc_terminal_session_request_paste(
+        session,
+        GC_TERMINAL_PASTE_CLIPBOARD
+    );
+}
+
+static void
+on_primary_paste_pressed(
+    GtkGestureClick *gesture,
+    gint n_press,
+    gdouble x,
+    gdouble y,
+    gpointer user_data
+)
+{
+    GcTerminalSession *session = user_data;
+    (void) x;
+    (void) y;
+
+    if (n_press != 1 || session->paste_requested == NULL) {
+        return;
     }
+
+    gc_terminal_session_request_paste(
+        session,
+        GC_TERMINAL_PASTE_PRIMARY
+    );
+    gtk_gesture_set_state(
+        GTK_GESTURE(gesture),
+        GTK_EVENT_SEQUENCE_CLAIMED
+    );
 }
 
 static gint
@@ -300,6 +328,29 @@ gc_terminal_session_new(
         );
     }
 
+    {
+        GtkGesture *middle_click = gtk_gesture_click_new();
+
+        gtk_gesture_single_set_button(
+            GTK_GESTURE_SINGLE(middle_click),
+            GDK_BUTTON_MIDDLE
+        );
+        gtk_event_controller_set_propagation_phase(
+            GTK_EVENT_CONTROLLER(middle_click),
+            GTK_PHASE_CAPTURE
+        );
+        g_signal_connect(
+            middle_click,
+            "pressed",
+            G_CALLBACK(on_primary_paste_pressed),
+            session
+        );
+        gtk_widget_add_controller(
+            GTK_WIDGET(session->terminal),
+            GTK_EVENT_CONTROLLER(middle_click)
+        );
+    }
+
     g_signal_connect(
         session->terminal,
         "current-directory-uri-changed",
@@ -408,6 +459,21 @@ void
 gc_terminal_session_paste(GcTerminalSession *session)
 {
     vte_terminal_paste_clipboard(session->terminal);
+}
+
+void
+gc_terminal_session_request_paste(
+    GcTerminalSession *session,
+    GcTerminalPasteSource source
+)
+{
+    if (session->paste_requested != NULL) {
+        session->paste_requested(
+            session,
+            source,
+            session->user_data
+        );
+    }
 }
 
 void
