@@ -3,7 +3,6 @@ context_test = executable(
   [
     'test-context.c',
     '../src/gc-context.c',
-    '../src/gc-shell-state.c',
   ],
   include_directories: include_directories('../src'),
   dependencies: [glib_dep],
@@ -57,6 +56,7 @@ workspace_test = executable(
     '../src/gc-terminal-session.c',
     '../src/gc-link-utils.c',
     '../src/gc-context.c',
+    '../src/gc-shell-state.c',
   ],
   include_directories: include_directories('../src'),
   dependencies: [gtk_dep, vte_dep, glib_dep, gio_dep, pcre2_dep],
