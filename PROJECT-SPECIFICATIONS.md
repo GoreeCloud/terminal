@@ -501,7 +501,13 @@ The initial dependency baseline is GTK 4.12 or newer, VTE GTK4 compatible with t
 
 The presence of VTE does not establish support for every requested terminal protocol, graphics protocol, shell integration, remote workflow, or performance target.
 
-### 7.2 Component Boundaries
+### 7.2 Development Module Boundary
+
+The Development source must keep local terminal-session behavior separate from workspace/tab orchestration and window-level presentation. Session objects own terminal/PTY state and shell lifecycle; workspace objects own tab membership, active-session selection, and working-directory-aware tab creation; the window layer owns application actions and presentation.
+
+The first-run experience may persist only minimal onboarding progress in the user's XDG configuration directory. That state is not a session-restore format, profile format, command-history store, credential store, or authorization source.
+
+### 7.3 Component Boundaries
 
 The implementation must preserve clear boundaries among:
 
