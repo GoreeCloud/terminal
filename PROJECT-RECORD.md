@@ -379,3 +379,91 @@ This event does not establish:
 
 Repository protection and the blank GitHub Description remain separately unresolved and are tracked in GitHub issue #3.
 
+## 2026-09-27 — Validated URL and Local-Path Interaction Integrated
+
+### Event
+
+Pull request #10 integrated deliberate Ctrl+click interaction for terminal hyperlinks, allowlisted URL targets, and existing local paths.
+
+### Exact Source Evidence
+
+- authoritative base: `2a793a7dda079d2b64a3a813beef799f525fe3e5`;
+- first source candidate: `199468735a303034108374033a4ffadee2c421ac`;
+- header-corrected candidate: `92073f997c3a74cc057061c12710957952416573`;
+- PCRE2-corrected candidate: `04366282742ce4f86253dc027c8d7e67a75f714b`;
+- exact accepted/hardened candidate: `d33a20a7fd64e873a0fc0d538bbefe574635b97c`;
+- pull request: #10, **Add validated URL and path interaction**;
+- merge method: squash;
+- authoritative merged commit: `df7111cac1fcb0f911809ce610b7b156a8fb2c37`;
+- merged tree: `39c34da58b61f6cab886d45fcea6ece7fb997421`; and
+- GitHub reports the merged commit signature as verified.
+
+### Corrective and Validation Evidence
+
+The first source candidate failed compilation because a generated header edit contained literal `\n` text instead of real line breaks:
+
+- Native Foundation run `36354961912` — push — failed in compile.
+
+That generated-text defect was corrected without weakening validation. The next candidate compiled, but the Xvfb workspace test exposed VTE's runtime requirement that terminal match regexes be compiled with PCRE2 multiline flags:
+
+- Native Foundation run `36355084004` — push — failed in test;
+- Native Foundation run `36355088167` — pull request — failed/cancelled as the candidate was superseded.
+
+The runtime test was preserved. PCRE2 was declared explicitly and match regexes were compiled with the required multiline flag. The corrected candidate then passed:
+
+- Native Foundation run `36355220056` — push — success;
+- Native Foundation run `36355224222` — pull request — success.
+
+The candidate was subsequently hardened to reject target control characters and reduce URL/path-regex overlap. The exact accepted head passed:
+
+- Native Foundation run `36355274565` — push — success;
+- Native Foundation run `36355277161` — pull request — success.
+
+After merge, authoritative `main` commit `df7111cac1fcb0f911809ce610b7b156a8fb2c37` passed:
+
+- Native Foundation run `36355339618` — push on `main` — success.
+
+The passing workflow verified repository governance, Meson configuration, native compilation, context tests, onboarding-state tests, link-target validation tests, paste-safety tests, the Xvfb workspace integration test, and install layout.
+
+### Implemented Development Boundary
+
+Verified source now adds:
+
+- Ctrl+primary-click intent before link/path opening;
+- explicit OSC 8 hyperlink lookup through VTE;
+- bounded HTTP/HTTPS/mailto/file and local-path match expressions;
+- an HTTP/HTTPS/mailto/local-file URI allowlist;
+- rejection of unsupported schemes and target control characters;
+- rejection of remote `file://` hosts;
+- resolution of explicit absolute, `~/`, `./`, and `../` local paths using active-pane working-directory context;
+- local-path existence validation before desktop launch;
+- GIO desktop-default-handler launch for validated targets; and
+- focused GLib/GIO tests for scheme, URI, control-character, path, and missing-path validation.
+
+PCRE2 is now an explicit compile-time dependency for the multiline flag required by VTE terminal match regexes.
+
+### Security and Privacy Boundary
+
+Terminal output and OSC 8 targets are treated as untrusted input. Matched text is never executed through the shell by this path. External opening requires an explicit Ctrl+click, arbitrary URI schemes are not launched, local paths must exist, remote file hosts are rejected, and GoreeCloud Terminal does not persist link/path history.
+
+Opening an allowed HTTP/HTTPS/mailto target hands it to the configured desktop application; any later network or external-application behavior is outside the Terminal transport boundary and occurs only after the user's explicit open request.
+
+### Remaining Product Boundary
+
+This event does not establish:
+
+- trustworthy command-boundary navigation or broader shell integration;
+- guarded primary-selection middle-click paste;
+- bare-filename guessing;
+- remote file URI opening;
+- SSH/remote administration;
+- profiles or general settings;
+- persistent workspace/session restoration;
+- container workflows;
+- representative Linux desktop runtime acceptance;
+- complete Glaze UI 1.6.0 consumer conformance;
+- production packaging or release acceptance; or
+- Stable/Anchor status.
+
+Command-boundary navigation remains gated on trustworthy shell integration rather than prompt-text inference. Repository protection and the blank GitHub Description remain separately unresolved in issue #3.
+
