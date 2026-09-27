@@ -1,6 +1,8 @@
 #pragma once
 
-#include <gtk/gtk.h>\n\n#include "gc-link-utils.h"
+#include <gtk/gtk.h>
+
+#include "gc-link-utils.h"
 
 G_BEGIN_DECLS
 
