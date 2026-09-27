@@ -2,7 +2,6 @@
 
 The following remain planned or materially incomplete:
 
-- horizontal and vertical split panes, pane resizing, and focus navigation;
 - profiles for shell, working directory, environment, startup command, shortcuts, and appearance;
 - searchable/regex scrollback and command-boundary navigation;
 - shell integration for exit status, command boundaries, process context, and reliable CWD;

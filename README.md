@@ -15,7 +15,9 @@ The current source provides:
 - GNOME VTE-backed local terminal sessions and asynchronous PTY shell startup;
 - an explicit session/workspace source boundary;
 - multiple reorderable local tabs;
-- working-directory-aware new-tab creation;
+- working-directory-aware new-tab and split-pane creation;
+- nested left/right and top/bottom split panes with draggable dividers;
+- keyboard pane focus cycling and active-pane closing;
 - visible local/elevated, user@host, working-directory, and active-session state;
 - keyboard-driven tab creation, closing, and navigation;
 - copy/paste header actions and shortcuts;
@@ -25,7 +27,7 @@ The current source provides:
 - Meson/Ninja build and install plumbing; and
 - GitHub Actions compile/test/install validation.
 
-This is Development source evidence only. Split panes, profiles, SSH, workspace/session persistence, search, safe multiline-paste review, containers, automation, protocol qualification, representative runtime acceptance, performance claims, full Glaze conformance, release qualification, and Stable/Anchor status remain unverified or planned.
+This is Development source evidence only. Profiles, SSH, workspace/session persistence, search, safe multiline-paste review, containers, automation, protocol qualification, representative runtime acceptance, performance claims, full Glaze conformance, release qualification, and Stable/Anchor status remain unverified or planned.
 
 ## Keyboard Shortcuts
 
@@ -33,6 +35,11 @@ This is Development source evidence only. Split panes, profiles, SSH, workspace/
 - Close active tab: `Ctrl+Shift+W`
 - Next tab: `Ctrl+PageDown`
 - Previous tab: `Ctrl+PageUp`
+- Split left/right: `Ctrl+Shift+E`
+- Split top/bottom: `Ctrl+Shift+O`
+- Close active pane: `Ctrl+Shift+X`
+- Focus previous pane: `Alt+Left`
+- Focus next pane: `Alt+Right`
 - Copy: `Ctrl+Shift+C`
 - Paste: `Ctrl+Shift+V`
 

@@ -8,6 +8,8 @@
 - Explicit terminal-session and workspace source modules.
 - Multiple reorderable local tabs.
 - Working-directory-aware new-tab creation.
+- Nested left/right and top/bottom split panes with draggable dividers.
+- Working-directory-aware pane creation, pane focus cycling, and active-pane closing.
 - Tab keyboard shortcuts and active-session context updates.
 - Durable first-run onboarding with Help replay.
 - Onboarding-state unit tests.

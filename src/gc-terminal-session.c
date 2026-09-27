@@ -59,6 +59,16 @@ update_window_title(VteTerminal *terminal, gpointer user_data)
 }
 
 static void
+on_focus_changed(GObject *object, GParamSpec *pspec, gpointer user_data)
+{
+    GcTerminalSession *session = user_data;
+    (void) object;
+    (void) pspec;
+
+    notify_changed(session);
+}
+
+static void
 on_child_exited(VteTerminal *terminal, gint status, gpointer user_data)
 {
     GcTerminalSession *session = user_data;
@@ -168,6 +178,12 @@ gc_terminal_session_new(
     );
     g_signal_connect(
         session->terminal,
+        "notify::has-focus",
+        G_CALLBACK(on_focus_changed),
+        session
+    );
+    g_signal_connect(
+        session->terminal,
         "child-exited",
         G_CALLBACK(on_child_exited),
         session
@@ -230,6 +246,12 @@ gc_terminal_session_dup_display_title(GcTerminalSession *session)
     }
 
     return g_strdup("Terminal");
+}
+
+gboolean
+gc_terminal_session_has_focus(GcTerminalSession *session)
+{
+    return gtk_widget_has_focus(GTK_WIDGET(session->terminal));
 }
 
 void

@@ -15,8 +15,9 @@ main.c
        -> active-session context ribbon
        -> onboarding launch/replay
        -> gc-workspace.c
-            -> tab membership + active selection
-            -> working-directory-aware tab creation
+            -> tab membership + active pane selection
+            -> ephemeral nested GtkPaned layout trees
+            -> working-directory-aware tab/pane creation
             -> gc-terminal-session.c
                  -> VTE widget + PTY shell lifecycle
                  -> session title/CWD/status
@@ -41,4 +42,4 @@ It contains only `completed` and `step`. It is not a workspace/session-restore s
 
 ## Future Separation
 
-Split-pane layout state, profiles, shell integration, remote transport, container context, persistent workspace recovery, automation, and platform adapters remain separate future modules rather than being folded back into the window layer.
+Pane layout is currently ephemeral and intentionally has no persistence contract. Profiles, shell integration, remote transport, container context, persistent workspace recovery, automation, and platform adapters remain separate future modules rather than being folded back into the window layer.

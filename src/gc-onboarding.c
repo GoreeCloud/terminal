@@ -17,15 +17,15 @@ typedef struct {
 static const char *page_titles[] = {
     "Welcome to GoreeCloud Terminal",
     "Know where commands will run",
-    "Work quickly with tabs and shortcuts",
+    "Work quickly with tabs and panes",
     "Current Development safety boundary",
 };
 
 static const char *page_bodies[] = {
     "GoreeCloud Terminal currently opens local shell sessions only. The app is still in Development, so planned remote, persistence, profile, and container features are not implied by this build.",
     "The context ribbon keeps privilege state, user@host, the active working directory, and session status visible. Treat these indicators as execution context, not as a substitute for reviewing commands before you run them.",
-    "Open a new tab with Ctrl+Shift+T. Close the active tab with Ctrl+Shift+W. Move between tabs with Ctrl+PageUp and Ctrl+PageDown. Copy and paste use Ctrl+Shift+C and Ctrl+Shift+V.",
-    "Tabs inherit the active tab's working directory when possible. SSH, split panes, persistent sessions, safe multiline-paste review, profiles, and production-grade Glaze UI acceptance are still planned. You can replay this guide from Help at any time.",
+    "Open a new tab with Ctrl+Shift+T. Split left/right with Ctrl+Shift+E or top/bottom with Ctrl+Shift+O. Cycle pane focus with Alt+Left and Alt+Right; close the active pane with Ctrl+Shift+X. Tab navigation remains Ctrl+PageUp and Ctrl+PageDown.",
+    "New tabs and panes inherit the active pane's working directory when possible. SSH, persistent sessions, safe multiline-paste review, profiles, and production-grade Glaze UI acceptance are still planned. You can replay this guide from Help at any time.",
 };
 
 static const guint page_count = G_N_ELEMENTS(page_titles);
