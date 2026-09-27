@@ -141,6 +141,20 @@ gc_link_target_to_uri(
         return NULL;
     }
 
+    for (const unsigned char *cursor = (const unsigned char *) target;
+         *cursor != '\0';
+         cursor++) {
+        if (g_ascii_iscntrl(*cursor)) {
+            g_set_error(
+                error,
+                G_IO_ERROR,
+                G_IO_ERROR_INVALID_ARGUMENT,
+                "Link target contains control characters"
+            );
+            return NULL;
+        }
+    }
+
     switch (kind) {
     case GC_LINK_TARGET_URI:
         return validated_uri(target, error);

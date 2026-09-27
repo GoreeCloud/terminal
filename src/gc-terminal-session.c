@@ -274,7 +274,7 @@ gc_terminal_session_new(
     );
     session->path_match_tag = add_match_regex(
         session->terminal,
-        "(?:~|\\.{1,2})?/[^[:space:]<>\\\"']+"
+        "(?<![[:alnum:]:/])(?:~|\\.{1,2})?/[^[:space:]<>\\\"']+"
     );
 
     {

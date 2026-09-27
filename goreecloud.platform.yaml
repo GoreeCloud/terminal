@@ -102,6 +102,10 @@ external_dependencies:
     purpose: Runtime utilities and application/action foundation.
     required: true
     version_constraint: ">=2.76"
+  - name: PCRE2
+    purpose: Compile-time match-regex flags required by the VTE link/path matcher.
+    required: true
+    version_constraint: "distribution-supported"
 
 compatibility:
   platform_contract: "0.4"

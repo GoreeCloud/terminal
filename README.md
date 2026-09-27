@@ -56,7 +56,7 @@ Ubuntu 24.04 dependencies:
 
 ```bash
 sudo apt update
-sudo apt install -y build-essential meson ninja-build pkg-config libgtk-4-dev libvte-2.91-gtk4-dev xvfb
+sudo apt install -y build-essential meson ninja-build pkg-config libgtk-4-dev libvte-2.91-gtk4-dev libpcre2-dev xvfb
 ```
 
 Build and run:

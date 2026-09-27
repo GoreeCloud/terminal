@@ -39,6 +39,16 @@ test_uri_validation(void)
     g_assert_null(uri);
     g_assert_error(error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED);
     g_clear_error(&error);
+
+    uri = gc_link_target_to_uri(
+        GC_LINK_TARGET_URI,
+        "https://example.com/\nunsafe",
+        NULL,
+        &error
+    );
+    g_assert_null(uri);
+    g_assert_error(error, G_IO_ERROR, G_IO_ERROR_INVALID_ARGUMENT);
+    g_clear_error(&error);
 }
 
 static void
@@ -74,6 +84,16 @@ test_path_resolution(void)
     g_assert_cmpstr(uri, ==, expected);
 
     g_clear_pointer(&uri, g_free);
+    uri = gc_link_target_to_uri(
+        GC_LINK_TARGET_PATH,
+        "report.txt",
+        directory,
+        &error
+    );
+    g_assert_null(uri);
+    g_assert_error(error, G_IO_ERROR, G_IO_ERROR_INVALID_ARGUMENT);
+    g_clear_error(&error);
+
     uri = gc_link_target_to_uri(
         GC_LINK_TARGET_PATH,
         "./missing.txt",

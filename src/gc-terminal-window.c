@@ -501,12 +501,12 @@ on_workspace_open_requested(
     gpointer user_data
 )
 {
-    TerminalWindowState *state = user_data;
     g_autofree char *working_directory =
         gc_terminal_session_dup_working_directory(session);
     g_autofree char *uri = NULL;
     GError *error = NULL;
     (void) workspace;
+    (void) user_data;
 
     uri = gc_link_target_to_uri(
         kind,
