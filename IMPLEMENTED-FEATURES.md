@@ -53,6 +53,17 @@ These entries establish Development source implementation only. They do not esta
 - Single-line clipboard or primary-selection text pastes directly.
 - Pure GLib tests cover line-break review detection and line counting.
 
+## Shell Lifecycle Awareness
+
+- VTE 0.78+ shell lifecycle term properties are consumed for prompt-ready, pre-execution, and post-execution events.
+- The active session status can show shell-ready state, command-running state, and the last validated shell exit status.
+- Exit status is accepted only when the VTE post-execution property is set and the value is within the shell-status range `0..255`.
+- Term-property reset notifications do not fabricate lifecycle events.
+- VTE's legacy OSC 777 translation is enabled on VTE 0.78+ for compatible existing shell integration.
+- The lifecycle model is a pure GLib module with focused unit tests.
+- The Ubuntu 24.04 / VTE 0.76 compatibility path remains generic; command-boundary navigation is not claimed.
+- Protocol-derived lifecycle status is advisory execution context, not an authorization, privilege, or security-boundary signal.
+
 ## First-Run Onboarding
 
 - Automatic first-run guide for current local-shell behavior, execution-context indicators, keyboard shortcuts, search, paste review, and Development safety boundaries.
