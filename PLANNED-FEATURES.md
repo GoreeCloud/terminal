@@ -4,7 +4,7 @@ The following remain planned or materially incomplete:
 
 - command-boundary navigation;
 - profiles for shell, working directory, environment, startup command, shortcuts, and appearance;
-- robust shell integration for exit status, command boundaries, process context, and reliable CWD;
+- complete shell integration across supported VTE baselines for command boundaries, process context, reliable CWD, and navigation; VTE 0.78+ lifecycle/exit-status awareness is only a bounded Development prerequisite;
 - persistent workspace/session restoration;
 - settings beyond the bounded onboarding state;
 - SSH host profiles, host verification, reconnection, and secure key/credential handling;
