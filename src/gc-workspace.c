@@ -154,12 +154,21 @@ on_session_changed(GcTerminalSession *session, gpointer user_data)
 }
 
 static void
-on_session_paste_requested(GcTerminalSession *session, gpointer user_data)
+on_session_paste_requested(
+    GcTerminalSession *session,
+    GcTerminalPasteSource source,
+    gpointer user_data
+)
 {
     GcWorkspace *workspace = user_data;
 
     if (workspace->paste_requested != NULL) {
-        workspace->paste_requested(workspace, session, workspace->user_data);
+        workspace->paste_requested(
+            workspace,
+            session,
+            source,
+            workspace->user_data
+        );
     }
 }
 

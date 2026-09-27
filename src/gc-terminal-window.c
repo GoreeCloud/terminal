@@ -452,9 +452,10 @@ on_clipboard_text_ready(
 }
 
 static void
-request_safe_clipboard_paste(
+request_safe_paste(
     TerminalWindowState *state,
-    GcTerminalSession *session
+    GcTerminalSession *session,
+    GcTerminalPasteSource source
 )
 {
     PasteReadRequest *request;
@@ -464,13 +465,24 @@ request_safe_clipboard_paste(
         return;
     }
 
+    switch (source) {
+    case GC_TERMINAL_PASTE_CLIPBOARD:
+        clipboard = gtk_widget_get_clipboard(GTK_WIDGET(state->window));
+        break;
+    case GC_TERMINAL_PASTE_PRIMARY:
+        clipboard = gtk_widget_get_primary_clipboard(GTK_WIDGET(state->window));
+        break;
+    default:
+        g_warning("Refusing unknown terminal paste source: %d", source);
+        return;
+    }
+
     request = g_new0(PasteReadRequest, 1);
     request->parent = g_object_ref(state->window);
     request->session_widget = g_object_ref(
         gc_terminal_session_get_widget(session)
     );
 
-    clipboard = gtk_widget_get_clipboard(GTK_WIDGET(state->window));
     gdk_clipboard_read_text_async(
         clipboard,
         NULL,
@@ -483,13 +495,14 @@ static void
 on_workspace_paste_requested(
     GcWorkspace *workspace,
     GcTerminalSession *session,
+    GcTerminalPasteSource source,
     gpointer user_data
 )
 {
     TerminalWindowState *state = user_data;
     (void) workspace;
 
-    request_safe_clipboard_paste(state, session);
+    request_safe_paste(state, session, source);
 }
 
 static void
