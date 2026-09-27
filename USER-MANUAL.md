@@ -36,7 +36,7 @@ Press `Ctrl+Shift+F` to show search for the active pane.
 - `Ctrl+G` moves to the next match.
 - `Ctrl+Shift+G` moves to the previous match.
 - Search wraps through terminal content.
-- Escape closes the search bar and clears the active pane's search expression.
+- Escape closes the search bar and clears the active pane's search expression while focus is inside the search UI; otherwise Escape continues to go to the active terminal.
 
 Invalid regular expressions are shown inline and are not applied.
 
