@@ -1,6 +1,7 @@
 #include "gc-terminal-session.h"
 
 #include "gc-context.h"
+#include "gc-shell-state.h"
 
 #include <pango/pango.h>
 
@@ -14,6 +15,7 @@ struct _GcTerminalSession {
     char *working_directory;
     char *title;
     char *status;
+    GcShellState shell_state;
     GcTerminalSessionChangedFunc changed;
     GcTerminalSessionPasteRequestedFunc paste_requested;
     GcTerminalSessionOpenRequestedFunc open_requested;
@@ -55,6 +57,17 @@ queue_notify_changed(GcTerminalSession *session)
         session->notify_idle_id = g_idle_add(notify_changed_idle, session);
     }
 }
+
+#if VTE_CHECK_VERSION(0, 78, 0)
+static void
+sync_shell_status(GcTerminalSession *session)
+{
+    g_autofree char *status = gc_shell_state_dup_status(&session->shell_state);
+
+    set_text(&session->status, status);
+    queue_notify_changed(session);
+}
+#endif
 
 static char *
 dup_current_directory_uri(VteTerminal *terminal)
@@ -150,6 +163,39 @@ on_termprop_changed(
             title != NULL && *title != '\0' ? title : "Terminal"
         );
         queue_notify_changed(session);
+    } else if (g_strcmp0(property, VTE_TERMPROP_SHELL_PRECMD) == 0) {
+        g_autoptr(GVariant) value =
+            vte_terminal_ref_termprop_variant(terminal, property);
+
+        if (value != NULL) {
+            gc_shell_state_mark_prompt(&session->shell_state);
+            sync_shell_status(session);
+        }
+    } else if (g_strcmp0(property, VTE_TERMPROP_SHELL_PREEXEC) == 0) {
+        g_autoptr(GVariant) value =
+            vte_terminal_ref_termprop_variant(terminal, property);
+
+        if (value != NULL) {
+            gc_shell_state_mark_preexec(&session->shell_state);
+            sync_shell_status(session);
+        }
+    } else if (g_strcmp0(property, VTE_TERMPROP_SHELL_POSTEXEC) == 0) {
+        guint64 exit_status = 0;
+
+        if (vte_terminal_get_termprop_uint(
+                terminal,
+                property,
+                &exit_status
+            )) {
+            gboolean valid_exit_status = exit_status <= 255;
+
+            gc_shell_state_mark_postexec(
+                &session->shell_state,
+                valid_exit_status,
+                exit_status
+            );
+            sync_shell_status(session);
+        }
     }
 }
 #endif
@@ -352,6 +398,7 @@ gc_terminal_session_new(
     session->working_directory = g_strdup(initial_directory);
     session->title = g_strdup("Terminal");
     session->status = g_strdup("Starting shell");
+    gc_shell_state_init(&session->shell_state);
     session->changed = changed;
     session->paste_requested = paste_requested;
     session->open_requested = open_requested;
@@ -381,6 +428,9 @@ gc_terminal_session_new(
     vte_terminal_set_colors(session->terminal, &foreground, &background, NULL, 0);
     vte_terminal_set_scrollback_lines(session->terminal, 10000);
     vte_terminal_set_allow_hyperlink(session->terminal, TRUE);
+#if VTE_CHECK_VERSION(0, 78, 0)
+    vte_terminal_set_enable_legacy_osc777(session->terminal, TRUE);
+#endif
     vte_terminal_set_bold_is_bright(session->terminal, TRUE);
     vte_terminal_set_cursor_blink_mode(session->terminal, VTE_CURSOR_BLINK_SYSTEM);
     vte_terminal_search_set_wrap_around(session->terminal, TRUE);
@@ -547,6 +597,30 @@ gboolean
 gc_terminal_session_has_focus(GcTerminalSession *session)
 {
     return gtk_widget_has_focus(GTK_WIDGET(session->terminal));
+}
+
+gboolean
+gc_terminal_session_has_shell_integration(GcTerminalSession *session)
+{
+    return gc_shell_state_is_integrated(&session->shell_state);
+}
+
+gboolean
+gc_terminal_session_is_command_running(GcTerminalSession *session)
+{
+    return gc_shell_state_is_running(&session->shell_state);
+}
+
+gboolean
+gc_terminal_session_get_last_exit_status(
+    GcTerminalSession *session,
+    guint64 *exit_status
+)
+{
+    return gc_shell_state_get_last_exit_status(
+        &session->shell_state,
+        exit_status
+    );
 }
 
 void

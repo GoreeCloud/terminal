@@ -44,6 +44,12 @@ const char *gc_terminal_session_get_status(GcTerminalSession *session);
 char *gc_terminal_session_dup_working_directory(GcTerminalSession *session);
 char *gc_terminal_session_dup_display_title(GcTerminalSession *session);
 gboolean gc_terminal_session_has_focus(GcTerminalSession *session);
+gboolean gc_terminal_session_has_shell_integration(GcTerminalSession *session);
+gboolean gc_terminal_session_is_command_running(GcTerminalSession *session);
+gboolean gc_terminal_session_get_last_exit_status(
+    GcTerminalSession *session,
+    guint64 *exit_status
+);
 
 void gc_terminal_session_copy(GcTerminalSession *session);
 void gc_terminal_session_paste(GcTerminalSession *session);
