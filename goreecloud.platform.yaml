@@ -113,6 +113,8 @@ compatibility:
     - vte-gtk4>=0.76
   provides:
     - goreecloud-terminal-local-session-dev-v1
+    - goreecloud-terminal-tabs-dev-v1
+    - goreecloud-terminal-onboarding-state-dev-v1
 
 evidence:
   acceptance_tests: []
@@ -132,5 +134,5 @@ conformance:
   blockers:
     - Glaze UI 1.6.0 consumer acceptance is incomplete.
     - Privacy Shield, Wardveil, Everkeep, Manager, Mesh, Identity, Policy, and Observability integration/acceptance are not established.
-    - Tabs, panes, remote administration, profiles, persistence, containers, automation, protocol validation, performance validation, and representative Linux runtime acceptance remain incomplete.
+    - Split panes, remote administration, profiles, workspace/session persistence, containers, automation, protocol validation, performance validation, and representative Linux runtime acceptance remain incomplete.
     - Production packaging, signed releases, rollback evidence, release approval, and lifecycle promotion remain incomplete.

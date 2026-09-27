@@ -9,19 +9,32 @@ GoreeCloud Terminal is a native Linux terminal and administration application fo
 
 ## Current Development Foundation
 
-The current source foundation provides:
+The current source provides:
 
 - a native GTK 4 Linux window;
-- a GNOME VTE-backed terminal widget and asynchronous PTY shell spawn;
-- one local shell session using `$SHELL` with `/bin/sh` fallback;
-- visible local/elevated, user@host, working-directory, and session-state context;
-- 10,000-line default scrollback;
-- copy/paste header actions and `Ctrl+Shift+C` / `Ctrl+Shift+V`;
+- GNOME VTE-backed local terminal sessions and asynchronous PTY shell startup;
+- an explicit session/workspace source boundary;
+- multiple reorderable local tabs;
+- working-directory-aware new-tab creation;
+- visible local/elevated, user@host, working-directory, and active-session state;
+- keyboard-driven tab creation, closing, and navigation;
+- copy/paste header actions and shortcuts;
+- first-run onboarding with durable step progress and Help replay;
+- 10,000-line default scrollback per session;
 - a restrained Glaze-inspired Development presentation;
 - Meson/Ninja build and install plumbing; and
-- GitHub Actions compile/install validation.
+- GitHub Actions compile/test/install validation.
 
-This is Development source evidence only. Tabs, panes, profiles, SSH, persistence, containers, automation, protocol qualification, representative runtime acceptance, performance claims, full Glaze conformance, release qualification, and Stable/Anchor status remain unverified or planned.
+This is Development source evidence only. Split panes, profiles, SSH, workspace/session persistence, search, safe multiline-paste review, containers, automation, protocol qualification, representative runtime acceptance, performance claims, full Glaze conformance, release qualification, and Stable/Anchor status remain unverified or planned.
+
+## Keyboard Shortcuts
+
+- New tab: `Ctrl+Shift+T`
+- Close active tab: `Ctrl+Shift+W`
+- Next tab: `Ctrl+PageDown`
+- Previous tab: `Ctrl+PageUp`
+- Copy: `Ctrl+Shift+C`
+- Paste: `Ctrl+Shift+V`
 
 ## Build
 
