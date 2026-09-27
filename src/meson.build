@@ -5,6 +5,7 @@ executable(
     'gc-context.c',
     'gc-link-utils.c',
     'gc-paste-safety.c',
+    'gc-shell-state.c',
     'gc-onboarding-state.c',
     'gc-onboarding.c',
     'gc-terminal-session.c',
