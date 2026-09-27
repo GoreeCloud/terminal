@@ -353,6 +353,7 @@ show_paste_review(
     gtk_window_set_default_size(review->window, 620, 420);
     gtk_window_set_modal(review->window, TRUE);
     gtk_window_set_transient_for(review->window, parent);
+    gtk_window_set_destroy_with_parent(review->window, TRUE);
 
     gtk_widget_set_margin_top(root, 20);
     gtk_widget_set_margin_bottom(root, 20);
@@ -578,6 +579,27 @@ on_search_option_toggled(GtkCheckButton *button, gpointer user_data)
     apply_search(state, TRUE);
 }
 
+static gboolean
+on_search_key_pressed(
+    GtkEventControllerKey *controller,
+    guint keyval,
+    guint keycode,
+    GdkModifierType modifiers,
+    gpointer user_data
+)
+{
+    (void) controller;
+    (void) keycode;
+    (void) modifiers;
+
+    if (keyval != GDK_KEY_Escape) {
+        return FALSE;
+    }
+
+    search_close_action(NULL, NULL, user_data);
+    return TRUE;
+}
+
 static void
 help_action(GSimpleAction *action, GVariant *parameter, gpointer user_data)
 {
@@ -614,7 +636,6 @@ build_header(GtkApplication *application, GtkWindow *window, TerminalWindowState
     const char *search_accels[] = {"<Control><Shift>f", NULL};
     const char *search_next_accels[] = {"<Control>g", NULL};
     const char *search_previous_accels[] = {"<Control><Shift>g", NULL};
-    const char *search_close_accels[] = {"Escape", NULL};
     const char *copy_accels[] = {"<Control><Shift>c", NULL};
     const char *paste_accels[] = {"<Control><Shift>v", NULL};
     const GActionEntry actions[] = {
@@ -692,7 +713,6 @@ build_header(GtkApplication *application, GtkWindow *window, TerminalWindowState
     gtk_application_set_accels_for_action(application, "win.search", search_accels);
     gtk_application_set_accels_for_action(application, "win.search-next", search_next_accels);
     gtk_application_set_accels_for_action(application, "win.search-previous", search_previous_accels);
-    gtk_application_set_accels_for_action(application, "win.search-close", search_close_accels);
     gtk_application_set_accels_for_action(application, "win.copy", copy_accels);
     gtk_application_set_accels_for_action(application, "win.paste", paste_accels);
 
@@ -742,6 +762,7 @@ build_search_bar(TerminalWindowState *state)
     GtkWidget *previous = gtk_button_new_from_icon_name("go-up-symbolic");
     GtkWidget *next = gtk_button_new_from_icon_name("go-down-symbolic");
     GtkWidget *close = gtk_button_new_from_icon_name("window-close-symbolic");
+    GtkEventController *key_controller = gtk_event_controller_key_new();
 
     state->search_bar = bar;
     state->search_entry = GTK_SEARCH_ENTRY(entry);
@@ -760,6 +781,18 @@ build_search_bar(TerminalWindowState *state)
     gtk_actionable_set_action_name(GTK_ACTIONABLE(previous), "win.search-previous");
     gtk_actionable_set_action_name(GTK_ACTIONABLE(next), "win.search-next");
     gtk_actionable_set_action_name(GTK_ACTIONABLE(close), "win.search-close");
+
+    gtk_event_controller_set_propagation_phase(
+        key_controller,
+        GTK_PHASE_CAPTURE
+    );
+    gtk_widget_add_controller(bar, key_controller);
+    g_signal_connect(
+        key_controller,
+        "key-pressed",
+        G_CALLBACK(on_search_key_pressed),
+        state
+    );
 
     gtk_box_append(GTK_BOX(bar), entry);
     gtk_box_append(GTK_BOX(bar), regex);
