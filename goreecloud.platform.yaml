@@ -1,0 +1,136 @@
+schema_version: "0.4"
+
+component:
+  type: application
+  id: goreecloud-terminal
+  product_name: GoreeCloud Terminal
+  repository: GoreeCloud/terminal
+
+lifecycle: development
+version: "0.1.0-dev"
+
+supported_platforms:
+  - linux
+
+api:
+  versions: []
+  endpoints: []
+
+platform_systems:
+  manager:
+    result: applicable-blocked
+    version: null
+    evidence: [README.md]
+    notes: Accepted Manager integration is not established.
+  privacy_shield:
+    result: applicable-blocked
+    version: null
+    evidence: ["PRIVACY POLICY.md"]
+    notes: Local-only behavior is privacy-minimized, but accepted Privacy Shield integration is not established.
+  wardveil_security:
+    result: applicable-blocked
+    version: null
+    evidence: [SECURITY.md]
+    notes: Accepted Wardveil runtime integration and protection acceptance are not established.
+  everkeep:
+    result: applicable-blocked
+    version: null
+    evidence: [PLANNED-FEATURES.md]
+    notes: Persistent sessions, backup, restore, and accepted recovery evidence are not established.
+  glaze_ui:
+    result: applicable-blocked
+    version: "1.6.0"
+    evidence: [src/gc-terminal-window.c, docs/glaze-ui-conformance.md]
+    notes: Source-side presentation exists; application-specific Glaze acceptance is incomplete.
+  mesh:
+    result: applicable-blocked
+    version: null
+    evidence: []
+    notes: Mesh registration, capabilities, events, and runtime acceptance are not established.
+    capabilities: []
+    dependencies: []
+    published_events: []
+    consumed_events: []
+  identity:
+    result: applicable-blocked
+    version: null
+    evidence: ["PRIVACY POLICY.md"]
+    notes: Local use requires no account; accepted Identity integration for future account-aware features is not established.
+  policy:
+    result: applicable-blocked
+    version: null
+    evidence: [PROJECT-SPECIFICATIONS.md]
+    notes: Accepted Policy runtime integration is not established.
+  observability:
+    result: applicable-blocked
+    version: null
+    evidence: [PLANNED-FEATURES.md]
+    notes: Accepted Observability integration is not established.
+
+health:
+  health_endpoint: null
+  readiness_endpoint: null
+
+continuity:
+  backup:
+    required: true
+    requirements:
+      - Define backup scope for profiles, preferences, and future persistent workspaces.
+  restore:
+    required: true
+    requirements:
+      - Validate schema compatibility and clean-target recovery before production recovery claims.
+  export:
+    required: true
+    requirements:
+      - Keep user configuration and profiles portable through documented text formats.
+  portability:
+    required: true
+    requirements:
+      - Keep GoreeCloud-owned configuration portable across supported Linux environments where practical.
+
+external_dependencies:
+  - name: GTK 4
+    purpose: Native Linux desktop toolkit.
+    required: true
+    version_constraint: ">=4.12"
+  - name: GNOME VTE GTK4
+    purpose: Terminal emulation and PTY supporting component.
+    required: true
+    version_constraint: ">=0.76"
+  - name: GLib/GIO
+    purpose: Runtime utilities and application/action foundation.
+    required: true
+    version_constraint: ">=2.76"
+
+compatibility:
+  platform_contract: "0.4"
+  glaze_ui_required: "1.6.0"
+  requires:
+    - goreecloud-platform-contract==0.4
+    - glaze-ui==1.6.0
+    - gtk4>=4.12
+    - vte-gtk4>=0.76
+  provides:
+    - goreecloud-terminal-local-session-dev-v1
+
+evidence:
+  acceptance_tests: []
+  release: []
+
+conformance:
+  status: nonconformant
+  validated_at: null
+  evidence:
+    - README.md
+    - PROJECT-SPECIFICATIONS.md
+    - IMPLEMENTED-FEATURES.md
+    - SECURITY.md
+    - "PRIVACY POLICY.md"
+    - goreecloud.platform.yaml
+    - .github/workflows/build.yml
+  blockers:
+    - Glaze UI 1.6.0 consumer acceptance is incomplete.
+    - Privacy Shield, Wardveil, Everkeep, Manager, Mesh, Identity, Policy, and Observability integration/acceptance are not established.
+    - Tabs, panes, remote administration, profiles, persistence, containers, automation, protocol validation, performance validation, and representative Linux runtime acceptance remain incomplete.
+    - Production packaging, signed releases, rollback evidence, release approval, and lifecycle promotion remain incomplete.

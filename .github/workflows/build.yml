@@ -1,0 +1,51 @@
+name: Native Foundation
+
+on:
+  push:
+    branches:
+      - main
+      - 'feature/**'
+      - 'fix/**'
+      - 'refactor/**'
+      - 'test/**'
+      - 'ci/**'
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: native-foundation-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential meson ninja-build pkg-config libgtk-4-dev libvte-2.91-gtk4-dev
+
+      - name: Validate repository governance
+        run: python3 scripts/validate_repository.py
+
+      - name: Configure
+        run: meson setup build --fatal-meson-warnings
+
+      - name: Compile
+        run: meson compile -C build
+
+      - name: Test
+        run: meson test -C build --print-errorlogs
+
+      - name: Validate install layout
+        run: |
+          DESTDIR="$RUNNER_TEMP/install-root" meson install -C build
+          test -x "$RUNNER_TEMP/install-root/usr/local/bin/goreecloud-terminal"
+          test -f "$RUNNER_TEMP/install-root/usr/local/share/applications/com.goreecloud.Terminal.desktop"
