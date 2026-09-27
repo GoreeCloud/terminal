@@ -19,6 +19,7 @@
 - Durable first-run onboarding with Help replay.
 - Local shell execution-context ribbon.
 - Meson build, Xvfb-backed workspace tests, install validation, and CI.
+- Debian 13 build/test/install CI coverage plus VTE 0.78+ term-property compatibility while retaining the VTE >=0.76 floor.
 - Platform Contract 0.4 manifest and repository governance baseline.
 
 No release, deployment, production acceptance, or Stable/Anchor status is implied.
