@@ -1,0 +1,10 @@
+build/
+/build/
+*.o
+*.a
+*.so
+*.swp
+*.swo
+*~
+.DS_Store
+compile_commands.json

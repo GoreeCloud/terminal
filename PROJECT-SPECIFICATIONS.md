@@ -491,7 +491,17 @@ Exact configuration schema, storage format, migration model, and backup behavior
 
 ## 7. Architecture and Integration Boundaries
 
-The exact implementation architecture is not yet established by this specification.
+### 7.1 Initial Development Architecture
+
+The initial Development implementation uses an original GoreeCloud application shell written in C with GTK 4 for Linux desktop integration and GNOME VTE for terminal-emulation and PTY primitives. Meson and Ninja provide the build system.
+
+VTE is a supporting component rather than product authority: GoreeCloud Terminal owns the application architecture, session model, context awareness, safety behavior, profiles, remote administration workflows, automation, visual presentation, and long-term product direction.
+
+The initial dependency baseline is GTK 4.12 or newer, VTE GTK4 compatible with the 0.76 Ubuntu 24.04 baseline, GLib/GIO 2.76 or newer, and a C17 toolchain.
+
+The presence of VTE does not establish support for every requested terminal protocol, graphics protocol, shell integration, remote workflow, or performance target.
+
+### 7.2 Component Boundaries
 
 The implementation must preserve clear boundaries among:
 
@@ -508,7 +518,7 @@ The implementation must preserve clear boundaries among:
 - notifications; and
 - security-sensitive credential or identity handling.
 
-Material external dependencies, terminal protocols, remote-connection libraries, shell-integration mechanisms, and desktop-toolkit decisions must be documented before they become authoritative implementation choices.
+Material external dependencies, terminal protocols, remote-connection libraries, shell-integration mechanisms, and desktop-toolkit decisions must be documented before they become authoritative implementation choices. The initial GTK 4, VTE, GLib/GIO, and Meson choices above are the first documented Development implementation decisions.
 
 ## 8. Accessibility and User Experience
 
