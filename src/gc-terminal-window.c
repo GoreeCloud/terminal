@@ -695,22 +695,22 @@ build_header(GtkApplication *application, GtkWindow *window, TerminalWindowState
     const char *copy_accels[] = {"<Control><Shift>c", NULL};
     const char *paste_accels[] = {"<Control><Shift>v", NULL};
     const GActionEntry actions[] = {
-        {"new-tab", new_tab_action, NULL, NULL, NULL},
-        {"close-tab", close_tab_action, NULL, NULL, NULL},
-        {"split-horizontal", split_horizontal_action, NULL, NULL, NULL},
-        {"split-vertical", split_vertical_action, NULL, NULL, NULL},
-        {"close-pane", close_pane_action, NULL, NULL, NULL},
-        {"next-pane", next_pane_action, NULL, NULL, NULL},
-        {"previous-pane", previous_pane_action, NULL, NULL, NULL},
-        {"next-tab", next_tab_action, NULL, NULL, NULL},
-        {"previous-tab", previous_tab_action, NULL, NULL, NULL},
-        {"search", search_action, NULL, NULL, NULL},
-        {"search-next", search_next_action, NULL, NULL, NULL},
-        {"search-previous", search_previous_action, NULL, NULL, NULL},
-        {"search-close", search_close_action, NULL, NULL, NULL},
-        {"copy", copy_action, NULL, NULL, NULL},
-        {"paste", paste_action, NULL, NULL, NULL},
-        {"help", help_action, NULL, NULL, NULL},
+        {.name = "new-tab", .activate = new_tab_action},
+        {.name = "close-tab", .activate = close_tab_action},
+        {.name = "split-horizontal", .activate = split_horizontal_action},
+        {.name = "split-vertical", .activate = split_vertical_action},
+        {.name = "close-pane", .activate = close_pane_action},
+        {.name = "next-pane", .activate = next_pane_action},
+        {.name = "previous-pane", .activate = previous_pane_action},
+        {.name = "next-tab", .activate = next_tab_action},
+        {.name = "previous-tab", .activate = previous_tab_action},
+        {.name = "search", .activate = search_action},
+        {.name = "search-next", .activate = search_next_action},
+        {.name = "search-previous", .activate = search_previous_action},
+        {.name = "search-close", .activate = search_close_action},
+        {.name = "copy", .activate = copy_action},
+        {.name = "paste", .activate = paste_action},
+        {.name = "help", .activate = help_action},
     };
 
     state->subtitle_label = GTK_LABEL(gtk_label_new("Development · 1 tab · 1 pane"));
