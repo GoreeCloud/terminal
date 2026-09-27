@@ -12,7 +12,7 @@ The application starts the shell specified by `$SHELL`, falling back to `/bin/sh
 
 ## First Run and Help
 
-The first-run guide covers local-shell behavior, execution context, tabs, panes, search, clipboard-paste review, shortcuts, and current Development limitations. If closed before completion, the current onboarding step is stored locally and resumed later. Help replays the guide without clearing completion state.
+The first-run guide covers local-shell behavior, execution context, tabs, panes, search, guarded clipboard/primary-selection paste review, shortcuts, and current Development limitations. If closed before completion, the current onboarding step is stored locally and resumed later. Help replays the guide without clearing completion state.
 
 ## Tabs and Split Panes
 
@@ -55,13 +55,11 @@ Supported targets in this Development slice are:
 
 Other URI schemes are rejected. Local paths must exist before they are opened. Detected text is not executed through the shell. Opening an HTTP/HTTPS or mail link hands it to the configured external application, which may perform network activity under that application's policies.
 
-## Clipboard Paste Review
+## Guarded Paste Review
 
-`Ctrl+Shift+V` and Shift+Insert use the guarded clipboard path.
+`Ctrl+Shift+V` and Shift+Insert use the guarded clipboard path. Middle-click primary-selection paste is captured before VTE's default primary-selection paste and reads GTK's primary clipboard through the same safety path.
 
-Single-line text is pasted directly. If the clipboard text contains a newline or carriage return, GoreeCloud Terminal opens a modal review that shows the exact text plus line and character counts. Choose **Paste anyway** to send the text or **Cancel** to discard it.
-
-Primary-selection middle-click paste is not yet intercepted by this review path. Treat that as a current Development limitation when working with sensitive shells.
+Single-line text is pasted directly. If clipboard or primary-selection text contains a newline or carriage return, GoreeCloud Terminal opens a modal review that shows the exact text plus line and character counts. Choose **Paste anyway** to send the text or **Cancel** to discard it.
 
 ## Context Ribbon
 
@@ -69,4 +67,4 @@ The ribbon shows local/elevated privilege state, `user@host`, the active pane's 
 
 ## Current Limitations
 
-The Development build does not yet provide command-boundary navigation, primary-selection paste review, SSH, profiles, workspace/session restoration, container workflows, or production-grade Glaze UI acceptance.
+The Development build does not yet provide command-boundary navigation, SSH, profiles, workspace/session restoration, container workflows, or production-grade Glaze UI acceptance.

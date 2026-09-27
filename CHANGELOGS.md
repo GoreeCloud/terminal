@@ -13,6 +13,7 @@
 - Active-pane scrollback search with literal/regex and case options.
 - Wrap-around next/previous search navigation.
 - Multiline clipboard paste review for GoreeCloud paste actions and VTE's paste-clipboard route.
+- Guarded primary-selection middle-click paste through the same multiline review path.
 - Validated Ctrl+click opening for explicit hyperlinks, allowlisted URLs, and existing local paths.
 - Paste-safety unit tests.
 - Durable first-run onboarding with Help replay.
