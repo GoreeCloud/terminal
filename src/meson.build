@@ -11,6 +11,6 @@ executable(
     'gc-workspace.c',
     'gc-terminal-window.c',
   ],
-  dependencies: [gtk_dep, vte_dep, glib_dep, gio_dep],
+  dependencies: [gtk_dep, vte_dep, glib_dep, gio_dep, pcre2_dep],
   install: true,
 )

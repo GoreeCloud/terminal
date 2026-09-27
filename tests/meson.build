@@ -48,7 +48,7 @@ workspace_test = executable(
     '../src/gc-context.c',
   ],
   include_directories: include_directories('../src'),
-  dependencies: [gtk_dep, vte_dep, glib_dep, gio_dep],
+  dependencies: [gtk_dep, vte_dep, glib_dep, gio_dep, pcre2_dep],
 )
 
 workspace_test_env = environment()

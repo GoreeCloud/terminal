@@ -3,6 +3,9 @@
 #include "gc-context.h"
 
 #include <pango/pango.h>
+
+#define PCRE2_CODE_UNIT_WIDTH 8
+#include <pcre2.h>
 #include <vte/vte.h>
 
 struct _GcTerminalSession {
@@ -88,7 +91,12 @@ static gint
 add_match_regex(VteTerminal *terminal, const char *pattern)
 {
     GError *error = NULL;
-    VteRegex *regex = vte_regex_new_for_match(pattern, -1, 0, &error);
+    VteRegex *regex = vte_regex_new_for_match(
+        pattern,
+        -1,
+        VTE_REGEX_FLAGS_DEFAULT | PCRE2_MULTILINE,
+        &error
+    );
     gint tag;
 
     if (regex == NULL) {
