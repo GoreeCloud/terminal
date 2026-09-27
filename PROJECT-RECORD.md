@@ -73,3 +73,91 @@ The following remain separate evidence questions for future project work:
 - production or Stable/Anchor qualification.
 
 Future project-record entries must cite concrete repository, pull-request, commit, workflow, release, or runtime evidence where applicable.
+
+## 2026-09-27 — Native GTK4/VTE Development Foundation Integrated
+
+### Event
+
+The first bounded native implementation foundation for GoreeCloud Terminal was integrated into authoritative `main` through pull request #1.
+
+The implementation establishes a native GTK 4 application shell with GNOME VTE as a bounded terminal-emulation and PTY dependency. GoreeCloud retains product authority over application behavior, session/workspace design, execution context, safety behavior, profiles, remote administration, configuration, automation, platform integration, and visual direction.
+
+### Exact Source Evidence
+
+- authoritative base before the change: `347a70d5916c072017d9623e98bd374b6bc45bee`;
+- exact merge candidate: `21356d7d20f8482a4879f85e00786dc8995de447`;
+- pull request: #1, **Native GTK4 terminal foundation**;
+- merge method: squash;
+- authoritative merged commit: `0e743e775dd7d770ec979a88eb39d946483f1e79`;
+- merged tree: `38891f9522b8b0df913bfeddcbf095f8a8cb0466`; and
+- GitHub reports the merged commit signature as verified.
+
+### Validation Evidence
+
+The exact candidate passed both push and pull-request validation before merge:
+
+- Native Foundation run `36350340491` — push — success;
+- Native Foundation run `36350466598` — pull request — success.
+
+The validated workflow completed:
+
+- repository-governance validation;
+- Ubuntu 24.04 dependency installation;
+- Meson configuration;
+- native compilation;
+- GLib context-helper tests; and
+- install-layout verification.
+
+After merge, authoritative `main` commit `0e743e775dd7d770ec979a88eb39d946483f1e79` passed Native Foundation run `36350564392`.
+
+### Implemented Development Boundary
+
+Verified source now includes:
+
+- GTK 4 application/window lifecycle;
+- VTE GTK4 terminal widget and asynchronous PTY-backed local shell startup;
+- `$SHELL` selection with a `/bin/sh` fallback;
+- 10,000-line default scrollback;
+- copy/paste actions and `Ctrl+Shift+C` / `Ctrl+Shift+V`;
+- local-versus-elevated-local context presentation;
+- current `user@host`, working-directory, and session-state presentation;
+- terminal-title propagation;
+- Meson/Ninja build and install plumbing;
+- focused context-helper tests;
+- repository-governance validation;
+- Platform Contract 0.4 declaration covering all nine Integral Platform Systems; and
+- a bounded Glaze-inspired Development presentation candidate.
+
+### Security and Privacy Review Boundary
+
+The integrated foundation contains no remote protocol implementation, reusable credentials, telemetry, analytics, hidden network reporting, or automatic privilege escalation.
+
+The pull-request diff review found no embedded secret material. Remote administration, credential/key handling, persistence, synchronization, diagnostics, and platform-system integrations remain separately gated future work.
+
+### Repository Governance Boundary
+
+Live GitHub verification at integration time showed `main` was not protected and no repository ruleset was present. The change nevertheless used an isolated branch, exact-head CI, a pull request, expected-head guarded squash merge, authoritative-branch readback, and post-merge CI.
+
+Repository-level branch/ruleset protection remains a separate GoreeCloud governance obligation and is not represented as remediated by this source integration.
+
+### Lifecycle and Acceptance Boundary
+
+GoreeCloud Terminal remains **Development**.
+
+This integration does not establish:
+
+- tabs or split panes;
+- SSH or remote administration;
+- profiles or configuration persistence;
+- detachable or reconnectable sessions;
+- container workflows;
+- terminal-protocol completeness;
+- GPU acceleration or performance targets;
+- representative Linux desktop runtime acceptance;
+- complete Glaze UI 1.6.0 consumer conformance;
+- production packaging or deployment;
+- release qualification; or
+- Stable/Anchor lifecycle status.
+
+Those capabilities remain subject to the applicable planned-feature, validation, release, and production-acceptance gates.
+
