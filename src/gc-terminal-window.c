@@ -53,7 +53,6 @@ static const char *development_css =
     ".gc-workspace > header tabs tab { color: #8faaca; background: transparent; border-right: 1px solid #102f4e; padding: 8px 12px; min-width: 120px; }"
     ".gc-workspace > header tabs tab:checked { color: #f2f7ff; background: #0a2340; box-shadow: inset 0 -2px #169cff; }"
     ".gc-workspace > header tabs tab:hover { background: #0a1c31; }"
-    ".gc-tab-label { spacing: 6px; }"
     ".gc-tab-icon { color: #2ea8ff; }"
     ".gc-tab-close { min-width: 22px; min-height: 22px; padding: 0; color: #7999bd; background: transparent; border-color: transparent; }"
     ".gc-tab-close:hover { color: #f2f7ff; background: #123656; }"
