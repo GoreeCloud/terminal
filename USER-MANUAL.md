@@ -63,7 +63,7 @@ Single-line text is pasted directly. If clipboard or primary-selection text cont
 
 ## Workspace Shell and Status Bar
 
-The mockup-inspired shell uses a deep-navy GoreeCloud titlebar, a truthful **Local shell** indicator, compact split/search/copy/paste/help controls, and a notebook tab strip with an explicit + control and per-tab close buttons. The bottom status bar shows local/elevated privilege state, `user@host`, the active pane's working directory, active shell state, and the current Development lifecycle.
+The mockup-inspired shell uses a deep-navy GoreeCloud titlebar, a truthful **Local shell** indicator, a left workspace sidebar, compact split/search/copy/paste/help controls, and a notebook tab strip with an explicit + control and per-tab close buttons. The sidebar exposes only currently implemented local actions: new tab, left/right split, top/bottom split, and scrollback search. The bottom status bar shows local/elevated privilege state, `user@host`, the active pane's working directory, active shell state, and the current Development lifecycle.
 
 The presentation does not imply remote connectivity, cloud-provider state, Kubernetes clusters, persistent command history, or saved sessions. Those capabilities remain outside the current Development boundary.
 
