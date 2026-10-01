@@ -8,12 +8,12 @@ The following remain planned or materially incomplete:
 - persistent workspace/session restoration;
 - settings beyond the bounded onboarding state;
 - SSH host profiles, host verification, reconnection, and secure key/credential handling;
-- remote/local/elevated visual differentiation;
+- remote/container and per-environment visual differentiation; local/elevated status is already surfaced in the Development shell;
 - container-shell launch and host/container context;
 - long-running-command/background notifications;
 - terminal graphics and protocol compatibility validation;
 - extension and automation APIs;
 - performance/latency/large-log/long-duration measurement;
-- complete Glaze UI 1.6.0 acceptance;
+- complete Glaze 1.6.0 consumer acceptance, including representative rendered, accessibility, adaptive, performance, and identity review;
 - all nine Integral Platform System integrations/acceptance;
 - Linux packaging, signed releases, rollback/recovery evidence, and lifecycle promotion.
