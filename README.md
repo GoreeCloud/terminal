@@ -5,7 +5,7 @@ GoreeCloud Terminal is a native Linux terminal and administration application fo
 > **Lifecycle:** Development  
 > **Repository:** `GoreeCloud/terminal`  
 > **Platform Contract:** 0.4  
-> **Glaze UI target:** 1.6.0 — consumer acceptance remains blocked
+> **Glaze target:** 1.6.0 — consumer acceptance remains blocked
 
 ## Current Development Foundation
 
