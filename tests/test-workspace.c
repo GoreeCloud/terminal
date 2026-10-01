@@ -61,6 +61,46 @@ test_paste_source_routing(void)
 }
 
 static void
+test_tab_chrome(void)
+{
+    GcWorkspace *workspace = gc_workspace_new(NULL, NULL, NULL, NULL);
+    GtkWidget *widget = gc_workspace_get_widget(workspace);
+    GtkNotebook *notebook = GTK_NOTEBOOK(widget);
+    GtkWidget *add_button;
+    GtkWidget *page;
+    GtkWidget *tab;
+    guint tab_children = 0;
+
+    g_object_ref_sink(widget);
+
+    add_button = gtk_notebook_get_action_widget(notebook, GTK_PACK_END);
+    g_assert_nonnull(add_button);
+    g_assert_true(GTK_IS_BUTTON(add_button));
+    g_assert_true(gtk_widget_has_css_class(add_button, "gc-tab-add"));
+
+    gc_workspace_add_tab(workspace, g_get_home_dir());
+    gc_workspace_add_tab(workspace, g_get_home_dir());
+    g_assert_cmpuint(gc_workspace_get_count(workspace), ==, 2);
+
+    page = gtk_notebook_get_nth_page(notebook, 0);
+    g_assert_nonnull(page);
+    tab = gtk_notebook_get_tab_label(notebook, page);
+    g_assert_nonnull(tab);
+    g_assert_true(GTK_IS_BOX(tab));
+    g_assert_true(gtk_widget_has_css_class(tab, "gc-tab-label"));
+
+    for (GtkWidget *child = gtk_widget_get_first_child(tab);
+         child != NULL;
+         child = gtk_widget_get_next_sibling(child)) {
+        tab_children++;
+    }
+    g_assert_cmpuint(tab_children, ==, 3);
+
+    g_object_unref(widget);
+    gc_workspace_free(workspace);
+}
+
+static void
 test_split_and_close(void)
 {
     GcWorkspace *workspace = gc_workspace_new(NULL, NULL, NULL, NULL);
@@ -101,6 +141,7 @@ main(int argc, char **argv)
     gtk_init();
     g_test_init(&argc, &argv, NULL);
     g_test_add_func("/workspace/paste-source-routing", test_paste_source_routing);
+    g_test_add_func("/workspace/tab-chrome", test_tab_chrome);
     g_test_add_func("/workspace/split-and-close", test_split_and_close);
     return g_test_run();
 }
