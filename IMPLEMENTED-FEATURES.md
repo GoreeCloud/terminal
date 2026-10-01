@@ -82,4 +82,4 @@ These entries establish Development source implementation only. They do not esta
 
 ## Glaze Boundary
 
-A mockup-inspired Development presentation exists for the deep-navy shell chrome, branded titlebar, local-session indicator, closable tab strip, terminal surfaces, bottom execution-context/status bar, search, paste review, and onboarding. It deliberately does not fabricate remote, cloud, cluster, history, or persistence state. Complete Glaze 1.6.0 consumer conformance and rendered/accessibility/performance acceptance remain blocked.
+A mockup-inspired Development presentation exists for the deep-navy shell chrome, branded titlebar, truthful Local Shell sidebar, local-session indicator, closable tab strip, terminal surfaces, bottom execution-context/status bar, search, paste review, and onboarding. It deliberately does not fabricate remote, cloud, cluster, history, or persistence state. Complete Glaze 1.6.0 consumer conformance and rendered/accessibility/performance acceptance remain blocked.
