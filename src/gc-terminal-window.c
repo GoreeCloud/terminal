@@ -48,6 +48,15 @@ static const char *development_css =
     ".search-bar { padding: 8px 12px; background: #071525; border-bottom: 1px solid #0d3c63; }"
     ".search-bar entry { background: #0a1b2f; color: #e5efff; border-color: #1a5589; border-radius: 8px; }"
     ".search-error { color: #ff9eaf; }"
+    ".sidebar { min-width: 210px; padding: 14px 10px; background: #06111f; border-right: 1px solid #0d3c63; }"
+    ".sidebar-heading { color: #6f8eb7; font-size: 0.78em; font-weight: 800; letter-spacing: 0.06em; margin: 2px 6px 6px 6px; }"
+    ".sidebar-card { padding: 9px 10px; border-radius: 8px; background: #0a2037; border: 1px solid #174b78; }"
+    ".sidebar-dot { color: #32e99b; font-weight: 900; }"
+    ".sidebar-title { color: #edf5ff; font-weight: 700; }"
+    ".sidebar-detail { color: #7f9dc5; font-size: 0.86em; }"
+    ".sidebar-action { color: #abc2df; background: transparent; border: 1px solid transparent; border-radius: 7px; padding: 7px 9px; }"
+    ".sidebar-action:hover { color: #f2f7ff; background: #0a2037; border-color: #174b78; }"
+    ".sidebar-footer { color: #6f8eb7; font-size: 0.84em; margin: 8px 6px 2px 6px; }"
     ".gc-workspace { background: #050d18; }"
     ".gc-workspace > header { background: #06111f; border-bottom: 1px solid #0d3c63; padding: 0 8px; }"
     ".gc-workspace > header tabs tab { color: #8faaca; background: transparent; border-right: 1px solid #102f4e; padding: 8px 12px; min-width: 120px; }"
@@ -857,6 +866,80 @@ build_context_bar(TerminalWindowState *state)
 }
 
 static GtkWidget *
+build_sidebar(void)
+{
+    GtkWidget *sidebar = gtk_box_new(GTK_ORIENTATION_VERTICAL, 8);
+    GtkWidget *workspace_heading = gtk_label_new("WORKSPACE");
+    GtkWidget *local_card = gtk_box_new(GTK_ORIENTATION_VERTICAL, 3);
+    GtkWidget *local_row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 7);
+    GtkWidget *local_dot = gtk_label_new("●");
+    GtkWidget *local_title = gtk_label_new("Local Shell");
+    g_autofree char *identity = gc_context_identity();
+    GtkWidget *local_detail = gtk_label_new(identity);
+    GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+    GtkWidget *actions_heading = gtk_label_new("QUICK ACTIONS");
+    GtkWidget *new_tab = gtk_button_new_with_label("＋  New tab");
+    GtkWidget *split_left_right = gtk_button_new_with_label("↔  Split left / right");
+    GtkWidget *split_top_bottom = gtk_button_new_with_label("↕  Split top / bottom");
+    GtkWidget *search = gtk_button_new_with_label("⌕  Search scrollback");
+    GtkWidget *spacer = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    GtkWidget *footer = gtk_label_new("GoreeCloud · Development");
+    GtkWidget *actions[] = {
+        new_tab,
+        split_left_right,
+        split_top_bottom,
+        search,
+    };
+
+    gtk_widget_add_css_class(sidebar, "sidebar");
+    gtk_widget_add_css_class(workspace_heading, "sidebar-heading");
+    gtk_widget_add_css_class(local_card, "sidebar-card");
+    gtk_widget_add_css_class(local_dot, "sidebar-dot");
+    gtk_widget_add_css_class(local_title, "sidebar-title");
+    gtk_widget_add_css_class(local_detail, "sidebar-detail");
+    gtk_widget_add_css_class(actions_heading, "sidebar-heading");
+    gtk_widget_add_css_class(footer, "sidebar-footer");
+
+    gtk_label_set_xalign(GTK_LABEL(workspace_heading), 0.0f);
+    gtk_label_set_xalign(GTK_LABEL(local_title), 0.0f);
+    gtk_label_set_xalign(GTK_LABEL(local_detail), 0.0f);
+    gtk_label_set_ellipsize(GTK_LABEL(local_detail), PANGO_ELLIPSIZE_END);
+    gtk_label_set_xalign(GTK_LABEL(actions_heading), 0.0f);
+    gtk_label_set_xalign(GTK_LABEL(footer), 0.0f);
+
+    gtk_box_append(GTK_BOX(local_row), local_dot);
+    gtk_box_append(GTK_BOX(local_row), local_title);
+    gtk_box_append(GTK_BOX(local_card), local_row);
+    gtk_box_append(GTK_BOX(local_card), local_detail);
+
+    for (guint i = 0; i < G_N_ELEMENTS(actions); i++) {
+        gtk_widget_add_css_class(actions[i], "sidebar-action");
+        gtk_widget_set_hexpand(actions[i], TRUE);
+        gtk_widget_set_halign(actions[i], GTK_ALIGN_FILL);
+    }
+
+    gtk_actionable_set_action_name(GTK_ACTIONABLE(new_tab), "win.new-tab");
+    gtk_actionable_set_action_name(GTK_ACTIONABLE(split_left_right), "win.split-horizontal");
+    gtk_actionable_set_action_name(GTK_ACTIONABLE(split_top_bottom), "win.split-vertical");
+    gtk_actionable_set_action_name(GTK_ACTIONABLE(search), "win.search");
+
+    gtk_widget_set_vexpand(spacer, TRUE);
+
+    gtk_box_append(GTK_BOX(sidebar), workspace_heading);
+    gtk_box_append(GTK_BOX(sidebar), local_card);
+    gtk_box_append(GTK_BOX(sidebar), separator);
+    gtk_box_append(GTK_BOX(sidebar), actions_heading);
+    gtk_box_append(GTK_BOX(sidebar), new_tab);
+    gtk_box_append(GTK_BOX(sidebar), split_left_right);
+    gtk_box_append(GTK_BOX(sidebar), split_top_bottom);
+    gtk_box_append(GTK_BOX(sidebar), search);
+    gtk_box_append(GTK_BOX(sidebar), spacer);
+    gtk_box_append(GTK_BOX(sidebar), footer);
+
+    return sidebar;
+}
+
+static GtkWidget *
 build_search_bar(TerminalWindowState *state)
 {
     GtkWidget *bar = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 8);
@@ -934,6 +1017,8 @@ gc_terminal_window_new(GtkApplication *application)
     TerminalWindowState *state = g_new0(TerminalWindowState, 1);
     GtkWidget *window = gtk_application_window_new(application);
     GtkWidget *root = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    GtkWidget *content = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    GtkWidget *main_area = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 
     state->window = GTK_WINDOW(window);
     state->workspace = gc_workspace_new(
@@ -960,8 +1045,17 @@ gc_terminal_window_new(GtkApplication *application)
         build_header(application, GTK_WINDOW(window), state)
     );
 
-    gtk_box_append(GTK_BOX(root), build_search_bar(state));
-    gtk_box_append(GTK_BOX(root), gc_workspace_get_widget(state->workspace));
+    gtk_widget_set_hexpand(main_area, TRUE);
+    gtk_widget_set_vexpand(main_area, TRUE);
+    gtk_box_append(GTK_BOX(main_area), build_search_bar(state));
+    gtk_box_append(GTK_BOX(main_area), gc_workspace_get_widget(state->workspace));
+
+    gtk_box_append(GTK_BOX(content), build_sidebar());
+    gtk_box_append(GTK_BOX(content), main_area);
+    gtk_widget_set_hexpand(content, TRUE);
+    gtk_widget_set_vexpand(content, TRUE);
+
+    gtk_box_append(GTK_BOX(root), content);
     gtk_box_append(GTK_BOX(root), build_context_bar(state));
     gtk_window_set_child(GTK_WINDOW(window), root);
 
