@@ -670,3 +670,73 @@ This event does not establish:
 - Stable/Anchor status.
 
 Repository protection and the blank GitHub Description remain separately unresolved in issue #3.
+
+## 2026-10-01 — Mockup-Inspired GoreeCloud Terminal Shell Integrated
+
+### Event
+
+Pull request #18 integrated the supplied GoreeCloud Terminal mockups into the native GTK 4 / VTE Development application as a truthful local-shell presentation. The implementation adopts the mockups' deep-navy GoreeCloud shell, branded header, tab treatment, left navigation structure, compact actions, and bottom context/status presentation without fabricating remote or cloud capabilities that are not yet implemented.
+
+### Exact Source Evidence
+
+- authoritative base: `143c0051c8508c033988b914782a0807d894511a`;
+- exact accepted candidate: `c6a3d5c8d3e8c7677f04144eae3e2048ba92dbf2`;
+- pull request: #18, **Implement the mockup-inspired GoreeCloud Terminal shell**;
+- merge method: squash; and
+- authoritative merged commit: `52ddace8e5c6d042cca5dbe1f1055ec0e7693d27`.
+
+### Validation Evidence
+
+The exact accepted candidate passed:
+
+- Native Foundation run `36925819177` — push — success on both Ubuntu 24.04 and Debian 13 jobs; and
+- Native Foundation run `36925828283` — pull request — success on both Ubuntu 24.04 and Debian 13 jobs.
+
+After merge, authoritative `main` commit `52ddace8e5c6d042cca5dbe1f1055ec0e7693d27` passed:
+
+- Native Foundation run `36926123676` — push on `main` — success on both Ubuntu 24.04 and Debian 13 jobs.
+
+The passing jobs verified repository governance, dependency setup, Meson configuration, native compilation, the full Xvfb-backed Meson test suite, and staged install layout. Workspace integration coverage now also verifies the mockup-style + tab action and the custom icon/title/close tab chrome.
+
+### Implemented Development Boundary
+
+Verified source now adds:
+
+- deep-navy and blue GoreeCloud Terminal application chrome derived from the supplied mockups;
+- a branded GTK header with a temporary platform terminal symbol pending canonical first-party Terminal artwork;
+- a truthful **Local shell** mode indicator rather than a fabricated remote-connected state;
+- a left **Local Shell** workspace sidebar containing only currently implemented actions: new tab, left/right split, top/bottom split, and scrollback search;
+- mockup-style reorderable tabs with explicit close controls and a + tab action;
+- compact split, search, copy, paste, and Help actions in the header;
+- a persistent bottom status bar for privilege context, `user@host`, working directory, active shell/session state, and Development lifecycle;
+- terminal foreground/background alignment with the new shell;
+- updated first-run and Help onboarding for the new presentation and truth boundary; and
+- reconciled README, implemented/planned feature, changelog, user-manual, branding, and Glaze consumer-status documentation.
+
+### Security, Privacy, and Truth Boundary
+
+The presentation intentionally does not fabricate production/staging clusters, Kubernetes resources, cloud-provider connections, SSH hosts, persistent command history, saved sessions, or other connected-service state shown in conceptual mockups. The blue local-mode indicator is presentation context rather than a remote health or connectivity assertion.
+
+The UI additions invoke existing local workspace actions only. They add no remote transport, credential storage, telemetry, analytics, persistent terminal history, command execution path, or privilege decision. Existing guarded-paste and validated-link boundaries remain unchanged.
+
+### Remaining Product Boundary
+
+This event does not establish:
+
+- SSH or remote administration;
+- cloud/Kubernetes environment discovery or management;
+- persistent command or session history;
+- profiles or general settings;
+- workspace/session restoration;
+- container workflows;
+- trustworthy command-boundary navigation;
+- canonical GoreeCloud Terminal identity artwork;
+- representative Linux desktop rendered acceptance;
+- complete light/dark/high-contrast, large-text/reflow, keyboard/focus, or screen-reader acceptance;
+- measured UI performance or Human Visual Excellence acceptance;
+- complete Glaze 1.6.0 consumer conformance;
+- production packaging or release acceptance; or
+- Stable/Anchor status.
+
+Repository branch protection and the blank GitHub Description remain separately unresolved in issue #3.
+
