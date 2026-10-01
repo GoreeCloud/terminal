@@ -423,8 +423,8 @@ gc_terminal_session_new(
     gtk_widget_set_hexpand(scroller, TRUE);
     gtk_widget_set_vexpand(scroller, TRUE);
 
-    gdk_rgba_parse(&foreground, "#e6edf3");
-    gdk_rgba_parse(&background, "#0b1017");
+    gdk_rgba_parse(&foreground, "#dceaff");
+    gdk_rgba_parse(&background, "#050d18");
     vte_terminal_set_colors(session->terminal, &foreground, &background, NULL, 0);
     vte_terminal_set_scrollback_lines(session->terminal, 10000);
     vte_terminal_set_allow_hyperlink(session->terminal, TRUE);
