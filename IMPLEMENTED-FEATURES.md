@@ -10,12 +10,12 @@ These entries establish Development source implementation only. They do not esta
 - 10,000-line scrollback per session.
 - Terminal hyperlink capability enabled.
 - Terminal title propagation.
-- Local/elevated context, user@host, working-directory, and active-session state presentation.
+- Local/elevated context, user@host, working-directory, and active-session state presentation in a persistent bottom status bar.
 
 ## Workspace, Tabs, and Panes
 
 - Explicit `GcTerminalSession` and `GcWorkspace` source modules.
-- Multiple reorderable local tabs.
+- Multiple reorderable local tabs with explicit close controls and a mockup-style + tab action.
 - Nested left/right and top/bottom split panes.
 - New tabs and panes inherit the active session working directory when available.
 - Active pane drives the context ribbon and tab/window title.
@@ -82,4 +82,4 @@ These entries establish Development source implementation only. They do not esta
 
 ## Glaze UI Boundary
 
-A restrained Development presentation exists for shell chrome, tabs, panes, search, paste review, execution-context indicators, and onboarding. Full Glaze UI 1.6.0 consumer conformance and rendered/accessibility/performance acceptance remain blocked.
+A mockup-inspired Development presentation exists for the deep-navy shell chrome, branded titlebar, local-session indicator, closable tab strip, terminal surfaces, bottom execution-context/status bar, search, paste review, and onboarding. It deliberately does not fabricate remote, cloud, cluster, history, or persistence state. Complete Glaze 1.6.0 consumer conformance and rendered/accessibility/performance acceptance remain blocked.
