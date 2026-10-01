@@ -23,7 +23,7 @@ The current source provides:
 - keyboard-driven tabs, panes, search, copy, paste, and link/path interaction;
 - first-run onboarding with durable step progress and Help replay;
 - 10,000-line default scrollback per session;
-- a restrained Glaze-inspired Development presentation;
+- a mockup-inspired deep-navy workspace shell with GoreeCloud branding, closable tabs, a + tab action, compact pane/search controls, and a persistent bottom execution-context/status bar;
 - Meson/Ninja build and install plumbing; and
 - GitHub Actions compile/test/install validation on Ubuntu 24.04 and Debian 13.
 
