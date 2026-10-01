@@ -20,7 +20,7 @@
 - Local shell execution-context ribbon.
 - Meson build, Xvfb-backed workspace tests, install validation, and CI.
 - Debian 13 build/test/install CI coverage plus VTE 0.78+ term-property compatibility while retaining the VTE >=0.76 floor.
-- Protocol-derived shell ready/running/last-exit status on VTE 0.78+ with tested state transitions and no prompt-text inference.
+- Protocol-derived shell ready/running/last-exit status on VTE 0.78+ with tested state transitions and no prompt-text inference.\n- Mockup-inspired GoreeCloud Terminal shell with deep-navy chrome, branded titlebar, truthful local-session indicator, closable tabs, + tab action, compact pane/search controls, and a persistent bottom status bar.
 - Platform Contract 0.4 manifest and repository governance baseline.
 
 No release, deployment, production acceptance, or Stable/Anchor status is implied.
