@@ -194,6 +194,34 @@ on_session_open_requested(
 }
 
 static void
+on_tab_close_clicked(GtkButton *button, gpointer user_data)
+{
+    GcWorkspace *workspace = user_data;
+    GtkWidget *page_root = g_object_get_data(
+        G_OBJECT(button),
+        "goreecloud-tab-page-root"
+    );
+    gint page_num;
+
+    if (page_root == NULL) {
+        return;
+    }
+
+    page_num = gtk_notebook_page_num(workspace->notebook, page_root);
+    if (page_num < 0) {
+        return;
+    }
+
+    gtk_notebook_set_current_page(workspace->notebook, page_num);
+
+    if (!gtk_widget_activate_action(GTK_WIDGET(button), "win.close-tab", NULL) &&
+        gtk_notebook_get_n_pages(workspace->notebook) > 1) {
+        gtk_notebook_remove_page(workspace->notebook, page_num);
+        notify_changed(workspace);
+    }
+}
+
+static void
 on_switch_page(
     GtkNotebook *notebook,
     GtkWidget *page_widget,
@@ -223,6 +251,7 @@ gc_workspace_new(
 {
     GcWorkspace *workspace = g_new0(GcWorkspace, 1);
     GtkWidget *notebook = gtk_notebook_new();
+    GtkWidget *add_button = gtk_button_new_from_icon_name("list-add-symbolic");
 
     workspace->notebook = GTK_NOTEBOOK(notebook);
     workspace->changed = changed;
@@ -235,6 +264,16 @@ gc_workspace_new(
     gtk_notebook_set_tab_pos(workspace->notebook, GTK_POS_TOP);
     gtk_widget_set_hexpand(notebook, TRUE);
     gtk_widget_set_vexpand(notebook, TRUE);
+    gtk_widget_add_css_class(notebook, "gc-workspace");
+
+    gtk_widget_add_css_class(add_button, "gc-tab-add");
+    gtk_widget_set_tooltip_text(add_button, "New tab");
+    gtk_actionable_set_action_name(GTK_ACTIONABLE(add_button), "win.new-tab");
+    gtk_notebook_set_action_widget(
+        workspace->notebook,
+        add_button,
+        GTK_PACK_END
+    );
 
     g_signal_connect(
         workspace->notebook,
@@ -292,7 +331,10 @@ gc_workspace_add_tab(GcWorkspace *workspace, const char *working_directory)
         workspace
     );
     GtkWidget *root = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    GtkWidget *tab = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
+    GtkWidget *icon = gtk_image_new_from_icon_name("utilities-terminal-symbolic");
     GtkWidget *label = gtk_label_new("Terminal");
+    GtkWidget *close = gtk_button_new_from_icon_name("window-close-symbolic");
     gint page_num;
 
     page->root = root;
@@ -312,10 +354,29 @@ gc_workspace_add_tab(GcWorkspace *workspace, const char *working_directory)
     gtk_widget_set_vexpand(root, TRUE);
     gtk_box_append(GTK_BOX(root), gc_terminal_session_get_widget(session));
 
+    gtk_widget_add_css_class(tab, "gc-tab-label");
+    gtk_widget_add_css_class(icon, "gc-tab-icon");
+    gtk_widget_add_css_class(close, "gc-tab-close");
     gtk_label_set_ellipsize(GTK_LABEL(label), PANGO_ELLIPSIZE_END);
     gtk_label_set_max_width_chars(GTK_LABEL(label), 28);
+    gtk_widget_set_tooltip_text(close, "Close tab");
+    g_object_set_data(
+        G_OBJECT(close),
+        "goreecloud-tab-page-root",
+        root
+    );
+    g_signal_connect(
+        close,
+        "clicked",
+        G_CALLBACK(on_tab_close_clicked),
+        workspace
+    );
 
-    page_num = gtk_notebook_append_page(workspace->notebook, root, label);
+    gtk_box_append(GTK_BOX(tab), icon);
+    gtk_box_append(GTK_BOX(tab), label);
+    gtk_box_append(GTK_BOX(tab), close);
+
+    page_num = gtk_notebook_append_page(workspace->notebook, root, tab);
     gtk_notebook_set_tab_reorderable(workspace->notebook, root, TRUE);
     update_tab_label(page);
     gtk_notebook_set_current_page(workspace->notebook, page_num);
