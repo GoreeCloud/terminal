@@ -33,22 +33,52 @@ typedef struct {
 } PasteReview;
 
 static const char *development_css =
-    ".gc-window { background: #0b1017; }"
-    ".gc-header { background: rgba(15, 23, 34, 0.94); border-bottom: 1px solid rgba(122, 162, 247, 0.18); }"
-    ".gc-title { font-weight: 700; letter-spacing: 0.02em; }"
-    ".gc-subtitle { color: rgba(226, 232, 240, 0.66); font-size: 0.90em; }"
-    ".context-bar { padding: 8px 12px; border-bottom: 1px solid rgba(122, 162, 247, 0.14); background: rgba(17, 26, 38, 0.82); }"
-    ".context-chip { padding: 4px 9px; border-radius: 999px; background: rgba(122, 162, 247, 0.10); border: 1px solid rgba(122, 162, 247, 0.18); }"
-    ".context-chip-elevated { background: rgba(244, 114, 182, 0.12); border-color: rgba(244, 114, 182, 0.28); }"
-    ".context-path { color: rgba(226, 232, 240, 0.78); }"
-    ".terminal-frame { padding: 8px; }"
-    ".search-bar { padding: 8px 12px; background: rgba(15, 23, 34, 0.96); border-bottom: 1px solid rgba(122, 162, 247, 0.16); }"
-    ".search-error { color: #fda4af; }"
-    ".onboarding-card { background: rgba(15, 23, 34, 0.98); color: #e6edf3; }"
-    ".onboarding-kicker { color: rgba(122, 162, 247, 0.82); font-size: 0.82em; font-weight: 700; letter-spacing: 0.06em; }"
-    ".onboarding-title { color: #e6edf3; font-size: 1.55em; font-weight: 700; }"
-    ".onboarding-body { color: rgba(226, 232, 240, 0.82); }"
-    ".paste-warning { color: #fbbf24; font-weight: 700; }";
+    ".gc-window { background: #030914; color: #dceaff; }"
+    ".gc-header { background: #071526; border-bottom: 1px solid #0d4777; padding: 4px 6px; }"
+    ".brand-box { margin: 0 8px 0 2px; }"
+    ".brand-icon { color: #2ea8ff; margin-right: 2px; }"
+    ".gc-title { color: #f4f8ff; font-weight: 800; letter-spacing: 0.01em; }"
+    ".gc-product { color: #8ca9d4; font-weight: 500; }"
+    ".header-center { margin: 0 8px; }"
+    ".connection-chip { color: #b9d2f3; padding: 5px 10px; border-radius: 999px; background: #0b1c30; border: 1px solid #174b78; }"
+    ".connection-dot { color: #2ea8ff; font-weight: 900; }"
+    ".gc-subtitle { color: #7f9dc5; font-size: 0.88em; }"
+    ".header-action { color: #b9d2f3; background: transparent; border: 1px solid transparent; border-radius: 8px; padding: 5px; }"
+    ".header-action:hover { background: #0c223a; border-color: #174b78; }"
+    ".search-bar { padding: 8px 12px; background: #071525; border-bottom: 1px solid #0d3c63; }"
+    ".search-bar entry { background: #0a1b2f; color: #e5efff; border-color: #1a5589; border-radius: 8px; }"
+    ".search-error { color: #ff9eaf; }"
+    ".sidebar { min-width: 210px; padding: 14px 10px; background: #06111f; border-right: 1px solid #0d3c63; }"
+    ".sidebar-heading { color: #6f8eb7; font-size: 0.78em; font-weight: 800; letter-spacing: 0.06em; margin: 2px 6px 6px 6px; }"
+    ".sidebar-card { padding: 9px 10px; border-radius: 8px; background: #0a2037; border: 1px solid #174b78; }"
+    ".sidebar-dot { color: #2ea8ff; font-weight: 900; }"
+    ".sidebar-title { color: #edf5ff; font-weight: 700; }"
+    ".sidebar-detail { color: #7f9dc5; font-size: 0.86em; }"
+    ".sidebar-action { color: #abc2df; background: transparent; border: 1px solid transparent; border-radius: 7px; padding: 7px 9px; }"
+    ".sidebar-action:hover { color: #f2f7ff; background: #0a2037; border-color: #174b78; }"
+    ".sidebar-footer { color: #6f8eb7; font-size: 0.84em; margin: 8px 6px 2px 6px; }"
+    ".gc-workspace { background: #050d18; }"
+    ".gc-workspace > header { background: #06111f; border-bottom: 1px solid #0d3c63; padding: 0 8px; }"
+    ".gc-workspace > header tabs tab { color: #8faaca; background: transparent; border-right: 1px solid #102f4e; padding: 8px 12px; min-width: 120px; }"
+    ".gc-workspace > header tabs tab:checked { color: #f2f7ff; background: #0a2340; box-shadow: inset 0 -2px #169cff; }"
+    ".gc-workspace > header tabs tab:hover { background: #0a1c31; }"
+    ".gc-tab-icon { color: #2ea8ff; }"
+    ".gc-tab-close { min-width: 22px; min-height: 22px; padding: 0; color: #7999bd; background: transparent; border-color: transparent; }"
+    ".gc-tab-close:hover { color: #f2f7ff; background: #123656; }"
+    ".gc-tab-add { min-width: 30px; min-height: 28px; padding: 2px 7px; margin: 4px 6px; color: #89a8cf; background: transparent; border: 1px solid transparent; border-radius: 7px; }"
+    ".gc-tab-add:hover { color: #f2f7ff; background: #0c223a; border-color: #174b78; }"
+    ".terminal-frame { padding: 10px 12px; background: #050d18; }"
+    ".status-bar { padding: 7px 12px; background: #071526; border-top: 1px solid #0d4777; }"
+    ".status-chip { padding: 3px 8px; border-radius: 999px; background: #0a2036; border: 1px solid #184d79; color: #b9d2f3; }"
+    ".status-chip-elevated { background: #321b33; border-color: #8b426f; color: #ffd4ea; }"
+    ".status-identity { color: #9eb7d6; }"
+    ".status-path { color: #81c8ff; }"
+    ".status-development { color: #f2c86f; padding: 3px 8px; border-radius: 999px; background: #302713; border: 1px solid #695622; }"
+    ".onboarding-card { background: #071526; color: #e6f0ff; border: 1px solid #174b78; }"
+    ".onboarding-kicker { color: #37aefc; font-size: 0.82em; font-weight: 800; letter-spacing: 0.06em; }"
+    ".onboarding-title { color: #f4f8ff; font-size: 1.55em; font-weight: 800; }"
+    ".onboarding-body { color: #b9cce6; }"
+    ".paste-warning { color: #f6c75f; font-weight: 800; }";
 
 static void
 install_development_style(void)
@@ -115,7 +145,7 @@ update_context(TerminalWindowState *state)
     g_autofree char *title = gc_terminal_session_dup_display_title(session);
     g_autofree char *window_title = g_strdup_printf("%s — GoreeCloud Terminal", title);
     g_autofree char *subtitle = g_strdup_printf(
-        "Development · %u tab%s · %u pane%s",
+        "%u tab%s · %u pane%s",
         tabs,
         tabs == 1 ? "" : "s",
         panes,
@@ -670,10 +700,14 @@ static GtkWidget *
 build_header(GtkApplication *application, GtkWindow *window, TerminalWindowState *state)
 {
     GtkWidget *header = gtk_header_bar_new();
-    GtkWidget *title_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-    GtkWidget *title = gtk_label_new("GoreeCloud Terminal");
-    GtkWidget *new_button = gtk_button_new_from_icon_name("list-add-symbolic");
-    GtkWidget *close_button = gtk_button_new_from_icon_name("window-close-symbolic");
+    GtkWidget *brand_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 7);
+    GtkWidget *brand_icon = gtk_image_new_from_icon_name("utilities-terminal-symbolic");
+    GtkWidget *brand_name = gtk_label_new("GoreeCloud");
+    GtkWidget *product_name = gtk_label_new("Terminal");
+    GtkWidget *center_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
+    GtkWidget *connection_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
+    GtkWidget *connection_dot = gtk_label_new("●");
+    GtkWidget *connection_text = gtk_label_new("Local shell");
     GtkWidget *split_horizontal_button = gtk_button_new_with_label("↔");
     GtkWidget *split_vertical_button = gtk_button_new_with_label("↕");
     GtkWidget *search_button = gtk_button_new_from_icon_name("edit-find-symbolic");
@@ -713,18 +747,30 @@ build_header(GtkApplication *application, GtkWindow *window, TerminalWindowState
         {.name = "help", .activate = help_action},
     };
 
-    state->subtitle_label = GTK_LABEL(gtk_label_new("Development · 1 tab · 1 pane"));
+    state->subtitle_label = GTK_LABEL(gtk_label_new("1 tab · 1 pane"));
 
     gtk_widget_add_css_class(header, "gc-header");
-    gtk_widget_add_css_class(title, "gc-title");
+    gtk_widget_add_css_class(brand_box, "brand-box");
+    gtk_widget_add_css_class(brand_icon, "brand-icon");
+    gtk_widget_add_css_class(brand_name, "gc-title");
+    gtk_widget_add_css_class(product_name, "gc-product");
+    gtk_widget_add_css_class(center_box, "header-center");
+    gtk_widget_add_css_class(connection_box, "connection-chip");
+    gtk_widget_add_css_class(connection_dot, "connection-dot");
     gtk_widget_add_css_class(GTK_WIDGET(state->subtitle_label), "gc-subtitle");
 
-    gtk_box_append(GTK_BOX(title_box), title);
-    gtk_box_append(GTK_BOX(title_box), GTK_WIDGET(state->subtitle_label));
-    gtk_header_bar_set_title_widget(GTK_HEADER_BAR(header), title_box);
+    gtk_box_append(GTK_BOX(brand_box), brand_icon);
+    gtk_box_append(GTK_BOX(brand_box), brand_name);
+    gtk_box_append(GTK_BOX(brand_box), product_name);
 
-    gtk_widget_set_tooltip_text(new_button, "New tab");
-    gtk_widget_set_tooltip_text(close_button, "Close active tab");
+    gtk_box_append(GTK_BOX(connection_box), connection_dot);
+    gtk_box_append(GTK_BOX(connection_box), connection_text);
+    gtk_box_append(GTK_BOX(center_box), connection_box);
+    gtk_box_append(GTK_BOX(center_box), GTK_WIDGET(state->subtitle_label));
+
+    gtk_header_bar_pack_start(GTK_HEADER_BAR(header), brand_box);
+    gtk_header_bar_set_title_widget(GTK_HEADER_BAR(header), center_box);
+
     gtk_widget_set_tooltip_text(split_horizontal_button, "Split left/right");
     gtk_widget_set_tooltip_text(split_vertical_button, "Split top/bottom");
     gtk_widget_set_tooltip_text(search_button, "Search active pane");
@@ -732,8 +778,18 @@ build_header(GtkApplication *application, GtkWindow *window, TerminalWindowState
     gtk_widget_set_tooltip_text(paste_button, "Paste clipboard");
     gtk_widget_set_tooltip_text(help_button, "Replay onboarding");
 
-    gtk_actionable_set_action_name(GTK_ACTIONABLE(new_button), "win.new-tab");
-    gtk_actionable_set_action_name(GTK_ACTIONABLE(close_button), "win.close-tab");
+    GtkWidget *header_actions[] = {
+        split_horizontal_button,
+        split_vertical_button,
+        search_button,
+        copy_button,
+        paste_button,
+        help_button,
+    };
+    for (guint i = 0; i < G_N_ELEMENTS(header_actions); i++) {
+        gtk_widget_add_css_class(header_actions[i], "header-action");
+    }
+
     gtk_actionable_set_action_name(GTK_ACTIONABLE(split_horizontal_button), "win.split-horizontal");
     gtk_actionable_set_action_name(GTK_ACTIONABLE(split_vertical_button), "win.split-vertical");
     gtk_actionable_set_action_name(GTK_ACTIONABLE(search_button), "win.search");
@@ -741,14 +797,12 @@ build_header(GtkApplication *application, GtkWindow *window, TerminalWindowState
     gtk_actionable_set_action_name(GTK_ACTIONABLE(paste_button), "win.paste");
     gtk_actionable_set_action_name(GTK_ACTIONABLE(help_button), "win.help");
 
-    gtk_header_bar_pack_start(GTK_HEADER_BAR(header), new_button);
-    gtk_header_bar_pack_start(GTK_HEADER_BAR(header), close_button);
-    gtk_header_bar_pack_start(GTK_HEADER_BAR(header), split_horizontal_button);
-    gtk_header_bar_pack_start(GTK_HEADER_BAR(header), split_vertical_button);
     gtk_header_bar_pack_end(GTK_HEADER_BAR(header), help_button);
     gtk_header_bar_pack_end(GTK_HEADER_BAR(header), paste_button);
     gtk_header_bar_pack_end(GTK_HEADER_BAR(header), copy_button);
     gtk_header_bar_pack_end(GTK_HEADER_BAR(header), search_button);
+    gtk_header_bar_pack_end(GTK_HEADER_BAR(header), split_vertical_button);
+    gtk_header_bar_pack_end(GTK_HEADER_BAR(header), split_horizontal_button);
 
     g_action_map_add_action_entries(
         G_ACTION_MAP(window),
@@ -778,22 +832,24 @@ build_header(GtkApplication *application, GtkWindow *window, TerminalWindowState
 static GtkWidget *
 build_context_bar(TerminalWindowState *state)
 {
-    GtkWidget *bar = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 8);
+    GtkWidget *bar = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
     GtkWidget *scope = gtk_label_new(gc_context_privilege_label());
     g_autofree char *identity = gc_context_identity();
     GtkWidget *identity_label = gtk_label_new(identity);
+    GtkWidget *development = gtk_label_new("Development");
 
     state->cwd_label = GTK_LABEL(gtk_label_new(g_get_home_dir()));
     state->session_label = GTK_LABEL(gtk_label_new("Starting shell"));
 
-    gtk_widget_add_css_class(bar, "context-bar");
-    gtk_widget_add_css_class(scope, "context-chip");
-    gtk_widget_add_css_class(identity_label, "context-chip");
-    gtk_widget_add_css_class(GTK_WIDGET(state->session_label), "context-chip");
-    gtk_widget_add_css_class(GTK_WIDGET(state->cwd_label), "context-path");
+    gtk_widget_add_css_class(bar, "status-bar");
+    gtk_widget_add_css_class(scope, "status-chip");
+    gtk_widget_add_css_class(identity_label, "status-identity");
+    gtk_widget_add_css_class(GTK_WIDGET(state->session_label), "status-chip");
+    gtk_widget_add_css_class(GTK_WIDGET(state->cwd_label), "status-path");
+    gtk_widget_add_css_class(development, "status-development");
 
     if (g_strcmp0(gc_context_privilege_label(), "Elevated local") == 0) {
-        gtk_widget_add_css_class(scope, "context-chip-elevated");
+        gtk_widget_add_css_class(scope, "status-chip-elevated");
     }
 
     gtk_label_set_ellipsize(state->cwd_label, PANGO_ELLIPSIZE_MIDDLE);
@@ -804,8 +860,83 @@ build_context_bar(TerminalWindowState *state)
     gtk_box_append(GTK_BOX(bar), identity_label);
     gtk_box_append(GTK_BOX(bar), GTK_WIDGET(state->cwd_label));
     gtk_box_append(GTK_BOX(bar), GTK_WIDGET(state->session_label));
+    gtk_box_append(GTK_BOX(bar), development);
 
     return bar;
+}
+
+static GtkWidget *
+build_sidebar(void)
+{
+    GtkWidget *sidebar = gtk_box_new(GTK_ORIENTATION_VERTICAL, 8);
+    GtkWidget *workspace_heading = gtk_label_new("WORKSPACE");
+    GtkWidget *local_card = gtk_box_new(GTK_ORIENTATION_VERTICAL, 3);
+    GtkWidget *local_row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 7);
+    GtkWidget *local_dot = gtk_label_new("●");
+    GtkWidget *local_title = gtk_label_new("Local Shell");
+    g_autofree char *identity = gc_context_identity();
+    GtkWidget *local_detail = gtk_label_new(identity);
+    GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+    GtkWidget *actions_heading = gtk_label_new("QUICK ACTIONS");
+    GtkWidget *new_tab = gtk_button_new_with_label("＋  New tab");
+    GtkWidget *split_left_right = gtk_button_new_with_label("↔  Split left / right");
+    GtkWidget *split_top_bottom = gtk_button_new_with_label("↕  Split top / bottom");
+    GtkWidget *search = gtk_button_new_with_label("⌕  Search scrollback");
+    GtkWidget *spacer = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    GtkWidget *footer = gtk_label_new("GoreeCloud · Development");
+    GtkWidget *actions[] = {
+        new_tab,
+        split_left_right,
+        split_top_bottom,
+        search,
+    };
+
+    gtk_widget_add_css_class(sidebar, "sidebar");
+    gtk_widget_add_css_class(workspace_heading, "sidebar-heading");
+    gtk_widget_add_css_class(local_card, "sidebar-card");
+    gtk_widget_add_css_class(local_dot, "sidebar-dot");
+    gtk_widget_add_css_class(local_title, "sidebar-title");
+    gtk_widget_add_css_class(local_detail, "sidebar-detail");
+    gtk_widget_add_css_class(actions_heading, "sidebar-heading");
+    gtk_widget_add_css_class(footer, "sidebar-footer");
+
+    gtk_label_set_xalign(GTK_LABEL(workspace_heading), 0.0f);
+    gtk_label_set_xalign(GTK_LABEL(local_title), 0.0f);
+    gtk_label_set_xalign(GTK_LABEL(local_detail), 0.0f);
+    gtk_label_set_ellipsize(GTK_LABEL(local_detail), PANGO_ELLIPSIZE_END);
+    gtk_label_set_xalign(GTK_LABEL(actions_heading), 0.0f);
+    gtk_label_set_xalign(GTK_LABEL(footer), 0.0f);
+
+    gtk_box_append(GTK_BOX(local_row), local_dot);
+    gtk_box_append(GTK_BOX(local_row), local_title);
+    gtk_box_append(GTK_BOX(local_card), local_row);
+    gtk_box_append(GTK_BOX(local_card), local_detail);
+
+    for (guint i = 0; i < G_N_ELEMENTS(actions); i++) {
+        gtk_widget_add_css_class(actions[i], "sidebar-action");
+        gtk_widget_set_hexpand(actions[i], TRUE);
+        gtk_widget_set_halign(actions[i], GTK_ALIGN_FILL);
+    }
+
+    gtk_actionable_set_action_name(GTK_ACTIONABLE(new_tab), "win.new-tab");
+    gtk_actionable_set_action_name(GTK_ACTIONABLE(split_left_right), "win.split-horizontal");
+    gtk_actionable_set_action_name(GTK_ACTIONABLE(split_top_bottom), "win.split-vertical");
+    gtk_actionable_set_action_name(GTK_ACTIONABLE(search), "win.search");
+
+    gtk_widget_set_vexpand(spacer, TRUE);
+
+    gtk_box_append(GTK_BOX(sidebar), workspace_heading);
+    gtk_box_append(GTK_BOX(sidebar), local_card);
+    gtk_box_append(GTK_BOX(sidebar), separator);
+    gtk_box_append(GTK_BOX(sidebar), actions_heading);
+    gtk_box_append(GTK_BOX(sidebar), new_tab);
+    gtk_box_append(GTK_BOX(sidebar), split_left_right);
+    gtk_box_append(GTK_BOX(sidebar), split_top_bottom);
+    gtk_box_append(GTK_BOX(sidebar), search);
+    gtk_box_append(GTK_BOX(sidebar), spacer);
+    gtk_box_append(GTK_BOX(sidebar), footer);
+
+    return sidebar;
 }
 
 static GtkWidget *
@@ -886,6 +1017,8 @@ gc_terminal_window_new(GtkApplication *application)
     TerminalWindowState *state = g_new0(TerminalWindowState, 1);
     GtkWidget *window = gtk_application_window_new(application);
     GtkWidget *root = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    GtkWidget *content = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    GtkWidget *main_area = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 
     state->window = GTK_WINDOW(window);
     state->workspace = gc_workspace_new(
@@ -905,16 +1038,25 @@ gc_terminal_window_new(GtkApplication *application)
     install_development_style();
 
     gtk_widget_add_css_class(window, "gc-window");
-    gtk_window_set_default_size(GTK_WINDOW(window), 1120, 720);
+    gtk_window_set_default_size(GTK_WINDOW(window), 1280, 800);
     gtk_window_set_title(GTK_WINDOW(window), "GoreeCloud Terminal");
     gtk_window_set_titlebar(
         GTK_WINDOW(window),
         build_header(application, GTK_WINDOW(window), state)
     );
 
+    gtk_widget_set_hexpand(main_area, TRUE);
+    gtk_widget_set_vexpand(main_area, TRUE);
+    gtk_box_append(GTK_BOX(main_area), build_search_bar(state));
+    gtk_box_append(GTK_BOX(main_area), gc_workspace_get_widget(state->workspace));
+
+    gtk_box_append(GTK_BOX(content), build_sidebar());
+    gtk_box_append(GTK_BOX(content), main_area);
+    gtk_widget_set_hexpand(content, TRUE);
+    gtk_widget_set_vexpand(content, TRUE);
+
+    gtk_box_append(GTK_BOX(root), content);
     gtk_box_append(GTK_BOX(root), build_context_bar(state));
-    gtk_box_append(GTK_BOX(root), build_search_bar(state));
-    gtk_box_append(GTK_BOX(root), gc_workspace_get_widget(state->workspace));
     gtk_window_set_child(GTK_WINDOW(window), root);
 
     gc_workspace_add_tab(state->workspace, g_get_home_dir());

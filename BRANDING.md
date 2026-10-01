@@ -4,6 +4,6 @@
 
 A canonical first-party Terminal icon has not yet been verified in this repository or in the searched GoreeCloud branding-assets repository.
 
-The Development desktop entry therefore uses the generic platform `utilities-terminal` icon temporarily. It is not canonical GoreeCloud Terminal artwork and must be replaced by approved first-party Glaze UI-conformant identity assets.
+The Development desktop entry therefore uses the generic platform `utilities-terminal` icon temporarily. The mockup-inspired in-app titlebar also uses the platform terminal symbolic icon as a truthful temporary identifier. Neither is canonical GoreeCloud Terminal artwork, and both must be replaced by approved first-party Glaze-conformant identity assets.
 
 The final identity should communicate command-line work, infrastructure administration, clarity, precision, and GoreeCloud family resemblance while preserving protected semantic colors.

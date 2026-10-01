@@ -61,10 +61,12 @@ Other URI schemes are rejected. Local paths must exist before they are opened. D
 
 Single-line text is pasted directly. If clipboard or primary-selection text contains a newline or carriage return, GoreeCloud Terminal opens a modal review that shows the exact text plus line and character counts. Choose **Paste anyway** to send the text or **Cancel** to discard it.
 
-## Context Ribbon
+## Workspace Shell and Status Bar
 
-The ribbon shows local/elevated privilege state, `user@host`, the active pane's working directory, and active shell state.
+The mockup-inspired shell uses a deep-navy GoreeCloud titlebar, a truthful **Local shell** indicator, a left workspace sidebar, compact split/search/copy/paste/help controls, and a notebook tab strip with an explicit + control and per-tab close buttons. The sidebar exposes only currently implemented local actions: new tab, left/right split, top/bottom split, and scrollback search. The bottom status bar shows local/elevated privilege state, `user@host`, the active pane's working directory, active shell state, and the current Development lifecycle.
+
+The presentation does not imply remote connectivity, cloud-provider state, Kubernetes clusters, persistent command history, or saved sessions. Those capabilities remain outside the current Development boundary.
 
 ## Current Limitations
 
-The Development build does not yet provide command-boundary navigation, SSH, profiles, workspace/session restoration, container workflows, or production-grade Glaze UI acceptance.
+The Development build does not yet provide command-boundary navigation, SSH, profiles, workspace/session restoration, container workflows, or complete Glaze 1.6.0 consumer acceptance.
