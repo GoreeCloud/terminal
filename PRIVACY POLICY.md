@@ -14,7 +14,7 @@ The first-run guide persists completion state and current step at `$XDG_CONFIG_H
 
 User-authored local profiles are read from `$XDG_CONFIG_HOME/goreecloud-terminal/profiles.ini`. The current profile fields are profile identity/name, local shell path, working directory, terminal font, foreground color, and background color.
 
-Bounded tab-restore state is stored at `$XDG_STATE_HOME/goreecloud-terminal/workspace.ini`. It contains a format version, tab count, selected-tab position, profile identifiers, and working directories. It does not contain terminal output, command history, running-process state, clipboard content, or search content.
+Bounded tab-restore state is stored at `$XDG_STATE_HOME/goreecloud-terminal/workspace.ini`, with one previous valid snapshot retained at the adjacent `.bak` path for local recovery. Both contain only a format version, tab count, selected-tab position, profile identifiers, and working directories. They do not contain terminal output, command history, running-process state, clipboard content, or search content.
 
 Future remote, synchronization, diagnostics, observability, or account-aware features require separate privacy review before activation.
 
