@@ -37,6 +37,7 @@ const char *gc_profile_get_font(const GcProfile *profile);
 const char *gc_profile_get_foreground(const GcProfile *profile);
 const char *gc_profile_get_background(const GcProfile *profile);
 char **gc_profile_dup_environment(const GcProfile *profile);
+char **gc_profile_dup_spawn_environment(const GcProfile *profile);
 
 char *gc_profile_dup_effective_working_directory(
     const GcProfile *profile,
