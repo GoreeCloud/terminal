@@ -14,6 +14,6 @@ The following remain planned or materially incomplete:
 - terminal graphics and protocol compatibility validation;
 - extension and automation APIs;
 - performance/latency/large-log/long-duration measurement;
-- complete Glaze 1.6.0 consumer acceptance, including representative rendered, accessibility, adaptive, performance, and identity review;
+- complete Glaze 1.6.0 consumer acceptance, including representative rendered, screen-reader, large-text/reflow, high-contrast, focus, adaptive, performance, and identity review; descriptive source-level labels for icon/glyph controls do not by themselves satisfy runtime accessibility acceptance;
 - all nine Integral Platform System integrations/acceptance;
 - Linux packaging, signed releases, rollback/recovery evidence, and lifecycle promotion.

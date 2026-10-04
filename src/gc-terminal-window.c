@@ -1209,6 +1209,24 @@ build_header(GtkApplication *application, GtkWindow *window, TerminalWindowState
     gtk_widget_set_tooltip_text(split_horizontal_button, "Split left/right");
     gtk_widget_set_tooltip_text(split_vertical_button, "Split top/bottom");
     gtk_widget_set_tooltip_text(search_button, "Search active pane");
+    gtk_accessible_update_property(
+        GTK_ACCESSIBLE(split_horizontal_button),
+        GTK_ACCESSIBLE_PROPERTY_LABEL,
+        "Split left/right",
+        -1
+    );
+    gtk_accessible_update_property(
+        GTK_ACCESSIBLE(split_vertical_button),
+        GTK_ACCESSIBLE_PROPERTY_LABEL,
+        "Split top/bottom",
+        -1
+    );
+    gtk_accessible_update_property(
+        GTK_ACCESSIBLE(search_button),
+        GTK_ACCESSIBLE_PROPERTY_LABEL,
+        "Search active pane",
+        -1
+    );
     gtk_widget_set_tooltip_text(
         previous_command_button,
         "Previous command start"
@@ -1220,6 +1238,36 @@ build_header(GtkApplication *application, GtkWindow *window, TerminalWindowState
     gtk_widget_set_tooltip_text(copy_button, "Copy selection");
     gtk_widget_set_tooltip_text(paste_button, "Paste clipboard");
     gtk_widget_set_tooltip_text(help_button, "Replay onboarding");
+    gtk_accessible_update_property(
+        GTK_ACCESSIBLE(previous_command_button),
+        GTK_ACCESSIBLE_PROPERTY_LABEL,
+        "Previous command start",
+        -1
+    );
+    gtk_accessible_update_property(
+        GTK_ACCESSIBLE(next_command_button),
+        GTK_ACCESSIBLE_PROPERTY_LABEL,
+        "Next command start",
+        -1
+    );
+    gtk_accessible_update_property(
+        GTK_ACCESSIBLE(copy_button),
+        GTK_ACCESSIBLE_PROPERTY_LABEL,
+        "Copy selection",
+        -1
+    );
+    gtk_accessible_update_property(
+        GTK_ACCESSIBLE(paste_button),
+        GTK_ACCESSIBLE_PROPERTY_LABEL,
+        "Paste clipboard",
+        -1
+    );
+    gtk_accessible_update_property(
+        GTK_ACCESSIBLE(help_button),
+        GTK_ACCESSIBLE_PROPERTY_LABEL,
+        "Replay onboarding",
+        -1
+    );
 
     GtkWidget *header_actions[] = {
         split_horizontal_button,
@@ -1402,6 +1450,18 @@ build_sidebar(TerminalWindowState *state)
         profile_reload,
         "Reload portable local profiles from profiles.ini"
     );
+    gtk_accessible_update_property(
+        GTK_ACCESSIBLE(profile_dropdown),
+        GTK_ACCESSIBLE_PROPERTY_LABEL,
+        "Profile for new local tabs",
+        -1
+    );
+    gtk_accessible_update_property(
+        GTK_ACCESSIBLE(profile_reload),
+        GTK_ACCESSIBLE_PROPERTY_LABEL,
+        "Reload local profiles",
+        -1
+    );
     g_signal_connect(
         profile_reload,
         "clicked",
@@ -1467,6 +1527,30 @@ build_search_bar(TerminalWindowState *state)
     gtk_widget_set_tooltip_text(previous, "Previous match");
     gtk_widget_set_tooltip_text(next, "Next match");
     gtk_widget_set_tooltip_text(close, "Close search");
+    gtk_accessible_update_property(
+        GTK_ACCESSIBLE(entry),
+        GTK_ACCESSIBLE_PROPERTY_LABEL,
+        "Search scrollback in active pane",
+        -1
+    );
+    gtk_accessible_update_property(
+        GTK_ACCESSIBLE(previous),
+        GTK_ACCESSIBLE_PROPERTY_LABEL,
+        "Previous search match",
+        -1
+    );
+    gtk_accessible_update_property(
+        GTK_ACCESSIBLE(next),
+        GTK_ACCESSIBLE_PROPERTY_LABEL,
+        "Next search match",
+        -1
+    );
+    gtk_accessible_update_property(
+        GTK_ACCESSIBLE(close),
+        GTK_ACCESSIBLE_PROPERTY_LABEL,
+        "Close search",
+        -1
+    );
 
     gtk_actionable_set_action_name(GTK_ACTIONABLE(previous), "win.search-previous");
     gtk_actionable_set_action_name(GTK_ACTIONABLE(next), "win.search-next");

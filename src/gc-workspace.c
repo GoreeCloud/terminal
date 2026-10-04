@@ -402,6 +402,12 @@ gc_workspace_new(
 
     gtk_widget_add_css_class(add_button, "gc-tab-add");
     gtk_widget_set_tooltip_text(add_button, "New tab");
+    gtk_accessible_update_property(
+        GTK_ACCESSIBLE(add_button),
+        GTK_ACCESSIBLE_PROPERTY_LABEL,
+        "New tab",
+        -1
+    );
     gtk_actionable_set_action_name(GTK_ACTIONABLE(add_button), "win.new-tab");
     gtk_notebook_set_action_widget(
         workspace->notebook,
@@ -675,6 +681,12 @@ gc_workspace_add_tab_with_profile_layout(
     gtk_label_set_ellipsize(GTK_LABEL(label), PANGO_ELLIPSIZE_END);
     gtk_label_set_max_width_chars(GTK_LABEL(label), 28);
     gtk_widget_set_tooltip_text(close, "Close tab");
+    gtk_accessible_update_property(
+        GTK_ACCESSIBLE(close),
+        GTK_ACCESSIBLE_PROPERTY_LABEL,
+        "Close tab",
+        -1
+    );
     g_object_set_data(
         G_OBJECT(close),
         "goreecloud-tab-page-root",
