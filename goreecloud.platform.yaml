@@ -36,12 +36,12 @@ platform_systems:
     result: applicable-blocked
     version: null
     evidence: [PLANNED-FEATURES.md]
-    notes: Bounded local top-level tab metadata restore exists, but persistent sessions, accepted backup/restore integration, and recovery acceptance are not established.
+    notes: Bounded schema-v2 workspace metadata restore includes nested split layouts, per-pane working directories, selected/active pane state, version-1 migration, and one previous-valid snapshot; persistent terminal/process continuity, accepted Everkeep integration, and broader recovery acceptance are not established.
   glaze_ui:
     result: applicable-blocked
     version: "1.6.0"
     evidence: [src/gc-terminal-window.c, docs/glaze-ui-conformance.md]
-    notes: Source-side presentation exists; application-specific Glaze acceptance is incomplete.
+    notes: Source-side presentation and descriptive accessibility labels for icon/glyph controls exist; representative rendered, screen-reader/focus, large-text/reflow, high-contrast, adaptive, performance, identity, and application-specific Glaze acceptance remain incomplete.
   mesh:
     result: applicable-blocked
     version: null
@@ -126,6 +126,11 @@ compatibility:
     - goreecloud-terminal-onboarding-state-dev-v1
     - goreecloud-terminal-local-profiles-dev-v1
     - goreecloud-terminal-top-level-tab-restore-dev-v1
+    - goreecloud-terminal-workspace-restore-dev-v2
+    - goreecloud-terminal-command-start-navigation-dev-v1
+    - goreecloud-terminal-profile-startup-command-dev-v1
+    - goreecloud-terminal-profile-cursor-appearance-dev-v1
+    - goreecloud-terminal-accessible-icon-labels-dev-v1
 
 evidence:
   acceptance_tests: []
@@ -145,5 +150,5 @@ conformance:
   blockers:
     - Glaze UI 1.6.0 consumer acceptance is incomplete.
     - Privacy Shield, Wardveil, Everkeep, Manager, Mesh, Identity, Policy, and Observability integration/acceptance are not established.
-    - Command-boundary navigation, remote administration, advanced profile options, broader workspace/session persistence, containers, automation, protocol validation, performance validation, and representative Linux runtime acceptance remain incomplete.
+    - Complete cross-baseline command navigation, remote administration, remaining profile keybindings/purpose/appearance options, terminal/process continuity, clean-target/export recovery acceptance, containers, automation, protocol validation, performance validation, and representative Linux runtime acceptance remain incomplete.
     - Production packaging, signed releases, rollback evidence, release approval, and lifecycle promotion remain incomplete.

@@ -28,6 +28,7 @@ These entries establish Development source implementation only. They do not esta
 - Local launch profiles can be selected and reloaded from the sidebar.
 - Profile environment overrides are validated and merged into the inherited local process environment for newly launched tabs and panes.
 - Optional `startup-command` values up to 4,096 bytes run through the selected local shell before it is replaced by the ordinary interactive shell; split panes inherit the tab profile and therefore the same startup behavior.
+- Per-profile cursor shape (`block`, `ibeam`, or `underline`), cursor blink mode (`system`, `on`, or `off`), and `bold-is-bright` behavior are validated and applied to newly launched tabs and panes.
 - Per-profile scrollback limits are configurable from 0 through 1,000,000 lines; the default remains 10,000 lines.
 - Tabs restore their profile, nested split-pane layout, per-pane working directories, active-pane selection, and selected-tab position after restart.
 - Workspace persistence uses a versioned schema with bounded layout parsing (up to 16 panes and 8 split levels per tab); version-1 top-level-tab state is migrated into the current schema on load.
