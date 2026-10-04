@@ -132,6 +132,7 @@ compatibility:
     - goreecloud-terminal-profile-cursor-appearance-dev-v1
     - goreecloud-terminal-profile-keybindings-dev-v1
     - goreecloud-terminal-canonical-branding-dev-v1
+    - goreecloud-terminal-long-command-notification-dev-v1
     - goreecloud-terminal-accessible-icon-labels-dev-v1
 
 evidence:
@@ -152,5 +153,5 @@ conformance:
   blockers:
     - Glaze UI 1.6.0 consumer acceptance is incomplete.
     - Privacy Shield, Wardveil, Everkeep, Manager, Mesh, Identity, Policy, and Observability integration/acceptance are not established.
-    - Complete cross-baseline command navigation, remote administration, remaining profile purpose/appearance options and richer keybinding replacement/disable semantics, terminal/process continuity, clean-target/export recovery acceptance, containers, automation, protocol validation, performance validation, and representative Linux runtime acceptance remain incomplete.
+    - Complete cross-baseline command navigation/notification coverage, remote administration, remaining profile purpose/appearance options and richer keybinding replacement/disable semantics, terminal/process continuity, clean-target/export recovery acceptance, broader background/activity notifications, containers, automation, protocol validation, performance validation, representative desktop-notification delivery, and representative Linux runtime acceptance remain incomplete.
     - Production packaging, signed releases, rollback evidence, release approval, and lifecycle promotion remain incomplete.
