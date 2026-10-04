@@ -15,6 +15,7 @@ executable(
     'gc-terminal-session.c',
     'gc-workspace.c',
     'gc-terminal-window.c',
+    terminal_resources,
   ],
   dependencies: [gtk_dep, vte_dep, glib_dep, gio_dep, pcre2_dep],
   install: true,
