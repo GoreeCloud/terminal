@@ -7,7 +7,7 @@ These entries establish Development source implementation only. They do not esta
 - GTK 4 application/window lifecycle.
 - VTE GTK4 terminal sessions with asynchronous PTY-backed local shell startup.
 - `$SHELL` selection with `/bin/sh` fallback.
-- 10,000-line scrollback per session.
+- 10,000-line default scrollback with a bounded per-profile override from 0 through 1,000,000 lines.
 - Terminal hyperlink capability enabled.
 - Terminal title propagation.
 - Local/elevated context, user@host, working-directory, and active-session state presentation in a persistent bottom status bar.
