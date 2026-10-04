@@ -81,4 +81,4 @@ The presentation does not imply remote connectivity, cloud-provider state, Kuber
 
 ## Current Limitations
 
-The Development build does not yet provide command-boundary navigation, SSH, advanced profile options, split-layout or process restoration, container workflows, or complete Glaze 1.6.0 consumer acceptance.
+The Development build does not yet provide complete command-boundary navigation across all supported VTE baselines, SSH, advanced profile options, split-layout or process restoration, container workflows, or complete Glaze 1.6.0 consumer acceptance.
