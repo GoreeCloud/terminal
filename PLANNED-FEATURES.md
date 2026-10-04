@@ -10,7 +10,7 @@ The following remain planned or materially incomplete:
 - SSH host profiles, host verification, reconnection, and secure key/credential handling;
 - remote/container and per-environment visual differentiation; local/elevated status is already surfaced in the Development shell;
 - container-shell launch and host/container context;
-- long-running-command/background notifications;
+- broader background-session and activity notifications; opt-in long-running command completion notifications are source-implemented on the VTE 0.78+ protocol path, while the VTE 0.76 compatibility path and representative desktop-notification delivery acceptance remain open;
 - terminal graphics and protocol compatibility validation;
 - extension and automation APIs;
 - performance/latency/large-log/long-duration measurement;
