@@ -5,7 +5,7 @@ profile_test = executable(
     '../src/gc-profile.c',
   ],
   include_directories: include_directories('../src'),
-  dependencies: [glib_dep, gio_dep],
+  dependencies: [gtk_dep, glib_dep, gio_dep],
 )
 
 workspace_layout_test = executable(
