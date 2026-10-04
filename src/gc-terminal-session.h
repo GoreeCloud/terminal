@@ -3,6 +3,7 @@
 #include <gtk/gtk.h>
 
 #include "gc-link-utils.h"
+#include "gc-profile.h"
 
 G_BEGIN_DECLS
 
@@ -39,10 +40,20 @@ GcTerminalSession *gc_terminal_session_new(
     gpointer user_data
 );
 
+GcTerminalSession *gc_terminal_session_new_with_profile(
+    const GcProfile *profile,
+    const char *working_directory,
+    GcTerminalSessionChangedFunc changed,
+    GcTerminalSessionPasteRequestedFunc paste_requested,
+    GcTerminalSessionOpenRequestedFunc open_requested,
+    gpointer user_data
+);
+
 GtkWidget *gc_terminal_session_get_widget(GcTerminalSession *session);
 const char *gc_terminal_session_get_status(GcTerminalSession *session);
 char *gc_terminal_session_dup_working_directory(GcTerminalSession *session);
 char *gc_terminal_session_dup_display_title(GcTerminalSession *session);
+const char *gc_terminal_session_get_profile_id(GcTerminalSession *session);
 gboolean gc_terminal_session_has_focus(GcTerminalSession *session);
 gboolean gc_terminal_session_has_shell_integration(GcTerminalSession *session);
 gboolean gc_terminal_session_is_command_running(GcTerminalSession *session);
