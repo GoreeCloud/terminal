@@ -65,6 +65,31 @@ test_load_profiles(void)
         g_assert_cmpstr(environment[1], ==, "GC_TEST=value=with=equals");
         g_assert_null(environment[2]);
     }
+
+    g_setenv("GC_PROFILE_INHERITED_TEST", "parent", TRUE);
+    {
+        g_auto(GStrv) environment =
+            gc_profile_dup_spawn_environment(profile);
+
+        g_assert_nonnull(environment);
+        g_assert_cmpstr(
+            g_environ_getenv(environment, "GC_PROFILE_INHERITED_TEST"),
+            ==,
+            "parent"
+        );
+        g_assert_cmpstr(
+            g_environ_getenv(environment, "TERM_PROGRAM"),
+            ==,
+            "GoreeCloud Terminal"
+        );
+        g_assert_cmpstr(
+            g_environ_getenv(environment, "GC_TEST"),
+            ==,
+            "value=with=equals"
+        );
+    }
+    g_unsetenv("GC_PROFILE_INHERITED_TEST");
+
     cwd = gc_profile_dup_effective_working_directory(profile, "/");
     g_assert_cmpstr(cwd, ==, g_get_home_dir());
 
