@@ -4,7 +4,7 @@
 > **Project:** GoreeCloud Terminal  
 > **Document:** `PROJECT-RECORD.md`  
 > **Authority:** Canonical repository-local significant project history  
-> **Last updated:** 2026-09-27  
+> **Last updated:** 2026-10-04  
 > **Owner:** GoreeCloud
 
 ## Record Purpose
@@ -786,4 +786,109 @@ Terminal output, command history, running-process continuity, and nested split l
 This event does not establish advanced profile options, nested split-layout restore, process continuity across restarts, remote administration, container workflows, command-boundary navigation, complete Glaze consumer acceptance, production packaging, or Stable/Anchor status.
 
 Repository branch protection and the blank GitHub Description remain separately unresolved in issue #3.
+
+## 2026-10-04 — Local Profile Environment Overrides Integrated
+
+### Event
+
+Pull request #22 extended the portable local profile model with validated per-profile environment overrides for newly launched local tabs and panes.
+
+### Exact Source Evidence
+
+- authoritative base: `d656df307908b07486631818f7ea7e004f0d4da2`;
+- exact accepted candidate: `baf2eb32ee80975d59b3677ffc1702f61c175f24`;
+- pull request: #22, **Add per-profile local environment overrides**;
+- merge method: squash; and
+- authoritative merged commit: `8fa734fb8151ecbb598ad806ee1e5466553f791a`.
+
+### Validation Evidence
+
+The exact accepted candidate passed:
+
+- Native Foundation run `37217821333` — push — success on both Ubuntu 24.04 and Debian 13 jobs; and
+- Native Foundation run `37217912807` — pull request — success on both Ubuntu 24.04 and Debian 13 jobs.
+
+After merge, authoritative `main` commit `8fa734fb8151ecbb598ad806ee1e5466553f791a` passed Native Foundation run `37218114313`.
+
+### Implemented Development Boundary
+
+Verified source now accepts profile `environment` entries as validated `NAME=value` string-list items. New local sessions inherit the Terminal process environment and apply profile entries as overrides. Split panes inherit the owning tab profile and therefore the same environment override behavior.
+
+Environment values remain local process input. They are not authorization, identity, policy, or trusted-security metadata.
+
+### Remaining Product Boundary
+
+Startup commands, profile keybindings, remote/container purpose profiles, broader appearance settings, command-boundary navigation, complete restore acceptance, representative desktop runtime acceptance, packaging, release qualification, and Stable/Anchor status remain separate obligations.
+
+Repository protection and the blank GitHub Description remain unresolved in issue #3.
+
+## 2026-10-04 — Previous-State Workspace Recovery Integrated
+
+### Event
+
+Pull request #23 hardened the versioned local top-level tab restore path by preserving one previous valid workspace snapshot and recovering from it when the primary state is missing or malformed.
+
+### Exact Source Evidence
+
+- authoritative base: `8fa734fb8151ecbb598ad806ee1e5466553f791a`;
+- exact accepted candidate: `aeca0c9f2627d7fc70fe8f3880ee83c534a3ef76`;
+- pull request: #23, **Add previous-state recovery for local tab restoration**;
+- merge method: squash; and
+- authoritative merged commit: `8e15b84926b535dd88ffdeee4c2cca63a180c935`.
+
+### Validation Evidence
+
+The exact accepted candidate passed:
+
+- Native Foundation run `37218193882` — push — success on both Ubuntu 24.04 and Debian 13 jobs; and
+- Native Foundation run `37218197664` — pull request — success on both Ubuntu 24.04 and Debian 13 jobs.
+
+After merge, authoritative `main` commit `8e15b84926b535dd88ffdeee4c2cca63a180c935` passed Native Foundation run `37218360010`. A later push event for the same commit also passed run `37218802554`.
+
+### Implemented Development Boundary
+
+Each successful workspace-state replacement preserves the prior valid primary state as an adjacent `.bak` snapshot. Load falls back to that snapshot only when the primary is missing or malformed. Unsupported future schema versions fail closed rather than silently loading an older backup.
+
+The primary and backup contain the same bounded restore metadata: format version, tab selection, profile identifiers, and working directories. They do not contain terminal output, command history, running-process state, clipboard content, search text, credentials, or remote identity.
+
+### Remaining Product Boundary
+
+Nested split-layout restoration, terminal-content restoration, long-running process continuity, clean-target migration acceptance, export/portability acceptance, remote administration, containers, packaging, release qualification, and Stable/Anchor status remain separate obligations.
+
+Repository protection and the blank GitHub Description remain unresolved in issue #3.
+
+## 2026-10-04 — Configurable Bounded Profile Scrollback Integrated
+
+### Event
+
+Pull request #24 added a bounded per-profile scrollback setting and reconciled first-run/Help onboarding with the verified local-profile capabilities.
+
+### Exact Source Evidence
+
+- authoritative base: `8e15b84926b535dd88ffdeee4c2cca63a180c935`;
+- exact accepted candidate: `a571b189b8fddc392ccc1f32a92d69217cfa366e`;
+- pull request: #24, **Add configurable per-profile scrollback limits**;
+- merge method: squash; and
+- authoritative merged commit: `719370ea6af035db10b1a78f88ac6cd99b31a0a6`.
+
+### Validation Evidence
+
+The exact accepted candidate passed:
+
+- Native Foundation run `37218718996` — push — success on both Ubuntu 24.04 and Debian 13 jobs; and
+- Native Foundation run `37218721181` — pull request — success on both Ubuntu 24.04 and Debian 13 jobs.
+
+After merge, authoritative `main` commit `719370ea6af035db10b1a78f88ac6cd99b31a0a6` passed Native Foundation run `37219720525`.
+
+### Implemented Development Boundary
+
+Profiles now support `scrollback-lines` with a default of 10,000 lines and a validated range from 0 through 1,000,000 lines. Invalid values reject the new profile file without replacing the previously loaded profile set. The selected value is applied when each local terminal session is created.
+
+Onboarding now accurately describes the verified profile surface: local shell, working directory, font, foreground/background colors, environment overrides, bounded scrollback, and top-level tab restoration. It no longer lists per-profile environment variables as an unfinished capability.
+
+### Security, Resource, and Lifecycle Boundary
+
+The upper bound prevents an unbounded profile value from requesting arbitrarily large scrollback retention. This slice adds no remote transport, telemetry, credential handling, release, deployment, production acceptance, or Stable/Anchor promotion.
+
+Repository protection remains disabled and the GitHub Description remains blank; both remain unresolved governance defects tracked in issue #3.
 
