@@ -15,7 +15,7 @@ The current source provides:
 - GNOME VTE-backed local terminal sessions and asynchronous PTY shell startup;
 - multiple reorderable local tabs and nested split panes;
 - active-session execution context and working-directory-aware tab/pane creation;
-- protocol-derived shell ready/running/last-exit status plus bounded previous/next command-start navigation on VTE 0.78+ when compatible shell integration emits lifecycle metadata;
+- protocol-derived shell ready/running/last-exit status, bounded previous/next command-start navigation, and opt-in privacy-minimized long-command completion notification requests on VTE 0.78+ when compatible shell integration emits lifecycle metadata;
 - searchable active-pane scrollback with literal or regular-expression matching;
 - case-sensitive or case-insensitive search and wrap-around navigation;
 - guarded clipboard and primary-selection paste review when pasted text contains line breaks;
@@ -31,7 +31,7 @@ The current source provides:
 
 This is Development source evidence only. Local profiles now include shell, working directory, colors/font, cursor shape/blink, bold-is-bright behavior, environment overrides, bounded scrollback, and optional startup commands; bounded nested split-layout restoration and VTE 0.78+ protocol-derived command-start navigation are also implemented. Remote/container profile purpose, richer keybinding replacement/disable semantics, additional appearance controls, terminal-content/process-continuity restoration, complete command navigation and shell integration across supported VTE baselines, SSH, containers, automation, protocol qualification, representative runtime acceptance, performance claims, full Glaze conformance, release qualification, and Stable/Anchor status remain incomplete.
 
-On VTE 0.78+ (including Debian 13), compatible shell integration can drive advisory `Shell ready`, `Command running`, and last-exit-code status. Ubuntu 24.04's VTE 0.76 path retains generic session status. GoreeCloud Terminal does not infer command lifecycle from prompt text, and lifecycle metadata is not treated as a privilege or authorization signal.
+On VTE 0.78+ (including Debian 13), compatible shell integration can drive advisory `Shell ready`, `Command running`, last-exit-code status, command-start navigation, and opt-in `notify-after-seconds` completion notifications. Notification content is limited to elapsed duration and validated exit status when available; command text and session content are not included. Ubuntu 24.04's VTE 0.76 path retains generic session status. GoreeCloud Terminal does not infer command lifecycle from prompt text, and lifecycle metadata is not treated as a privilege or authorization signal.
 
 Validated Development build/test environments are Ubuntu 24.04 and Debian 13 (Trixie). An owner-supplied Debian 13.7 x86_64 VPS also passed the repository build, all Meson tests, and staged install-layout validation on 2026-09-27. This evidence does not establish representative graphical desktop acceptance.
 
