@@ -420,6 +420,26 @@ on_window_close_request(GtkWindow *window, gpointer user_data)
 }
 
 static void
+set_window_action_enabled(
+    TerminalWindowState *state,
+    const char *name,
+    gboolean enabled
+)
+{
+    GAction *action = g_action_map_lookup_action(
+        G_ACTION_MAP(state->window),
+        name
+    );
+
+    if (G_IS_SIMPLE_ACTION(action)) {
+        g_simple_action_set_enabled(
+            G_SIMPLE_ACTION(action),
+            enabled
+        );
+    }
+}
+
+static void
 update_context(TerminalWindowState *state)
 {
     GcTerminalSession *session = gc_workspace_get_current_session(state->workspace);
@@ -429,6 +449,8 @@ update_context(TerminalWindowState *state)
     if (session == NULL) {
         gtk_label_set_text(state->cwd_label, g_get_home_dir());
         gtk_label_set_text(state->session_label, "No active session");
+        set_window_action_enabled(state, "previous-command", FALSE);
+        set_window_action_enabled(state, "next-command", FALSE);
         gtk_window_set_title(state->window, "GoreeCloud Terminal");
         return;
     }
@@ -445,7 +467,20 @@ update_context(TerminalWindowState *state)
     );
 
     gtk_label_set_text(state->cwd_label, cwd);
-    gtk_label_set_text(state->session_label, gc_terminal_session_get_status(session));
+    gtk_label_set_text(
+        state->session_label,
+        gc_terminal_session_get_status(session)
+    );
+    set_window_action_enabled(
+        state,
+        "previous-command",
+        gc_terminal_session_has_command_navigation(session)
+    );
+    set_window_action_enabled(
+        state,
+        "next-command",
+        gc_terminal_session_has_command_navigation(session)
+    );
     gtk_label_set_text(state->subtitle_label, subtitle);
     gtk_window_set_title(state->window, window_title);
 }
@@ -598,6 +633,42 @@ next_tab_action(GSimpleAction *action, GVariant *parameter, gpointer user_data)
     (void) parameter;
 
     gc_workspace_select_relative(state->workspace, 1);
+}
+
+static void
+previous_command_action(
+    GSimpleAction *action,
+    GVariant *parameter,
+    gpointer user_data
+)
+{
+    TerminalWindowState *state = user_data;
+    GcTerminalSession *session =
+        gc_workspace_get_current_session(state->workspace);
+    (void) action;
+    (void) parameter;
+
+    if (session != NULL) {
+        gc_terminal_session_navigate_command(session, -1);
+    }
+}
+
+static void
+next_command_action(
+    GSimpleAction *action,
+    GVariant *parameter,
+    gpointer user_data
+)
+{
+    TerminalWindowState *state = user_data;
+    GcTerminalSession *session =
+        gc_workspace_get_current_session(state->workspace);
+    (void) action;
+    (void) parameter;
+
+    if (session != NULL) {
+        gc_terminal_session_navigate_command(session, 1);
+    }
 }
 
 static void
@@ -1012,6 +1083,10 @@ build_header(GtkApplication *application, GtkWindow *window, TerminalWindowState
     GtkWidget *split_horizontal_button = gtk_button_new_with_label("↔");
     GtkWidget *split_vertical_button = gtk_button_new_with_label("↕");
     GtkWidget *search_button = gtk_button_new_from_icon_name("edit-find-symbolic");
+    GtkWidget *previous_command_button =
+        gtk_button_new_from_icon_name("go-up-symbolic");
+    GtkWidget *next_command_button =
+        gtk_button_new_from_icon_name("go-down-symbolic");
     GtkWidget *copy_button = gtk_button_new_from_icon_name("edit-copy-symbolic");
     GtkWidget *paste_button = gtk_button_new_from_icon_name("edit-paste-symbolic");
     GtkWidget *help_button = gtk_button_new_from_icon_name("help-about-symbolic");
@@ -1022,6 +1097,8 @@ build_header(GtkApplication *application, GtkWindow *window, TerminalWindowState
     const char *close_pane_accels[] = {"<Control><Shift>x", NULL};
     const char *next_pane_accels[] = {"<Alt>Right", NULL};
     const char *previous_pane_accels[] = {"<Alt>Left", NULL};
+    const char *previous_command_accels[] = {"<Alt>Up", NULL};
+    const char *next_command_accels[] = {"<Alt>Down", NULL};
     const char *next_accels[] = {"<Control>Page_Down", NULL};
     const char *previous_accels[] = {"<Control>Page_Up", NULL};
     const char *search_accels[] = {"<Control><Shift>f", NULL};
@@ -1037,6 +1114,8 @@ build_header(GtkApplication *application, GtkWindow *window, TerminalWindowState
         {.name = "close-pane", .activate = close_pane_action},
         {.name = "next-pane", .activate = next_pane_action},
         {.name = "previous-pane", .activate = previous_pane_action},
+        {.name = "previous-command", .activate = previous_command_action},
+        {.name = "next-command", .activate = next_command_action},
         {.name = "next-tab", .activate = next_tab_action},
         {.name = "previous-tab", .activate = previous_tab_action},
         {.name = "search", .activate = search_action},
@@ -1075,6 +1154,14 @@ build_header(GtkApplication *application, GtkWindow *window, TerminalWindowState
     gtk_widget_set_tooltip_text(split_horizontal_button, "Split left/right");
     gtk_widget_set_tooltip_text(split_vertical_button, "Split top/bottom");
     gtk_widget_set_tooltip_text(search_button, "Search active pane");
+    gtk_widget_set_tooltip_text(
+        previous_command_button,
+        "Previous command start"
+    );
+    gtk_widget_set_tooltip_text(
+        next_command_button,
+        "Next command start"
+    );
     gtk_widget_set_tooltip_text(copy_button, "Copy selection");
     gtk_widget_set_tooltip_text(paste_button, "Paste clipboard");
     gtk_widget_set_tooltip_text(help_button, "Replay onboarding");
@@ -1083,6 +1170,8 @@ build_header(GtkApplication *application, GtkWindow *window, TerminalWindowState
         split_horizontal_button,
         split_vertical_button,
         search_button,
+        previous_command_button,
+        next_command_button,
         copy_button,
         paste_button,
         help_button,
@@ -1094,6 +1183,14 @@ build_header(GtkApplication *application, GtkWindow *window, TerminalWindowState
     gtk_actionable_set_action_name(GTK_ACTIONABLE(split_horizontal_button), "win.split-horizontal");
     gtk_actionable_set_action_name(GTK_ACTIONABLE(split_vertical_button), "win.split-vertical");
     gtk_actionable_set_action_name(GTK_ACTIONABLE(search_button), "win.search");
+    gtk_actionable_set_action_name(
+        GTK_ACTIONABLE(previous_command_button),
+        "win.previous-command"
+    );
+    gtk_actionable_set_action_name(
+        GTK_ACTIONABLE(next_command_button),
+        "win.next-command"
+    );
     gtk_actionable_set_action_name(GTK_ACTIONABLE(copy_button), "win.copy");
     gtk_actionable_set_action_name(GTK_ACTIONABLE(paste_button), "win.paste");
     gtk_actionable_set_action_name(GTK_ACTIONABLE(help_button), "win.help");
@@ -1101,6 +1198,8 @@ build_header(GtkApplication *application, GtkWindow *window, TerminalWindowState
     gtk_header_bar_pack_end(GTK_HEADER_BAR(header), help_button);
     gtk_header_bar_pack_end(GTK_HEADER_BAR(header), paste_button);
     gtk_header_bar_pack_end(GTK_HEADER_BAR(header), copy_button);
+    gtk_header_bar_pack_end(GTK_HEADER_BAR(header), next_command_button);
+    gtk_header_bar_pack_end(GTK_HEADER_BAR(header), previous_command_button);
     gtk_header_bar_pack_end(GTK_HEADER_BAR(header), search_button);
     gtk_header_bar_pack_end(GTK_HEADER_BAR(header), split_vertical_button);
     gtk_header_bar_pack_end(GTK_HEADER_BAR(header), split_horizontal_button);
@@ -1119,6 +1218,16 @@ build_header(GtkApplication *application, GtkWindow *window, TerminalWindowState
     gtk_application_set_accels_for_action(application, "win.close-pane", close_pane_accels);
     gtk_application_set_accels_for_action(application, "win.next-pane", next_pane_accels);
     gtk_application_set_accels_for_action(application, "win.previous-pane", previous_pane_accels);
+    gtk_application_set_accels_for_action(
+        application,
+        "win.previous-command",
+        previous_command_accels
+    );
+    gtk_application_set_accels_for_action(
+        application,
+        "win.next-command",
+        next_command_accels
+    );
     gtk_application_set_accels_for_action(application, "win.next-tab", next_accels);
     gtk_application_set_accels_for_action(application, "win.previous-tab", previous_accels);
     gtk_application_set_accels_for_action(application, "win.search", search_accels);

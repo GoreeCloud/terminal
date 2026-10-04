@@ -70,8 +70,10 @@ These entries establish Development source implementation only. They do not esta
 - Term-property reset notifications do not fabricate lifecycle events.
 - VTE's legacy OSC 777 translation is enabled on VTE 0.78+ for compatible existing shell integration.
 - The lifecycle model is a pure GLib module with focused unit tests.
-- The Ubuntu 24.04 / VTE 0.76 compatibility path remains generic; command-boundary navigation is not claimed.
-- Protocol-derived lifecycle status is advisory execution context, not an authorization, privilege, or security-boundary signal.
+- On VTE 0.78+ with compatible shell integration, each protocol-derived pre-execution event records the terminal's absolute cursor row in a bounded 512-entry command-start history.
+- Header up/down glyphs and `Alt+Up` / `Alt+Down` navigate to the previous/next recorded command start; the actions remain disabled until protocol-derived command metadata exists.
+- The Ubuntu 24.04 / VTE 0.76 compatibility path remains generic and does not expose command-start navigation.
+- Protocol-derived lifecycle and command-start metadata are advisory execution context, not authorization, privilege, or security-boundary signals.
 
 ## First-Run Onboarding
 

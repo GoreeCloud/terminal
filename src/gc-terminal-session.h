@@ -61,6 +61,13 @@ gboolean gc_terminal_session_get_last_exit_status(
     GcTerminalSession *session,
     guint64 *exit_status
 );
+gboolean gc_terminal_session_has_command_navigation(
+    GcTerminalSession *session
+);
+gboolean gc_terminal_session_navigate_command(
+    GcTerminalSession *session,
+    gint direction
+);
 
 void gc_terminal_session_copy(GcTerminalSession *session);
 void gc_terminal_session_paste(GcTerminalSession *session);

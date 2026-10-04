@@ -1,5 +1,6 @@
 #include "gc-terminal-session.h"
 
+#include "gc-command-boundaries.h"
 #include "gc-context.h"
 #include "gc-shell-state.h"
 
@@ -17,6 +18,7 @@ struct _GcTerminalSession {
     char *title;
     char *status;
     GcShellState shell_state;
+    GcCommandBoundaries command_boundaries;
     GcTerminalSessionChangedFunc changed;
     GcTerminalSessionPasteRequestedFunc paste_requested;
     GcTerminalSessionOpenRequestedFunc open_requested;
@@ -177,6 +179,18 @@ on_termprop_changed(
             vte_terminal_ref_termprop_variant(terminal, property);
 
         if (value != NULL) {
+            glong column = 0;
+            glong row = 0;
+
+            vte_terminal_get_cursor_position(
+                session->terminal,
+                &column,
+                &row
+            );
+            gc_command_boundaries_mark_start(
+                &session->command_boundaries,
+                (gint64) row
+            );
             gc_shell_state_mark_preexec(&session->shell_state);
             sync_shell_status(session);
         }
@@ -366,6 +380,7 @@ session_free(gpointer data)
         g_source_remove(session->notify_idle_id);
     }
 
+    gc_command_boundaries_clear(&session->command_boundaries);
     g_free(session->working_directory);
     g_free(session->profile_id);
     g_free(session->title);
@@ -426,6 +441,7 @@ gc_terminal_session_new_with_profile(
     session->title = g_strdup("Terminal");
     session->status = g_strdup("Starting shell");
     gc_shell_state_init(&session->shell_state);
+    gc_command_boundaries_init(&session->command_boundaries);
     session->changed = changed;
     session->paste_requested = paste_requested;
     session->open_requested = open_requested;
@@ -682,6 +698,98 @@ gc_terminal_session_get_last_exit_status(
         &session->shell_state,
         exit_status
     );
+}
+
+gboolean
+gc_terminal_session_has_command_navigation(
+    GcTerminalSession *session
+)
+{
+#if VTE_CHECK_VERSION(0, 78, 0)
+    return session != NULL &&
+        gc_shell_state_is_integrated(&session->shell_state) &&
+        gc_command_boundaries_get_count(
+            &session->command_boundaries
+        ) > 0;
+#else
+    (void) session;
+    return FALSE;
+#endif
+}
+
+gboolean
+gc_terminal_session_navigate_command(
+    GcTerminalSession *session,
+    gint direction
+)
+{
+#if VTE_CHECK_VERSION(0, 78, 0)
+    GtkAdjustment *adjustment;
+    gdouble value;
+    gdouble upper;
+    gdouble page_size;
+    gint64 reference_row;
+    gint64 target_row = 0;
+    gboolean found;
+
+    if (session == NULL || direction == 0 ||
+        !gc_terminal_session_has_command_navigation(session)) {
+        return FALSE;
+    }
+
+    adjustment = gtk_scrollable_get_vadjustment(
+        GTK_SCROLLABLE(session->terminal)
+    );
+    if (adjustment == NULL) {
+        return FALSE;
+    }
+
+    gc_command_boundaries_prune_before(
+        &session->command_boundaries,
+        (gint64) gtk_adjustment_get_lower(adjustment)
+    );
+
+    value = gtk_adjustment_get_value(adjustment);
+    upper = gtk_adjustment_get_upper(adjustment);
+    page_size = gtk_adjustment_get_page_size(adjustment);
+    reference_row = (gint64) value;
+
+    if (value + page_size >= upper - 0.5) {
+        glong column = 0;
+        glong row = 0;
+
+        vte_terminal_get_cursor_position(
+            session->terminal,
+            &column,
+            &row
+        );
+        reference_row = (gint64) row + (direction < 0 ? 1 : 0);
+    }
+
+    found = direction < 0
+        ? gc_command_boundaries_previous(
+            &session->command_boundaries,
+            reference_row,
+            &target_row
+        )
+        : gc_command_boundaries_next(
+            &session->command_boundaries,
+            reference_row,
+            &target_row
+        );
+
+    if (!found) {
+        return FALSE;
+    }
+
+    gtk_adjustment_set_value(adjustment, (gdouble) target_row);
+    gc_terminal_session_focus(session);
+    return TRUE;
+#else
+    (void) session;
+    (void) direction;
+    return FALSE;
+#endif
 }
 
 void
