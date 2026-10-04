@@ -24,7 +24,7 @@
 - Bounded protocol-derived command-start navigation on VTE 0.78+ using header glyphs and `Alt+Up` / `Alt+Down`, with no prompt-text inference.
 - Mockup-inspired GoreeCloud Terminal shell with deep-navy chrome, branded titlebar, truthful Local Shell sidebar and local-session indicator, closable tabs, + tab action, compact pane/search controls, and a persistent bottom status bar.
 - Canonical first-party GoreeCloud Terminal SVG identity integrated from `GoreeCloud/branding-assets` for the Linux desktop entry and embedded native header.
-- Local profile selection, per-profile environment overrides, optional bounded startup commands, cursor shape/blink and bold-is-bright appearance controls, configurable bounded scrollback, and bounded versioned workspace restoration with previous-state recovery, version-1 migration, nested split layouts, per-pane working directories, and active-pane selection.
+- Local profile selection, per-profile environment overrides, optional bounded startup commands, additive profile-local keybindings, cursor shape/blink and bold-is-bright appearance controls, configurable bounded scrollback, and bounded versioned workspace restoration with previous-state recovery, version-1 migration, nested split layouts, per-pane working directories, and active-pane selection.
 - Platform Contract 0.4 manifest and repository governance baseline.
 
 No release, deployment, production acceptance, or Stable/Anchor status is implied.
