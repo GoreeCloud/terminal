@@ -3,10 +3,10 @@
 The following remain planned or materially incomplete:
 
 - command-boundary navigation;
-- profiles for shell, working directory, environment, startup command, shortcuts, and appearance;
+- remaining profile options for environment, startup behavior, shortcuts, remote/container purposes, and broader appearance settings;
 - complete shell integration across supported VTE baselines for command boundaries, process context, reliable CWD, and navigation; VTE 0.78+ lifecycle/exit-status awareness is only a bounded Development prerequisite;
-- persistent workspace/session restoration;
-- settings beyond the bounded onboarding state;
+- remaining restore work for split layouts, terminal content, and long-running process continuity;
+- general settings beyond onboarding, local profiles, and bounded tab restore;
 - SSH host profiles, host verification, reconnection, and secure key/credential handling;
 - remote/container and per-environment visual differentiation; local/elevated status is already surfaced in the Development shell;
 - container-shell launch and host/container context;
