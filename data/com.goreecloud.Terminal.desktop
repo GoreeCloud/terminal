@@ -6,5 +6,5 @@ Exec=goreecloud-terminal
 Icon=com.goreecloud.Terminal
 Terminal=false
 Categories=System;TerminalEmulator;
-Keywords=terminal;shell;console;administration;ssh;
+Keywords=terminal;shell;console;administration;
 StartupNotify=true
