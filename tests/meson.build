@@ -84,6 +84,7 @@ command_boundaries_test = executable(
   [
     'test-command-boundaries.c',
     '../src/gc-command-boundaries.c',
+    '../src/gc-command-notification.c',
   ],
   include_directories: include_directories('../src'),
   dependencies: [glib_dep],
