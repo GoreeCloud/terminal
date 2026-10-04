@@ -40,10 +40,23 @@ GtkWidget *gc_workspace_get_widget(GcWorkspace *workspace);
 GcTerminalSession *gc_workspace_get_current_session(GcWorkspace *workspace);
 guint gc_workspace_get_count(GcWorkspace *workspace);
 guint gc_workspace_get_current_pane_count(GcWorkspace *workspace);
+guint gc_workspace_get_current_index(GcWorkspace *workspace);
+const char *gc_workspace_get_current_profile_id(GcWorkspace *workspace);
+const char *gc_workspace_get_tab_profile_id(GcWorkspace *workspace, guint index);
+char *gc_workspace_dup_tab_working_directory(
+    GcWorkspace *workspace,
+    guint index
+);
 
 void gc_workspace_add_tab(GcWorkspace *workspace, const char *working_directory);
+void gc_workspace_add_tab_with_profile(
+    GcWorkspace *workspace,
+    const GcProfile *profile,
+    const char *working_directory
+);
 gboolean gc_workspace_close_current(GcWorkspace *workspace);
 void gc_workspace_select_relative(GcWorkspace *workspace, gint delta);
+void gc_workspace_select_index(GcWorkspace *workspace, guint index);
 char *gc_workspace_dup_current_working_directory(GcWorkspace *workspace);
 
 gboolean gc_workspace_split_current(
