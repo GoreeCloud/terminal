@@ -10,6 +10,8 @@ Clipboard paste through GoreeCloud Terminal's clipboard action and VTE's paste-c
 
 Search patterns remain local to the active terminal process and are not transmitted externally.
 
+Command-start navigation records only terminal cursor rows associated with VTE 0.78+ protocol-derived pre-execution events. It does not parse prompt text or arbitrary terminal output to infer command boundaries. The bounded command-row history is process-local and is not persisted. Shell lifecycle and command-start metadata remain advisory execution context and must not be treated as authorization, identity, privilege, or command-safety evidence.
+
 Ctrl+click link/path interaction uses an allowlist of HTTP, HTTPS, mailto, and local file URI schemes. Local paths must exist before launch, remote file URI hosts are rejected, and detected terminal text is never executed as a shell command. OSC 8 hyperlink targets are treated as untrusted input and pass through the same validation boundary before the desktop handler is invoked.
 
 The onboarding state remains separate from the new local profile and top-level tab-restore files. Profile data and restore metadata are local configuration/state only and must not be treated as authorization signals. Profile environment overrides are user-controlled process input and can materially change local shell behavior; they are syntax-validated but are not treated as trusted security policy. Per-profile scrollback is resource-bounded to at most 1,000,000 lines. Workspace state saves preserve one previous valid snapshot using user-only file permissions and recover from that snapshot only through the same versioned parser and validation path.
