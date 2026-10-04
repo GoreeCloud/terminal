@@ -65,7 +65,7 @@ static const char *development_css =
     ".sidebar-detail { color: #7f9dc5; font-size: 0.86em; }"
     ".sidebar-action { color: #abc2df; background: transparent; border: 1px solid transparent; border-radius: 7px; padding: 7px 9px; }"
     ".sidebar-action:hover { color: #f2f7ff; background: #0a2037; border-color: #174b78; }"
-    ".sidebar-footer { color: #6f8eb7; font-size: 0.84em; margin: 8px 6px 2px 6px; }"
+    ".sidebar-footer { color: #6f8eb7; font-size: 0.84em; margin: 8px 6px 2px 6px; }"\n    ".profile-row { margin: 0 2px 4px 2px; }"\n    ".profile-dropdown { background: #081a2d; border: 1px solid #174b78; border-radius: 7px; }"\n    ".profile-status { color: #6f8eb7; font-size: 0.80em; margin: 0 6px 4px 6px; }"\n    ".profile-reload { min-width: 30px; min-height: 30px; padding: 2px; color: #9eb7d6; background: transparent; border: 1px solid #174b78; border-radius: 7px; }"
     ".gc-workspace { background: #050d18; }"
     ".gc-workspace > header { background: #06111f; border-bottom: 1px solid #0d3c63; padding: 0 8px; }"
     ".gc-workspace > header tabs tab { color: #8faaca; background: transparent; border-right: 1px solid #102f4e; padding: 8px 12px; min-width: 120px; }"
@@ -1162,7 +1162,7 @@ build_context_bar(TerminalWindowState *state)
 }
 
 static GtkWidget *
-build_sidebar(void)
+build_sidebar(TerminalWindowState *state)
 {
     GtkWidget *sidebar = gtk_box_new(GTK_ORIENTATION_VERTICAL, 8);
     GtkWidget *workspace_heading = gtk_label_new("WORKSPACE");
@@ -1172,6 +1172,11 @@ build_sidebar(void)
     GtkWidget *local_title = gtk_label_new("Local Shell");
     g_autofree char *identity = gc_context_identity();
     GtkWidget *local_detail = gtk_label_new(identity);
+    GtkWidget *profile_heading = gtk_label_new("PROFILE");
+    GtkWidget *profile_row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
+    GtkWidget *profile_dropdown = gtk_drop_down_new(NULL, NULL);
+    GtkWidget *profile_reload = gtk_button_new_from_icon_name("view-refresh-symbolic");
+    GtkWidget *profile_status = gtk_label_new("");
     GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
     GtkWidget *actions_heading = gtk_label_new("QUICK ACTIONS");
     GtkWidget *new_tab = gtk_button_new_with_label("＋  New tab");
@@ -1193,6 +1198,11 @@ build_sidebar(void)
     gtk_widget_add_css_class(local_dot, "sidebar-dot");
     gtk_widget_add_css_class(local_title, "sidebar-title");
     gtk_widget_add_css_class(local_detail, "sidebar-detail");
+    gtk_widget_add_css_class(profile_heading, "sidebar-heading");
+    gtk_widget_add_css_class(profile_row, "profile-row");
+    gtk_widget_add_css_class(profile_dropdown, "profile-dropdown");
+    gtk_widget_add_css_class(profile_reload, "profile-reload");
+    gtk_widget_add_css_class(profile_status, "profile-status");
     gtk_widget_add_css_class(actions_heading, "sidebar-heading");
     gtk_widget_add_css_class(footer, "sidebar-footer");
 
@@ -1200,6 +1210,9 @@ build_sidebar(void)
     gtk_label_set_xalign(GTK_LABEL(local_title), 0.0f);
     gtk_label_set_xalign(GTK_LABEL(local_detail), 0.0f);
     gtk_label_set_ellipsize(GTK_LABEL(local_detail), PANGO_ELLIPSIZE_END);
+    gtk_label_set_xalign(GTK_LABEL(profile_heading), 0.0f);
+    gtk_label_set_xalign(GTK_LABEL(profile_status), 0.0f);
+    gtk_label_set_wrap(GTK_LABEL(profile_status), TRUE);
     gtk_label_set_xalign(GTK_LABEL(actions_heading), 0.0f);
     gtk_label_set_xalign(GTK_LABEL(footer), 0.0f);
 
@@ -1207,6 +1220,28 @@ build_sidebar(void)
     gtk_box_append(GTK_BOX(local_row), local_title);
     gtk_box_append(GTK_BOX(local_card), local_row);
     gtk_box_append(GTK_BOX(local_card), local_detail);
+
+    state->profile_dropdown = GTK_DROP_DOWN(profile_dropdown);
+    state->profile_status = GTK_LABEL(profile_status);
+    gtk_widget_set_hexpand(profile_dropdown, TRUE);
+    gtk_drop_down_set_enable_search(state->profile_dropdown, TRUE);
+    gtk_widget_set_tooltip_text(
+        profile_dropdown,
+        "Profile used when opening a new local tab"
+    );
+    gtk_widget_set_tooltip_text(
+        profile_reload,
+        "Reload portable local profiles from profiles.ini"
+    );
+    g_signal_connect(
+        profile_reload,
+        "clicked",
+        G_CALLBACK(on_reload_profiles_clicked),
+        state
+    );
+    gtk_box_append(GTK_BOX(profile_row), profile_dropdown);
+    gtk_box_append(GTK_BOX(profile_row), profile_reload);
+    refresh_profile_dropdown(state, "default");
 
     for (guint i = 0; i < G_N_ELEMENTS(actions); i++) {
         gtk_widget_add_css_class(actions[i], "sidebar-action");
@@ -1223,6 +1258,9 @@ build_sidebar(void)
 
     gtk_box_append(GTK_BOX(sidebar), workspace_heading);
     gtk_box_append(GTK_BOX(sidebar), local_card);
+    gtk_box_append(GTK_BOX(sidebar), profile_heading);
+    gtk_box_append(GTK_BOX(sidebar), profile_row);
+    gtk_box_append(GTK_BOX(sidebar), profile_status);
     gtk_box_append(GTK_BOX(sidebar), separator);
     gtk_box_append(GTK_BOX(sidebar), actions_heading);
     gtk_box_append(GTK_BOX(sidebar), new_tab);
@@ -1346,7 +1384,7 @@ gc_terminal_window_new(GtkApplication *application)
     gtk_box_append(GTK_BOX(main_area), build_search_bar(state));
     gtk_box_append(GTK_BOX(main_area), gc_workspace_get_widget(state->workspace));
 
-    gtk_box_append(GTK_BOX(content), build_sidebar());
+    gtk_box_append(GTK_BOX(content), build_sidebar(state));
     gtk_box_append(GTK_BOX(content), main_area);
     gtk_widget_set_hexpand(content, TRUE);
     gtk_widget_set_vexpand(content, TRUE);
