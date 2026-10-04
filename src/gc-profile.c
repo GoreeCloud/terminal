@@ -3,6 +3,9 @@
 #include <gio/gio.h>
 #include <string.h>
 
+#define GC_PROFILE_DEFAULT_SCROLLBACK_LINES 10000
+#define GC_PROFILE_MAX_SCROLLBACK_LINES 1000000
+
 struct _GcProfile {
     char *id;
     char *name;
@@ -11,6 +14,7 @@ struct _GcProfile {
     char *font;
     char *foreground;
     char *background;
+    gint64 scrollback_lines;
     char **environment;
 };
 
@@ -34,6 +38,7 @@ profile_new_default(void)
     profile->font = g_strdup("Monospace 11");
     profile->foreground = g_strdup("#dceaff");
     profile->background = g_strdup("#050d18");
+    profile->scrollback_lines = GC_PROFILE_DEFAULT_SCROLLBACK_LINES;
 
     return profile;
 }
@@ -191,6 +196,34 @@ load_profile_group(
     profile->font = optional_key_string(key_file, group, "font");
     profile->foreground = optional_key_string(key_file, group, "foreground");
     profile->background = optional_key_string(key_file, group, "background");
+    profile->scrollback_lines = GC_PROFILE_DEFAULT_SCROLLBACK_LINES;
+
+    if (g_key_file_has_key(key_file, group, "scrollback-lines", NULL)) {
+        GError *scrollback_error = NULL;
+
+        profile->scrollback_lines = g_key_file_get_int64(
+            key_file,
+            group,
+            "scrollback-lines",
+            &scrollback_error
+        );
+        if (scrollback_error != NULL ||
+            profile->scrollback_lines < 0 ||
+            profile->scrollback_lines > GC_PROFILE_MAX_SCROLLBACK_LINES) {
+            g_clear_error(&scrollback_error);
+            g_set_error(
+                error,
+                profile_error_quark(),
+                7,
+                "Profile %s scrollback-lines must be between 0 and %d",
+                id,
+                GC_PROFILE_MAX_SCROLLBACK_LINES
+            );
+            gc_profile_free(profile);
+            return FALSE;
+        }
+    }
+
     profile->environment = g_key_file_get_string_list(
         key_file,
         group,
@@ -405,6 +438,7 @@ gc_profile_copy(const GcProfile *profile)
     copy->font = g_strdup(profile->font);
     copy->foreground = g_strdup(profile->foreground);
     copy->background = g_strdup(profile->background);
+    copy->scrollback_lines = profile->scrollback_lines;
     copy->environment = g_strdupv(profile->environment);
     return copy;
 }
@@ -473,6 +507,14 @@ gc_profile_get_background(const GcProfile *profile)
     return profile != NULL && profile->background != NULL
         ? profile->background
         : "#050d18";
+}
+
+gint64
+gc_profile_get_scrollback_lines(const GcProfile *profile)
+{
+    return profile != NULL
+        ? profile->scrollback_lines
+        : GC_PROFILE_DEFAULT_SCROLLBACK_LINES;
 }
 
 char **
