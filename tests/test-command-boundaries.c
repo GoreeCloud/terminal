@@ -54,6 +54,28 @@ test_prune_and_deduplicate(void)
 }
 
 static void
+test_negative_absolute_rows(void)
+{
+    GcCommandBoundaries boundaries;
+    gint64 target = 0;
+
+    gc_command_boundaries_init(&boundaries);
+    gc_command_boundaries_mark_start(&boundaries, -12);
+    gc_command_boundaries_mark_start(&boundaries, -3);
+    gc_command_boundaries_mark_start(&boundaries, 4);
+
+    g_assert_cmpuint(gc_command_boundaries_get_count(&boundaries), ==, 3);
+    g_assert_true(gc_command_boundaries_previous(&boundaries, 0, &target));
+    g_assert_cmpint(target, ==, -3);
+
+    gc_command_boundaries_prune_before(&boundaries, -5);
+    g_assert_cmpuint(gc_command_boundaries_get_count(&boundaries), ==, 2);
+    g_assert_false(gc_command_boundaries_previous(&boundaries, -3, &target));
+
+    gc_command_boundaries_clear(&boundaries);
+}
+
+static void
 test_history_is_bounded(void)
 {
     GcCommandBoundaries boundaries;
@@ -91,6 +113,10 @@ main(int argc, char **argv)
     g_test_add_func(
         "/command-boundaries/prune-deduplicate",
         test_prune_and_deduplicate
+    );
+    g_test_add_func(
+        "/command-boundaries/negative-absolute-rows",
+        test_negative_absolute_rows
     );
     g_test_add_func(
         "/command-boundaries/bounded-history",
