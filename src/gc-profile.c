@@ -16,6 +16,9 @@ struct _GcProfile {
     char *font;
     char *foreground;
     char *background;
+    GcProfileCursorShape cursor_shape;
+    GcProfileCursorBlink cursor_blink;
+    gboolean bold_is_bright;
     gint64 scrollback_lines;
     char **environment;
 };
@@ -40,6 +43,9 @@ profile_new_default(void)
     profile->font = g_strdup("Monospace 11");
     profile->foreground = g_strdup("#dceaff");
     profile->background = g_strdup("#050d18");
+    profile->cursor_shape = GC_PROFILE_CURSOR_SHAPE_BLOCK;
+    profile->cursor_blink = GC_PROFILE_CURSOR_BLINK_SYSTEM;
+    profile->bold_is_bright = TRUE;
     profile->scrollback_lines = GC_PROFILE_DEFAULT_SCROLLBACK_LINES;
 
     return profile;
@@ -88,6 +94,48 @@ environment_entry_is_valid(const char *entry)
     }
 
     return TRUE;
+}
+
+static gboolean
+parse_cursor_shape(
+    const char *value,
+    GcProfileCursorShape *shape
+)
+{
+    if (value == NULL || g_strcmp0(value, "block") == 0) {
+        *shape = GC_PROFILE_CURSOR_SHAPE_BLOCK;
+        return TRUE;
+    }
+    if (g_strcmp0(value, "ibeam") == 0) {
+        *shape = GC_PROFILE_CURSOR_SHAPE_IBEAM;
+        return TRUE;
+    }
+    if (g_strcmp0(value, "underline") == 0) {
+        *shape = GC_PROFILE_CURSOR_SHAPE_UNDERLINE;
+        return TRUE;
+    }
+    return FALSE;
+}
+
+static gboolean
+parse_cursor_blink(
+    const char *value,
+    GcProfileCursorBlink *blink
+)
+{
+    if (value == NULL || g_strcmp0(value, "system") == 0) {
+        *blink = GC_PROFILE_CURSOR_BLINK_SYSTEM;
+        return TRUE;
+    }
+    if (g_strcmp0(value, "on") == 0) {
+        *blink = GC_PROFILE_CURSOR_BLINK_ON;
+        return TRUE;
+    }
+    if (g_strcmp0(value, "off") == 0) {
+        *blink = GC_PROFILE_CURSOR_BLINK_OFF;
+        return TRUE;
+    }
+    return FALSE;
 }
 
 static gboolean
@@ -203,7 +251,70 @@ load_profile_group(
     profile->font = optional_key_string(key_file, group, "font");
     profile->foreground = optional_key_string(key_file, group, "foreground");
     profile->background = optional_key_string(key_file, group, "background");
+    profile->cursor_shape = GC_PROFILE_CURSOR_SHAPE_BLOCK;
+    profile->cursor_blink = GC_PROFILE_CURSOR_BLINK_SYSTEM;
+    profile->bold_is_bright = TRUE;
     profile->scrollback_lines = GC_PROFILE_DEFAULT_SCROLLBACK_LINES;
+
+    {
+        g_autofree char *cursor_shape = optional_key_string(
+            key_file,
+            group,
+            "cursor-shape"
+        );
+        g_autofree char *cursor_blink = optional_key_string(
+            key_file,
+            group,
+            "cursor-blink"
+        );
+
+        if (!parse_cursor_shape(cursor_shape, &profile->cursor_shape)) {
+            g_set_error(
+                error,
+                profile_error_quark(),
+                9,
+                "Profile %s cursor-shape must be block, ibeam, or underline",
+                id
+            );
+            gc_profile_free(profile);
+            return FALSE;
+        }
+
+        if (!parse_cursor_blink(cursor_blink, &profile->cursor_blink)) {
+            g_set_error(
+                error,
+                profile_error_quark(),
+                10,
+                "Profile %s cursor-blink must be system, on, or off",
+                id
+            );
+            gc_profile_free(profile);
+            return FALSE;
+        }
+    }
+
+    if (g_key_file_has_key(key_file, group, "bold-is-bright", NULL)) {
+        GError *boolean_error = NULL;
+
+        profile->bold_is_bright = g_key_file_get_boolean(
+            key_file,
+            group,
+            "bold-is-bright",
+            &boolean_error
+        );
+        if (boolean_error != NULL) {
+            g_clear_error(&boolean_error);
+            g_set_error(
+                error,
+                profile_error_quark(),
+                11,
+                "Profile %s bold-is-bright must be true or false",
+                id
+            );
+            gc_profile_free(profile);
+            return FALSE;
+        }
+    }
 
     if (g_key_file_has_key(key_file, group, "scrollback-lines", NULL)) {
         GError *scrollback_error = NULL;
@@ -461,6 +572,9 @@ gc_profile_copy(const GcProfile *profile)
     copy->font = g_strdup(profile->font);
     copy->foreground = g_strdup(profile->foreground);
     copy->background = g_strdup(profile->background);
+    copy->cursor_shape = profile->cursor_shape;
+    copy->cursor_blink = profile->cursor_blink;
+    copy->bold_is_bright = profile->bold_is_bright;
     copy->scrollback_lines = profile->scrollback_lines;
     copy->environment = g_strdupv(profile->environment);
     return copy;
@@ -537,6 +651,28 @@ gc_profile_get_background(const GcProfile *profile)
     return profile != NULL && profile->background != NULL
         ? profile->background
         : "#050d18";
+}
+
+GcProfileCursorShape
+gc_profile_get_cursor_shape(const GcProfile *profile)
+{
+    return profile != NULL
+        ? profile->cursor_shape
+        : GC_PROFILE_CURSOR_SHAPE_BLOCK;
+}
+
+GcProfileCursorBlink
+gc_profile_get_cursor_blink(const GcProfile *profile)
+{
+    return profile != NULL
+        ? profile->cursor_blink
+        : GC_PROFILE_CURSOR_BLINK_SYSTEM;
+}
+
+gboolean
+gc_profile_get_bold_is_bright(const GcProfile *profile)
+{
+    return profile != NULL ? profile->bold_is_bright : TRUE;
 }
 
 gint64
