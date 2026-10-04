@@ -252,17 +252,6 @@ gc_session_store_load(
 
     if (g_file_test(backup_path, G_FILE_TEST_EXISTS) &&
         session_store_load_file(backup_path, state, &backup_error)) {
-        if (primary_error != NULL) {
-            g_warning(
-                "Recovered terminal workspace from backup after primary state failed: %s",
-                primary_error->message
-            );
-        } else {
-            g_warning(
-                "Recovered terminal workspace from backup because primary state was missing"
-            );
-        }
-
         g_clear_error(&primary_error);
         return TRUE;
     }
