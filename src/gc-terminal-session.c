@@ -179,6 +179,18 @@ on_termprop_changed(
             vte_terminal_ref_termprop_variant(terminal, property);
 
         if (value != NULL) {
+            glong column = 0;
+            glong row = 0;
+
+            vte_terminal_get_cursor_position(
+                session->terminal,
+                &column,
+                &row
+            );
+            gc_command_boundaries_mark_start(
+                &session->command_boundaries,
+                (gint64) row
+            );
             gc_shell_state_mark_preexec(&session->shell_state);
             sync_shell_status(session);
         }
