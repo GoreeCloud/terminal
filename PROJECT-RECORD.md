@@ -1101,3 +1101,104 @@ The feature adds no remote transport, telemetry, analytics, credential store, cl
 ### Remaining Product Boundary
 
 Profile-specific keybindings, remote/container profile purpose, broader appearance controls, SSH, containers, terminal-content/process-continuity restoration, complete cross-baseline shell integration, representative graphical/runtime acceptance, complete Glaze consumer acceptance, production packaging, release qualification, deployment, production acceptance, and Stable/Anchor status remain separate obligations.
+
+
+## 2026-10-04 — Profile Cursor Appearance Controls Integrated
+
+### Event
+
+Pull request #33 extended portable local profiles with bounded cursor appearance controls while preserving the existing profile defaults.
+
+### Exact Source Evidence
+
+- authoritative base: `17bb4fc4d65df3f326ec25f006ed76555b21fbe2`;
+- exact accepted candidate: `6f36dfaf12308b8b7b787f86f66c6e413820cbd6`;
+- pull request: #33, **Add profile cursor appearance controls**;
+- merge method: squash; and
+- authoritative merged commit: `63711b6870e975336c95750734fee136a24ff8f2`.
+
+### Validation Evidence
+
+The exact accepted candidate passed:
+
+- Native Foundation run `37240053403` — push — success on Ubuntu 24.04 and Debian 13; and
+- Native Foundation run `37240322094` — pull request — success on Ubuntu 24.04 and Debian 13.
+
+After merge, authoritative `main` commit `63711b6870e975336c95750734fee136a24ff8f2` passed:
+
+- Native Foundation run `37240453665` — push on `main` — success on Ubuntu 24.04 and Debian 13.
+
+### Implemented Development Boundary
+
+Profiles now support validated cursor shape (`block`, `ibeam`, or `underline`), cursor blink mode (`system`, `on`, or `off`), and boolean `bold-is-bright`. Defaults preserve the previous block/system/bright behavior. Invalid values reject the new profile file without replacing the already loaded profile set. Split panes inherit the owning tab profile and therefore the same appearance settings.
+
+This source integration does not establish representative rendered, high-contrast, large-text, screen-reader, or complete Glaze acceptance.
+
+## 2026-10-04 — Canonical GoreeCloud Terminal Branding Integrated
+
+### Event
+
+The canonical branding registry was corrected first, then pull request #34 replaced the temporary generic Terminal identity with the approved first-party GoreeCloud Terminal SVG.
+
+### Canonical Branding Evidence
+
+- branding authority: `GoreeCloud/branding-assets`;
+- canonical asset: `products/terminal/app-icon.svg`;
+- canonical asset blob: `fd28f49fc0dd67e2f3e31480942d555914e8fc5b`;
+- branding-assets PR #32 corrected the Terminal consumer mapping to `GoreeCloud/terminal`;
+- branding-assets merge: `8baba9c3b2761b5c4ff10a4f8ca4b46ebe9894c9`;
+- branding catalog pull-request run `37239991517` passed; and
+- branding catalog post-merge run `37240082761` passed.
+
+### Terminal Source Evidence
+
+- authoritative base: `63711b6870e975336c95750734fee136a24ff8f2`;
+- exact accepted candidate: `ac159af4375af4594aaefd83f457e5bf004b3ea8`;
+- pull request: #34, **Integrate canonical GoreeCloud Terminal branding**;
+- merge method: squash; and
+- authoritative merged commit: `e3550d88d097061c52cbeecef3dee8cb470ff568`.
+
+The exact Terminal candidate passed Native Foundation push run `37240573132` and pull-request run `37240800642`. Authoritative merged `main` then passed run `37240894712`, all on Ubuntu 24.04 and Debian 13.
+
+### Implemented Development Boundary
+
+The consumer SVG is byte-identical to the canonical branding blob, installs as `com.goreecloud.Terminal` under the scalable hicolor app-icon path, and is embedded as a GLib resource for the native header. The desktop entry now references the first-party icon and no longer advertises an unimplemented SSH search keyword.
+
+Branding remains presentation identity only. It does not establish remote capability, security acceptance, complete Glaze conformance, release qualification, production readiness, or Stable/Anchor status.
+
+## 2026-10-04 — Additive Profile-Local Keybindings Integrated
+
+### Event
+
+Pull request #35 added bounded per-profile additional keybindings for the existing Terminal window actions.
+
+### Exact Source Evidence
+
+- authoritative base: `e3550d88d097061c52cbeecef3dee8cb470ff568`;
+- exact accepted candidate: `c8d5031117f1f00955942a20614aea76a4c053b9`;
+- pull request: #35, **Add profile-local keybindings**;
+- merge method: squash; and
+- authoritative merged commit: `9de47e564d71fa2b47c6702015a6a5ebb88da266`.
+
+### Validation Evidence
+
+The exact accepted candidate passed:
+
+- Native Foundation run `37240995711` — push — success on Ubuntu 24.04 and Debian 13; and
+- Native Foundation run `37241093667` — pull request — success on Ubuntu 24.04 and Debian 13.
+
+After merge, authoritative `main` commit `9de47e564d71fa2b47c6702015a6a5ebb88da266` passed:
+
+- Native Foundation run `37241189178` — push on `main` — success on Ubuntu 24.04 and Debian 13.
+
+### Implemented Development Boundary
+
+Profiles may define up to 32 additional `action=accelerator` entries, with each entry bounded to 192 bytes. Action names are allowlisted to the existing Terminal window-action set and accelerators are validated through GTK before the new profile store replaces the currently loaded store. Each terminal session installs its profile shortcuts with local shortcut scope, so the additional bindings apply while that terminal has focus.
+
+These keybindings are additive. Built-in application shortcuts remain available. Profile shortcuts invoke existing window actions and do not provide an arbitrary shell-command execution path.
+
+### Remaining Product Boundary
+
+Remote/container profile purposes, richer shortcut replacement/disable semantics, additional appearance options, complete cross-baseline shell integration, terminal/process-continuity restoration, representative accessibility/Glaze acceptance, production packaging, release qualification, deployment, production acceptance, and Stable/Anchor status remain separate obligations.
+
+Repository protection also remains unresolved: live `main` remains unprotected and repository rulesets remain empty.
