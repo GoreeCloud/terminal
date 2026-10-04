@@ -23,6 +23,12 @@ These entries establish Development source implementation only. They do not esta
 - Keyboard tab/pane creation, closing, and focus cycling.
 - Pane layout remains ephemeral Development state.
 
+## Local Profiles and Tab Restore
+
+- Local launch profiles can be selected and reloaded from the sidebar.
+- Top-level tabs restore their profile, working directory, and selected-tab position after restart.
+- Split layout and terminal output remain outside this restore slice.
+
 ## Scrollback Search
 
 - `Ctrl+Shift+F` opens an active-pane search bar.

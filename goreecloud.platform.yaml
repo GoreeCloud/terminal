@@ -36,7 +36,7 @@ platform_systems:
     result: applicable-blocked
     version: null
     evidence: [PLANNED-FEATURES.md]
-    notes: Persistent sessions, backup, restore, and accepted recovery evidence are not established.
+    notes: Bounded local top-level tab metadata restore exists, but persistent sessions, accepted backup/restore integration, and recovery acceptance are not established.
   glaze_ui:
     result: applicable-blocked
     version: "1.6.0"
@@ -124,6 +124,8 @@ compatibility:
     - goreecloud-terminal-guarded-primary-paste-dev-v1
     - goreecloud-terminal-url-path-interaction-dev-v1
     - goreecloud-terminal-onboarding-state-dev-v1
+    - goreecloud-terminal-local-profiles-dev-v1
+    - goreecloud-terminal-top-level-tab-restore-dev-v1
 
 evidence:
   acceptance_tests: []
@@ -143,5 +145,5 @@ conformance:
   blockers:
     - Glaze UI 1.6.0 consumer acceptance is incomplete.
     - Privacy Shield, Wardveil, Everkeep, Manager, Mesh, Identity, Policy, and Observability integration/acceptance are not established.
-    - Command-boundary navigation, remote administration, profiles, workspace/session persistence, containers, automation, protocol validation, performance validation, and representative Linux runtime acceptance remain incomplete.
+    - Command-boundary navigation, remote administration, advanced profile options, broader workspace/session persistence, containers, automation, protocol validation, performance validation, and representative Linux runtime acceptance remain incomplete.
     - Production packaging, signed releases, rollback evidence, release approval, and lifecycle promotion remain incomplete.
