@@ -87,8 +87,14 @@ ensure_parent_directory(const char *path, GError **error)
     return TRUE;
 }
 
-gboolean
-gc_session_store_load(
+static char *
+session_store_backup_path(const char *path)
+{
+    return g_strdup_printf("%s.bak", path);
+}
+
+static gboolean
+session_store_load_file(
     const char *path,
     GcSessionStore *state,
     GError **error
@@ -102,13 +108,6 @@ gc_session_store_load(
     gint current_tab;
 
     gc_session_store_init(&loaded);
-
-    if (path == NULL || !g_file_test(path, G_FILE_TEST_EXISTS)) {
-        gc_session_store_clear(state);
-        *state = loaded;
-        g_key_file_unref(key_file);
-        return TRUE;
-    }
 
     if (!g_key_file_load_from_file(
             key_file,
@@ -224,6 +223,63 @@ gc_session_store_load(
     gc_session_store_clear(state);
     *state = loaded;
     g_key_file_unref(key_file);
+    return TRUE;
+}
+
+gboolean
+gc_session_store_load(
+    const char *path,
+    GcSessionStore *state,
+    GError **error
+)
+{
+    g_autofree char *backup_path = NULL;
+    GError *primary_error = NULL;
+    GError *backup_error = NULL;
+
+    if (path == NULL) {
+        gc_session_store_clear(state);
+        gc_session_store_init(state);
+        return TRUE;
+    }
+
+    backup_path = session_store_backup_path(path);
+
+    if (g_file_test(path, G_FILE_TEST_EXISTS) &&
+        session_store_load_file(path, state, &primary_error)) {
+        return TRUE;
+    }
+
+    if (g_file_test(backup_path, G_FILE_TEST_EXISTS) &&
+        session_store_load_file(backup_path, state, &backup_error)) {
+        if (primary_error != NULL) {
+            g_warning(
+                "Recovered terminal workspace from backup after primary state failed: %s",
+                primary_error->message
+            );
+        } else {
+            g_warning(
+                "Recovered terminal workspace from backup because primary state was missing"
+            );
+        }
+
+        g_clear_error(&primary_error);
+        return TRUE;
+    }
+
+    if (primary_error != NULL) {
+        g_propagate_error(error, primary_error);
+        g_clear_error(&backup_error);
+        return FALSE;
+    }
+
+    if (backup_error != NULL) {
+        g_propagate_error(error, backup_error);
+        return FALSE;
+    }
+
+    gc_session_store_clear(state);
+    gc_session_store_init(state);
     return TRUE;
 }
 
