@@ -1,0 +1,116 @@
+#include "gc-profile.h"
+
+#include <glib/gstdio.h>
+
+static void
+test_default_profile(void)
+{
+    GcProfileStore *store = gc_profile_store_new();
+    const GcProfile *profile = gc_profile_store_get_default(store);
+
+    g_assert_nonnull(profile);
+    g_assert_cmpstr(gc_profile_get_id(profile), ==, "default");
+    g_assert_cmpstr(gc_profile_get_name(profile), ==, "Default");
+    g_assert_cmpuint(gc_profile_store_get_count(store), ==, 1);
+
+    gc_profile_store_free(store);
+}
+
+static void
+test_load_profiles(void)
+{
+    GError *error = NULL;
+    g_autofree char *directory = g_dir_make_tmp(
+        "goreecloud-terminal-profiles-XXXXXX",
+        &error
+    );
+    g_autofree char *path = NULL;
+    GcProfileStore *store;
+    const GcProfile *profile;
+    g_autofree char *cwd = NULL;
+    const char *data =
+        "[profile work]\n"
+        "name=Work shell\n"
+        "shell=/bin/sh\n"
+        "working-directory=~\n"
+        "font=Monospace 12\n"
+        "foreground=#ffffff\n"
+        "background=#101820\n";
+
+    g_assert_no_error(error);
+    path = g_build_filename(directory, "profiles.ini", NULL);
+    g_assert_true(g_file_set_contents(path, data, -1, &error));
+    g_assert_no_error(error);
+
+    store = gc_profile_store_new();
+    g_assert_true(gc_profile_store_load(store, path, &error));
+    g_assert_no_error(error);
+    g_assert_cmpuint(gc_profile_store_get_count(store), ==, 2);
+
+    profile = gc_profile_store_lookup(store, "work");
+    g_assert_nonnull(profile);
+    g_assert_cmpstr(gc_profile_get_name(profile), ==, "Work shell");
+    g_assert_cmpstr(gc_profile_get_shell(profile), ==, "/bin/sh");
+    g_assert_cmpstr(gc_profile_get_font(profile), ==, "Monospace 12");
+    cwd = gc_profile_dup_effective_working_directory(profile, "/");
+    g_assert_cmpstr(cwd, ==, g_get_home_dir());
+
+    gc_profile_store_free(store);
+    g_remove(path);
+    g_rmdir(directory);
+}
+
+static void
+test_invalid_profile_does_not_replace_store(void)
+{
+    GError *error = NULL;
+    g_autofree char *directory = g_dir_make_tmp(
+        "goreecloud-terminal-profiles-invalid-XXXXXX",
+        &error
+    );
+    g_autofree char *path = NULL;
+    GcProfileStore *store;
+    const char *valid_data =
+        "[profile work]\n"
+        "name=Work\n"
+        "shell=/bin/sh\n";
+    const char *invalid_data =
+        "[profile bad]\n"
+        "shell=relative-shell\n";
+
+    g_assert_no_error(error);
+    path = g_build_filename(directory, "profiles.ini", NULL);
+
+    store = gc_profile_store_new();
+    g_assert_true(g_file_set_contents(path, valid_data, -1, &error));
+    g_assert_no_error(error);
+    g_assert_true(gc_profile_store_load(store, path, &error));
+    g_assert_no_error(error);
+    g_assert_nonnull(gc_profile_store_lookup(store, "work"));
+
+    g_assert_true(g_file_set_contents(path, invalid_data, -1, &error));
+    g_assert_no_error(error);
+    g_assert_false(gc_profile_store_load(store, path, &error));
+    g_assert_error(error, g_quark_from_static_string("goreecloud-terminal-profile-error"), 3);
+    g_clear_error(&error);
+
+    g_assert_nonnull(gc_profile_store_lookup(store, "work"));
+    g_assert_null(gc_profile_store_lookup(store, "bad"));
+
+    gc_profile_store_free(store);
+    g_remove(path);
+    g_rmdir(directory);
+}
+
+int
+main(int argc, char **argv)
+{
+    g_test_init(&argc, &argv, NULL);
+    g_test_add_func("/profiles/default", test_default_profile);
+    g_test_add_func("/profiles/load", test_load_profiles);
+    g_test_add_func(
+        "/profiles/invalid-preserves-store",
+        test_invalid_profile_does_not_replace_store
+    );
+    return g_test_run();
+}
