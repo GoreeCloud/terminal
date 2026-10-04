@@ -1128,7 +1128,9 @@ build_header(GtkApplication *application, GtkWindow *window, TerminalWindowState
 {
     GtkWidget *header = gtk_header_bar_new();
     GtkWidget *brand_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 7);
-    GtkWidget *brand_icon = gtk_image_new_from_icon_name("utilities-terminal-symbolic");
+    GtkWidget *brand_icon = gtk_image_new_from_resource(
+        "/com/goreecloud/Terminal/app-icon.svg"
+    );
     GtkWidget *brand_name = gtk_label_new("GoreeCloud");
     GtkWidget *product_name = gtk_label_new("Terminal");
     GtkWidget *center_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
@@ -1187,6 +1189,7 @@ build_header(GtkApplication *application, GtkWindow *window, TerminalWindowState
     gtk_widget_add_css_class(header, "gc-header");
     gtk_widget_add_css_class(brand_box, "brand-box");
     gtk_widget_add_css_class(brand_icon, "brand-icon");
+    gtk_image_set_pixel_size(GTK_IMAGE(brand_icon), 26);
     gtk_widget_add_css_class(brand_name, "gc-title");
     gtk_widget_add_css_class(product_name, "gc-product");
     gtk_widget_add_css_class(center_box, "header-center");
