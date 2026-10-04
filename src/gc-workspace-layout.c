@@ -84,17 +84,16 @@ parse_node(LayoutParser *parser, GError **error)
 
     skip_spaces(parser);
 
-    if (parser->depth > GC_WORKSPACE_LAYOUT_MAX_DEPTH) {
-        g_set_error(
-            error,
-            workspace_layout_error_quark(),
-            GC_WORKSPACE_LAYOUT_ERROR,
-            "Workspace layout exceeds maximum nesting depth"
-        );
-        return NULL;
-    }
-
     if (*parser->cursor == 'H' || *parser->cursor == 'V') {
+        if (parser->depth >= GC_WORKSPACE_LAYOUT_MAX_DEPTH) {
+            g_set_error(
+                error,
+                workspace_layout_error_quark(),
+                GC_WORKSPACE_LAYOUT_ERROR,
+                "Workspace layout exceeds maximum nesting depth"
+            );
+            return NULL;
+        }
         orientation = *parser->cursor == 'H'
             ? GC_WORKSPACE_LAYOUT_HORIZONTAL
             : GC_WORKSPACE_LAYOUT_VERTICAL;
