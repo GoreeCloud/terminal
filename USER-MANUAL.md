@@ -30,7 +30,9 @@ New tabs and panes attempt to inherit the active pane's current working director
 
 The sidebar Profile selector chooses the local profile used for a new tab, and the adjacent reload control refreshes profile configuration without restarting the application. The current profile surface covers display name, local shell selection, working directory, terminal font, foreground color, background color, environment overrides, and `scrollback-lines`. Environment entries use `NAME=value` list items and are merged over the inherited local environment for newly launched tabs and panes. `scrollback-lines` accepts values from 0 through 1,000,000; profiles that omit it use 10,000 lines.
 
-After restart, GoreeCloud Terminal restores top-level tabs, each tab's profile and working directory, and the selected-tab position. A previous valid local workspace snapshot is retained so a missing or malformed primary state file can fall back to the prior snapshot. Terminal output, command history, running processes, and split-pane layout are not restored by this Development slice.
+After restart, GoreeCloud Terminal restores tabs, each tab's profile, nested horizontal/vertical split layout, each pane's working directory, the active pane, and the selected-tab position. Layout persistence is bounded to 16 panes and 8 split levels per tab. Existing version-1 top-level-tab state is migrated into the current schema when loaded. A previous valid local workspace snapshot is retained so a missing or malformed primary state file can fall back to the prior snapshot.
+
+Terminal output, command history, and running processes are not restored by this Development slice. A saved working directory that no longer exists falls back safely rather than being treated as authoritative runtime state.
 
 ## Search
 
@@ -81,4 +83,4 @@ The presentation does not imply remote connectivity, cloud-provider state, Kuber
 
 ## Current Limitations
 
-The Development build does not yet provide complete command-boundary navigation across all supported VTE baselines, SSH, advanced profile options, split-layout or process restoration, container workflows, or complete Glaze 1.6.0 consumer acceptance.
+The Development build does not yet provide complete command-boundary navigation across all supported VTE baselines, SSH, advanced profile options, terminal-content or process-continuity restoration, container workflows, or complete Glaze 1.6.0 consumer acceptance.
