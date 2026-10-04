@@ -73,6 +73,7 @@ shell_state_test = executable(
   [
     'test-shell-state.c',
     '../src/gc-shell-state.c',
+    '../src/gc-command-boundaries.c',
   ],
   include_directories: include_directories('../src'),
   dependencies: [glib_dep],
