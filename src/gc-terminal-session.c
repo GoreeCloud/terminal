@@ -1,5 +1,6 @@
 #include "gc-terminal-session.h"
 
+#include "gc-command-boundaries.h"
 #include "gc-context.h"
 #include "gc-shell-state.h"
 
@@ -17,6 +18,7 @@ struct _GcTerminalSession {
     char *title;
     char *status;
     GcShellState shell_state;
+    GcCommandBoundaries command_boundaries;
     GcTerminalSessionChangedFunc changed;
     GcTerminalSessionPasteRequestedFunc paste_requested;
     GcTerminalSessionOpenRequestedFunc open_requested;
@@ -366,6 +368,7 @@ session_free(gpointer data)
         g_source_remove(session->notify_idle_id);
     }
 
+    gc_command_boundaries_clear(&session->command_boundaries);
     g_free(session->working_directory);
     g_free(session->profile_id);
     g_free(session->title);
@@ -426,6 +429,7 @@ gc_terminal_session_new_with_profile(
     session->title = g_strdup("Terminal");
     session->status = g_strdup("Starting shell");
     gc_shell_state_init(&session->shell_state);
+    gc_command_boundaries_init(&session->command_boundaries);
     session->changed = changed;
     session->paste_requested = paste_requested;
     session->open_requested = open_requested;
