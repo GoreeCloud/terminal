@@ -26,6 +26,37 @@ struct _GcTerminalSession {
     gpointer user_data;
 };
 
+static char **
+build_spawn_environment(const GcProfile *profile)
+{
+    char **environment = g_get_environ();
+    g_auto(GStrv) overrides = gc_profile_dup_environment(profile);
+
+    for (guint i = 0;
+         overrides != NULL && overrides[i] != NULL;
+         i++) {
+        const char *equals = strchr(overrides[i], '=');
+        g_autofree char *name = NULL;
+
+        if (equals == NULL) {
+            continue;
+        }
+
+        name = g_strndup(
+            overrides[i],
+            (gsize) (equals - overrides[i])
+        );
+        environment = g_environ_setenv(
+            environment,
+            name,
+            equals + 1,
+            TRUE
+        );
+    }
+
+    return environment;
+}
+
 static void
 notify_changed(GcTerminalSession *session)
 {
@@ -393,6 +424,7 @@ gc_terminal_session_new_with_profile(
     const char *shell = gc_context_shell();
     g_autofree char *profile_directory = NULL;
     const char *initial_directory;
+    g_auto(GStrv) environment = NULL;
     char *argv[2];
 
     if (configured_shell != NULL &&
@@ -416,6 +448,7 @@ gc_terminal_session_new_with_profile(
     initial_directory = profile_directory;
     argv[0] = (char *) shell;
     argv[1] = NULL;
+    environment = build_spawn_environment(profile);
 
     session->root = scroller;
     session->terminal = VTE_TERMINAL(terminal_widget);
@@ -568,7 +601,7 @@ gc_terminal_session_new_with_profile(
         VTE_PTY_DEFAULT,
         initial_directory,
         argv,
-        NULL,
+        environment,
         G_SPAWN_DEFAULT,
         NULL,
         NULL,
