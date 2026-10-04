@@ -334,6 +334,8 @@ restore_workspace(TerminalWindowState *state)
     GError *error = NULL;
 
     gc_session_store_init(&stored);
+    state->restoring_workspace = TRUE;
+
     if (!gc_session_store_load(
             state->session_store_path,
             &stored,
@@ -350,10 +352,9 @@ restore_workspace(TerminalWindowState *state)
             gc_profile_store_get_default(state->profiles),
             g_get_home_dir()
         );
+        state->restoring_workspace = FALSE;
         return;
     }
-
-    state->restoring_workspace = TRUE;
 
     for (guint i = 0; i < stored.tabs->len; i++) {
         GcSessionStoreTab *tab = g_ptr_array_index(stored.tabs, i);
@@ -1355,6 +1356,28 @@ gc_terminal_window_new(GtkApplication *application)
     GtkWidget *main_area = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 
     state->window = GTK_WINDOW(window);
+    state->profiles = gc_profile_store_new();
+    state->profile_path = gc_profile_default_path();
+    state->session_store_path = gc_session_store_default_path();
+
+    {
+        GError *profile_error = NULL;
+
+        if (!gc_profile_store_load(
+                state->profiles,
+                state->profile_path,
+                &profile_error
+            )) {
+            g_warning(
+                "Unable to load terminal profiles at startup: %s",
+                profile_error != NULL
+                    ? profile_error->message
+                    : "unknown error"
+            );
+            g_clear_error(&profile_error);
+        }
+    }
+
     state->workspace = gc_workspace_new(
         on_workspace_changed,
         on_workspace_paste_requested,
@@ -1393,7 +1416,14 @@ gc_terminal_window_new(GtkApplication *application)
     gtk_box_append(GTK_BOX(root), build_context_bar(state));
     gtk_window_set_child(GTK_WINDOW(window), root);
 
-    gc_workspace_add_tab(state->workspace, g_get_home_dir());
+    g_signal_connect(
+        window,
+        "close-request",
+        G_CALLBACK(on_window_close_request),
+        state
+    );
+
+    restore_workspace(state);
     update_context(state);
 
     return GTK_WINDOW(window);
