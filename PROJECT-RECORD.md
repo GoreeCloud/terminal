@@ -1013,3 +1013,91 @@ Workspace restore state remains local. It does not persist terminal output, comm
 This event does not establish terminal-content restoration, long-running process continuity, clean-target restore acceptance, export/portability acceptance, SSH or remote administration, container workflows, complete cross-baseline shell integration, representative graphical desktop acceptance, complete Glaze consumer acceptance, production packaging, release qualification, deployment, production acceptance, or Stable/Anchor status.
 
 Repository protection remains disabled and is tracked separately in issue #3.
+
+
+## 2026-10-04 — Descriptive Accessibility Labels Added to Glyph Controls
+
+### Event
+
+Pull request #30 added descriptive GTK accessibility labels to icon-only and glyph controls across the current Development shell. This is a source-level accessibility improvement and does not by itself establish representative assistive-technology acceptance.
+
+### Exact Source Evidence
+
+- authoritative base: `382611b9e2be57405dc3cf098f917441620dc37c`;
+- exact accepted candidate: `063314b545668dd560eba52c998d077893ac9c2c`;
+- pull request: #30, **Add descriptive labels to glyph controls**;
+- merge method: squash; and
+- authoritative merged commit: `dc1d7758634df6288cd19f20c21779ebfd806d06`.
+
+### Validation Evidence
+
+The exact accepted candidate passed:
+
+- Native Foundation run `37238450723` — push — success on both Ubuntu 24.04 and Debian 13 jobs; and
+- Native Foundation run `37238549133` — pull request — success on both Ubuntu 24.04 and Debian 13 jobs.
+
+After merge, authoritative `main` commit `dc1d7758634df6288cd19f20c21779ebfd806d06` passed:
+
+- Native Foundation run `37238659257` — push on `main` — success on both Ubuntu 24.04 and Debian 13 jobs.
+
+### Implemented Development Boundary
+
+Verified source now supplies descriptive accessibility labels for:
+
+- header split, search, command-navigation, copy, paste, and Help controls;
+- the profile selector and profile-reload control;
+- search entry, previous/next match, and close-search controls; and
+- notebook new-tab and per-tab close controls.
+
+### Remaining Accessibility Boundary
+
+Representative screen-reader, focus traversal, large-text/reflow, high-contrast, reduced-motion, adaptive-layout, and broader Glaze consumer acceptance remain open. This event records source semantics only and must not be represented as complete accessibility acceptance.
+
+## 2026-10-04 — Optional Local Profile Startup Commands Integrated
+
+### Event
+
+Pull request #31 extended reusable local profiles with an optional bounded `startup-command` field. A configured command is executed by the selected local shell before GoreeCloud Terminal replaces that command shell with the ordinary interactive shell when the startup command returns normally.
+
+### Exact Source Evidence
+
+- authoritative base: `dc1d7758634df6288cd19f20c21779ebfd806d06`;
+- exact accepted candidate: `b4f8c79ccb9f0a89e05734eaa4e4cd680d2b9f0b`;
+- pull request: #31, **Add optional profile startup commands**;
+- merge method: squash; and
+- authoritative merged commit: `794eba5a7fbe3999d0da95b7e1b78ad504bccbec`.
+
+### Corrective and Validation Evidence
+
+An earlier candidate reached the full test suite but exposed only a profile-test fixture escaping mismatch in Native Foundation run `37238014145`. The fixture was corrected without weakening implementation behavior or coverage.
+
+The exact accepted candidate then passed:
+
+- Native Foundation run `37238684950` — push — success on both Ubuntu 24.04 and Debian 13 jobs; and
+- Native Foundation run `37238785488` — pull request — success on both Ubuntu 24.04 and Debian 13 jobs.
+
+After merge, authoritative `main` commit `794eba5a7fbe3999d0da95b7e1b78ad504bccbec` passed:
+
+- Native Foundation run `37238954256` — push on `main` — success on both Ubuntu 24.04 and Debian 13 jobs.
+
+### Implemented Development Boundary
+
+Verified source now adds:
+
+- optional per-profile `startup-command` strings;
+- a 4,096-byte maximum command length;
+- execution through the selected local shell;
+- relaunch of the selected shell as the ordinary interactive session after normal command return;
+- profile inheritance of startup behavior by split panes;
+- preservation of the existing inherited environment and profile environment overrides; and
+- focused profile parsing, validation, and previous-valid-store preservation tests.
+
+### Security and Privacy Boundary
+
+Startup commands are user-authored local process input, not trusted policy or authorization data. They can materially change local shell behavior and may be briefly visible in local process arguments while the command shell starts. Reusable credentials, tokens, private keys, recovery secrets, and other protected values must not be placed in `startup-command` or ordinary profile configuration.
+
+The feature adds no remote transport, telemetry, analytics, credential store, cloud dependency, or hidden execution source.
+
+### Remaining Product Boundary
+
+Profile-specific keybindings, remote/container profile purpose, broader appearance controls, SSH, containers, terminal-content/process-continuity restoration, complete cross-baseline shell integration, representative graphical/runtime acceptance, complete Glaze consumer acceptance, production packaging, release qualification, deployment, production acceptance, and Stable/Anchor status remain separate obligations.
