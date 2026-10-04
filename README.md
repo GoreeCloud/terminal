@@ -21,6 +21,7 @@ The current source provides:
 - guarded clipboard and primary-selection paste review when pasted text contains line breaks;
 - explicit Ctrl+click opening for validated hyperlinks and existing local paths;
 - keyboard-driven tabs, panes, search, copy, paste, and link/path interaction;
+- local launch profiles with in-app selection/reload and bounded top-level tab restoration;
 - first-run onboarding with durable step progress and Help replay;
 - 10,000-line default scrollback per session;
 - a mockup-inspired deep-navy workspace shell with GoreeCloud branding, a truthful Local Shell sidebar, closable tabs, a + tab action, compact pane/search controls, and a persistent bottom execution-context/status bar;
