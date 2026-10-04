@@ -393,6 +393,7 @@ gc_terminal_session_new_with_profile(
     const char *shell = gc_context_shell();
     g_autofree char *profile_directory = NULL;
     const char *initial_directory;
+    g_auto(GStrv) environment = NULL;
     char *argv[2];
 
     if (configured_shell != NULL &&
@@ -416,6 +417,7 @@ gc_terminal_session_new_with_profile(
     initial_directory = profile_directory;
     argv[0] = (char *) shell;
     argv[1] = NULL;
+    environment = gc_profile_dup_spawn_environment(profile);
 
     session->root = scroller;
     session->terminal = VTE_TERMINAL(terminal_widget);
@@ -568,7 +570,7 @@ gc_terminal_session_new_with_profile(
         VTE_PTY_DEFAULT,
         initial_directory,
         argv,
-        NULL,
+        environment,
         G_SPAWN_DEFAULT,
         NULL,
         NULL,
