@@ -58,6 +58,16 @@ paste_safety_test = executable(
   dependencies: [glib_dep],
 )
 
+command_boundaries_test = executable(
+  'test-command-boundaries',
+  [
+    'test-command-boundaries.c',
+    '../src/gc-command-boundaries.c',
+  ],
+  include_directories: include_directories('../src'),
+  dependencies: [glib_dep],
+)
+
 shell_state_test = executable(
   'test-shell-state',
   [
@@ -93,5 +103,6 @@ test('context helpers', context_test)
 test('onboarding state', onboarding_state_test)
 test('link target validation', link_utils_test)
 test('paste safety', paste_safety_test)
+test('command boundaries', command_boundaries_test)
 test('shell state', shell_state_test)
 test('workspace panes', workspace_test, env: workspace_test_env)
