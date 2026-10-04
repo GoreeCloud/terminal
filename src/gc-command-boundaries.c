@@ -36,10 +36,6 @@ gc_command_boundaries_mark_start(
 
     g_return_if_fail(boundaries != NULL);
 
-    if (row < 0) {
-        return;
-    }
-
     ensure_rows(boundaries);
 
     if (boundaries->rows->len > 0) {
