@@ -73,7 +73,6 @@ shell_state_test = executable(
   [
     'test-shell-state.c',
     '../src/gc-shell-state.c',
-    '../src/gc-command-boundaries.c',
   ],
   include_directories: include_directories('../src'),
   dependencies: [glib_dep],
@@ -89,6 +88,7 @@ workspace_test = executable(
     '../src/gc-context.c',
     '../src/gc-profile.c',
     '../src/gc-shell-state.c',
+    '../src/gc-command-boundaries.c',
   ],
   include_directories: include_directories('../src'),
   dependencies: [gtk_dep, vte_dep, glib_dep, gio_dep, pcre2_dep],
