@@ -27,6 +27,7 @@ These entries establish Development source implementation only. They do not esta
 
 - Local launch profiles can be selected and reloaded from the sidebar.
 - Profile environment overrides are validated and merged into the inherited local process environment for newly launched tabs and panes.
+- Per-profile scrollback limits are configurable from 0 through 1,000,000 lines; the default remains 10,000 lines.
 - Top-level tabs restore their profile, working directory, and selected-tab position after restart.
 - Split layout and terminal output remain outside this restore slice.
 
