@@ -1,3 +1,23 @@
+profile_test = executable(
+  'test-profile',
+  [
+    'test-profile.c',
+    '../src/gc-profile.c',
+  ],
+  include_directories: include_directories('../src'),
+  dependencies: [glib_dep, gio_dep],
+)
+
+local_state_test = executable(
+  'test-local-state',
+  [
+    'test-local-state.c',
+    '../src/gc-session-store.c',
+  ],
+  include_directories: include_directories('../src'),
+  dependencies: [glib_dep],
+)
+
 context_test = executable(
   'test-context',
   [
@@ -56,6 +76,7 @@ workspace_test = executable(
     '../src/gc-terminal-session.c',
     '../src/gc-link-utils.c',
     '../src/gc-context.c',
+    '../src/gc-profile.c',
     '../src/gc-shell-state.c',
   ],
   include_directories: include_directories('../src'),
@@ -66,6 +87,8 @@ workspace_test_env = environment()
 workspace_test_env.set('GTK_A11Y', 'none')
 workspace_test_env.set('GSK_RENDERER', 'cairo')
 
+test('profiles', profile_test)
+test('local workspace state', local_state_test)
 test('context helpers', context_test)
 test('onboarding state', onboarding_state_test)
 test('link target validation', link_utils_test)
