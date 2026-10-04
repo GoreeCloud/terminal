@@ -420,6 +420,26 @@ on_window_close_request(GtkWindow *window, gpointer user_data)
 }
 
 static void
+set_window_action_enabled(
+    TerminalWindowState *state,
+    const char *name,
+    gboolean enabled
+)
+{
+    GAction *action = g_action_map_lookup_action(
+        G_ACTION_MAP(state->window),
+        name
+    );
+
+    if (G_IS_SIMPLE_ACTION(action)) {
+        g_simple_action_set_enabled(
+            G_SIMPLE_ACTION(action),
+            enabled
+        );
+    }
+}
+
+static void
 update_context(TerminalWindowState *state)
 {
     GcTerminalSession *session = gc_workspace_get_current_session(state->workspace);
@@ -598,6 +618,42 @@ next_tab_action(GSimpleAction *action, GVariant *parameter, gpointer user_data)
     (void) parameter;
 
     gc_workspace_select_relative(state->workspace, 1);
+}
+
+static void
+previous_command_action(
+    GSimpleAction *action,
+    GVariant *parameter,
+    gpointer user_data
+)
+{
+    TerminalWindowState *state = user_data;
+    GcTerminalSession *session =
+        gc_workspace_get_current_session(state->workspace);
+    (void) action;
+    (void) parameter;
+
+    if (session != NULL) {
+        gc_terminal_session_navigate_command(session, -1);
+    }
+}
+
+static void
+next_command_action(
+    GSimpleAction *action,
+    GVariant *parameter,
+    gpointer user_data
+)
+{
+    TerminalWindowState *state = user_data;
+    GcTerminalSession *session =
+        gc_workspace_get_current_session(state->workspace);
+    (void) action;
+    (void) parameter;
+
+    if (session != NULL) {
+        gc_terminal_session_navigate_command(session, 1);
+    }
 }
 
 static void
