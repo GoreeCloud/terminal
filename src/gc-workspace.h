@@ -47,12 +47,36 @@ char *gc_workspace_dup_tab_working_directory(
     GcWorkspace *workspace,
     guint index
 );
+guint gc_workspace_get_tab_pane_count(
+    GcWorkspace *workspace,
+    guint index
+);
+guint gc_workspace_get_tab_active_pane_index(
+    GcWorkspace *workspace,
+    guint index
+);
+char *gc_workspace_dup_tab_pane_working_directory(
+    GcWorkspace *workspace,
+    guint index,
+    guint pane_index
+);
+char *gc_workspace_dup_tab_layout(
+    GcWorkspace *workspace,
+    guint index
+);
 
 void gc_workspace_add_tab(GcWorkspace *workspace, const char *working_directory);
 void gc_workspace_add_tab_with_profile(
     GcWorkspace *workspace,
     const GcProfile *profile,
     const char *working_directory
+);
+gboolean gc_workspace_add_tab_with_profile_layout(
+    GcWorkspace *workspace,
+    const GcProfile *profile,
+    const char *layout,
+    GPtrArray *pane_working_directories,
+    guint active_pane
 );
 gboolean gc_workspace_close_current(GcWorkspace *workspace);
 void gc_workspace_select_relative(GcWorkspace *workspace, gint delta);

@@ -15,20 +15,20 @@ The current source provides:
 - GNOME VTE-backed local terminal sessions and asynchronous PTY shell startup;
 - multiple reorderable local tabs and nested split panes;
 - active-session execution context and working-directory-aware tab/pane creation;
-- protocol-derived shell ready/running/last-exit status on VTE 0.78+ when compatible shell integration emits lifecycle metadata;
+- protocol-derived shell ready/running/last-exit status plus bounded previous/next command-start navigation on VTE 0.78+ when compatible shell integration emits lifecycle metadata;
 - searchable active-pane scrollback with literal or regular-expression matching;
 - case-sensitive or case-insensitive search and wrap-around navigation;
 - guarded clipboard and primary-selection paste review when pasted text contains line breaks;
 - explicit Ctrl+click opening for validated hyperlinks and existing local paths;
 - keyboard-driven tabs, panes, search, copy, paste, and link/path interaction;
-- local launch profiles with in-app selection/reload and bounded top-level tab restoration;
+- local launch profiles with in-app selection/reload and bounded versioned workspace restoration for nested split layouts, per-pane working directories, and active-pane selection;
 - first-run onboarding with durable step progress and Help replay;
 - 10,000-line default scrollback per session;
 - a mockup-inspired deep-navy workspace shell with GoreeCloud branding, a truthful Local Shell sidebar, closable tabs, a + tab action, compact pane/search controls, and a persistent bottom execution-context/status bar;
 - Meson/Ninja build and install plumbing; and
 - GitHub Actions compile/test/install validation on Ubuntu 24.04 and Debian 13.
 
-This is Development source evidence only. Local profiles and bounded top-level tab restore are implemented. Broader profile options, split-layout restore, process continuity, command-boundary navigation, complete cross-baseline shell integration, SSH, containers, automation, protocol qualification, representative runtime acceptance, performance claims, full Glaze conformance, release qualification, and Stable/Anchor status remain incomplete.
+This is Development source evidence only. Local profiles, bounded nested split-layout restoration, and VTE 0.78+ protocol-derived command-start navigation are implemented. Broader profile options, terminal-content/process-continuity restoration, complete command navigation and shell integration across supported VTE baselines, SSH, containers, automation, protocol qualification, representative runtime acceptance, performance claims, full Glaze conformance, release qualification, and Stable/Anchor status remain incomplete.
 
 On VTE 0.78+ (including Debian 13), compatible shell integration can drive advisory `Shell ready`, `Command running`, and last-exit-code status. Ubuntu 24.04's VTE 0.76 path retains generic session status. GoreeCloud Terminal does not infer command lifecycle from prompt text, and lifecycle metadata is not treated as a privilege or authorization signal.
 
@@ -45,6 +45,8 @@ Validated Development build/test environments are Ubuntu 24.04 and Debian 13 (Tr
 - Close active pane: `Ctrl+Shift+X`
 - Focus previous pane: `Alt+Left`
 - Focus next pane: `Alt+Right`
+- Previous command start (VTE 0.78+ protocol integration): `Alt+Up`
+- Next command start (VTE 0.78+ protocol integration): `Alt+Down`
 - Search active pane: `Ctrl+Shift+F`
 - Next search match: `Ctrl+G`
 - Previous search match: `Ctrl+Shift+G`

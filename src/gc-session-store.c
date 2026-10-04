@@ -1,5 +1,7 @@
 #include "gc-session-store.h"
 
+#include "gc-workspace-layout.h"
+
 #include <errno.h>
 #include <unistd.h>
 
@@ -11,9 +13,22 @@
 static GQuark
 session_store_error_quark(void)
 {
-    return g_quark_from_static_string("goreecloud-terminal-session-store-error");
+    return g_quark_from_static_string(
+        "goreecloud-terminal-session-store-error"
+    );
 }
 
+static char *
+normalized_working_directory(const char *working_directory)
+{
+    return g_strdup(
+        working_directory != NULL &&
+        *working_directory != '\0' &&
+        g_path_is_absolute(working_directory)
+            ? working_directory
+            : g_get_home_dir()
+    );
+}
 
 static void
 tab_free(gpointer data)
@@ -22,6 +37,8 @@ tab_free(gpointer data)
 
     g_free(tab->profile_id);
     g_free(tab->working_directory);
+    g_free(tab->layout);
+    g_clear_pointer(&tab->pane_working_directories, g_ptr_array_unref);
     g_free(tab);
 }
 
@@ -46,18 +63,38 @@ gc_session_store_clear(GcSessionStore *state)
 }
 
 void
-gc_session_store_add_tab(
+gc_session_store_add_tab_layout(
     GcSessionStore *state,
     const char *profile_id,
-    const char *working_directory
+    const char *layout,
+    GPtrArray *pane_working_directories,
+    guint active_pane
 )
 {
     GcSessionStoreTab *tab;
+    GcWorkspaceLayoutNode *parsed;
+    GError *error = NULL;
+    guint pane_count;
 
     if (state == NULL || state->tabs == NULL ||
-        state->tabs->len >= GC_SESSION_STORE_MAX_TABS) {
+        state->tabs->len >= GC_SESSION_STORE_MAX_TABS ||
+        pane_working_directories == NULL) {
         return;
     }
+
+    pane_count = pane_working_directories->len;
+    if (pane_count == 0 ||
+        pane_count > GC_WORKSPACE_LAYOUT_MAX_PANES ||
+        active_pane >= pane_count) {
+        return;
+    }
+
+    parsed = gc_workspace_layout_parse(layout, pane_count, &error);
+    if (parsed == NULL) {
+        g_clear_error(&error);
+        return;
+    }
+    gc_workspace_layout_free(parsed);
 
     tab = g_new0(GcSessionStoreTab, 1);
     tab->profile_id = g_strdup(
@@ -65,12 +102,50 @@ gc_session_store_add_tab(
             ? profile_id
             : "default"
     );
+    tab->layout = g_strdup(layout);
+    tab->active_pane = active_pane;
+    tab->pane_working_directories =
+        g_ptr_array_new_with_free_func(g_free);
+
+    for (guint i = 0; i < pane_count; i++) {
+        const char *cwd = g_ptr_array_index(
+            pane_working_directories,
+            i
+        );
+
+        g_ptr_array_add(
+            tab->pane_working_directories,
+            normalized_working_directory(cwd)
+        );
+    }
+
     tab->working_directory = g_strdup(
-        working_directory != NULL && *working_directory != '\0'
-            ? working_directory
-            : g_get_home_dir()
+        g_ptr_array_index(
+            tab->pane_working_directories,
+            tab->active_pane
+        )
     );
     g_ptr_array_add(state->tabs, tab);
+}
+
+void
+gc_session_store_add_tab(
+    GcSessionStore *state,
+    const char *profile_id,
+    const char *working_directory
+)
+{
+    GPtrArray *panes = g_ptr_array_new();
+
+    g_ptr_array_add(panes, (gpointer) working_directory);
+    gc_session_store_add_tab_layout(
+        state,
+        profile_id,
+        "0",
+        panes,
+        0
+    );
+    g_ptr_array_unref(panes);
 }
 
 static gboolean
@@ -99,6 +174,156 @@ static char *
 session_store_backup_path(const char *path)
 {
     return g_strdup_printf("%s.bak", path);
+}
+
+static gboolean
+load_version_one_tab(
+    GKeyFile *key_file,
+    const char *group,
+    GcSessionStore *loaded
+)
+{
+    g_autofree char *profile_id = g_key_file_get_string(
+        key_file,
+        group,
+        "profile",
+        NULL
+    );
+    g_autofree char *working_directory = g_key_file_get_string(
+        key_file,
+        group,
+        "working-directory",
+        NULL
+    );
+
+    gc_session_store_add_tab(
+        loaded,
+        profile_id,
+        working_directory
+    );
+    return TRUE;
+}
+
+static gboolean
+load_version_two_tab(
+    GKeyFile *key_file,
+    gint tab_index,
+    const char *group,
+    GcSessionStore *loaded,
+    GError **error
+)
+{
+    g_autofree char *profile_id = NULL;
+    g_autofree char *layout = NULL;
+    GPtrArray *pane_working_directories = NULL;
+    GcWorkspaceLayoutNode *parsed = NULL;
+    GError *local_error = NULL;
+    gint pane_count;
+    gint active_pane;
+
+    profile_id = g_key_file_get_string(
+        key_file,
+        group,
+        "profile",
+        NULL
+    );
+    layout = g_key_file_get_string(
+        key_file,
+        group,
+        "layout",
+        &local_error
+    );
+    if (local_error != NULL) {
+        g_propagate_prefixed_error(
+            error,
+            local_error,
+            "Session tab layout is missing or invalid: "
+        );
+        return FALSE;
+    }
+
+    pane_count = g_key_file_get_integer(
+        key_file,
+        group,
+        "pane-count",
+        &local_error
+    );
+    if (local_error != NULL || pane_count <= 0 ||
+        pane_count > GC_WORKSPACE_LAYOUT_MAX_PANES) {
+        g_clear_error(&local_error);
+        g_set_error(
+            error,
+            G_KEY_FILE_ERROR,
+            G_KEY_FILE_ERROR_INVALID_VALUE,
+            "Session tab pane-count is invalid"
+        );
+        return FALSE;
+    }
+
+    active_pane = g_key_file_get_integer(
+        key_file,
+        group,
+        "active-pane",
+        &local_error
+    );
+    if (local_error != NULL || active_pane < 0 ||
+        active_pane >= pane_count) {
+        g_clear_error(&local_error);
+        g_set_error(
+            error,
+            G_KEY_FILE_ERROR,
+            G_KEY_FILE_ERROR_INVALID_VALUE,
+            "Session tab active-pane is invalid"
+        );
+        return FALSE;
+    }
+
+    parsed = gc_workspace_layout_parse(
+        layout,
+        (guint) pane_count,
+        &local_error
+    );
+    if (parsed == NULL) {
+        g_propagate_prefixed_error(
+            error,
+            local_error,
+            "Session tab layout is invalid: "
+        );
+        return FALSE;
+    }
+    gc_workspace_layout_free(parsed);
+
+    pane_working_directories =
+        g_ptr_array_new_with_free_func(g_free);
+
+    for (gint pane = 0; pane < pane_count; pane++) {
+        g_autofree char *pane_group = g_strdup_printf(
+            "tab %d pane %d",
+            tab_index,
+            pane
+        );
+        g_autofree char *cwd = g_key_file_get_string(
+            key_file,
+            pane_group,
+            "working-directory",
+            NULL
+        );
+
+        g_ptr_array_add(
+            pane_working_directories,
+            normalized_working_directory(cwd)
+        );
+    }
+
+    gc_session_store_add_tab_layout(
+        loaded,
+        profile_id,
+        layout,
+        pane_working_directories,
+        (guint) active_pane
+    );
+    g_ptr_array_unref(pane_working_directories);
+    return TRUE;
 }
 
 static gboolean
@@ -150,7 +375,7 @@ session_store_load_file(
         return FALSE;
     }
 
-    if (version != GC_SESSION_STORE_VERSION) {
+    if (version != 1 && version != GC_SESSION_STORE_VERSION) {
         g_set_error(
             error,
             session_store_error_quark(),
@@ -195,30 +420,30 @@ session_store_load_file(
 
     for (gint i = 0; i < tab_count; i++) {
         g_autofree char *group = g_strdup_printf("tab %d", i);
-        g_autofree char *profile_id = g_key_file_get_string(
-            key_file,
-            group,
-            "profile",
-            NULL
-        );
-        g_autofree char *working_directory = g_key_file_get_string(
-            key_file,
-            group,
-            "working-directory",
-            NULL
-        );
+        gboolean loaded_tab;
 
-        if (working_directory == NULL ||
-            !g_path_is_absolute(working_directory)) {
-            g_clear_pointer(&working_directory, g_free);
-            working_directory = g_strdup(g_get_home_dir());
+        if (version == 1) {
+            loaded_tab = load_version_one_tab(
+                key_file,
+                group,
+                &loaded
+            );
+        } else {
+            loaded_tab = load_version_two_tab(
+                key_file,
+                i,
+                group,
+                &loaded,
+                &local_error
+            );
         }
 
-        gc_session_store_add_tab(
-            &loaded,
-            profile_id,
-            working_directory
-        );
+        if (!loaded_tab) {
+            g_propagate_error(error, local_error);
+            gc_session_store_clear(&loaded);
+            g_key_file_unref(key_file);
+            return FALSE;
+        }
     }
 
     if (loaded.tabs->len > 0) {
@@ -315,6 +540,16 @@ gc_session_store_save(
         return FALSE;
     }
 
+    if (state->tabs->len > GC_SESSION_STORE_MAX_TABS) {
+        g_set_error(
+            error,
+            G_FILE_ERROR,
+            G_FILE_ERROR_INVAL,
+            "Session state contains too many tabs"
+        );
+        return FALSE;
+    }
+
     if (!ensure_parent_directory(path, error)) {
         return FALSE;
     }
@@ -342,6 +577,50 @@ gc_session_store_save(
     for (guint i = 0; i < state->tabs->len; i++) {
         GcSessionStoreTab *tab = g_ptr_array_index(state->tabs, i);
         g_autofree char *group = g_strdup_printf("tab %u", i);
+        GcWorkspaceLayoutNode *parsed;
+        GError *layout_error = NULL;
+        guint pane_count;
+
+        if (tab->pane_working_directories == NULL) {
+            g_set_error(
+                error,
+                G_FILE_ERROR,
+                G_FILE_ERROR_INVAL,
+                "Session tab has no pane state"
+            );
+            g_key_file_unref(key_file);
+            return FALSE;
+        }
+
+        pane_count = tab->pane_working_directories->len;
+        if (pane_count == 0 ||
+            pane_count > GC_WORKSPACE_LAYOUT_MAX_PANES ||
+            tab->active_pane >= pane_count) {
+            g_set_error(
+                error,
+                G_FILE_ERROR,
+                G_FILE_ERROR_INVAL,
+                "Session tab pane state is invalid"
+            );
+            g_key_file_unref(key_file);
+            return FALSE;
+        }
+
+        parsed = gc_workspace_layout_parse(
+            tab->layout,
+            pane_count,
+            &layout_error
+        );
+        if (parsed == NULL) {
+            g_propagate_prefixed_error(
+                error,
+                layout_error,
+                "Session tab layout is invalid: "
+            );
+            g_key_file_unref(key_file);
+            return FALSE;
+        }
+        gc_workspace_layout_free(parsed);
 
         g_key_file_set_string(
             key_file,
@@ -352,11 +631,48 @@ gc_session_store_save(
         g_key_file_set_string(
             key_file,
             group,
+            "layout",
+            tab->layout
+        );
+        g_key_file_set_integer(
+            key_file,
+            group,
+            "pane-count",
+            (gint) pane_count
+        );
+        g_key_file_set_integer(
+            key_file,
+            group,
+            "active-pane",
+            (gint) tab->active_pane
+        );
+        g_key_file_set_string(
+            key_file,
+            group,
             "working-directory",
             tab->working_directory != NULL
                 ? tab->working_directory
                 : g_get_home_dir()
         );
+
+        for (guint pane = 0; pane < pane_count; pane++) {
+            g_autofree char *pane_group = g_strdup_printf(
+                "tab %u pane %u",
+                i,
+                pane
+            );
+            const char *cwd = g_ptr_array_index(
+                tab->pane_working_directories,
+                pane
+            );
+
+            g_key_file_set_string(
+                key_file,
+                pane_group,
+                "working-directory",
+                cwd != NULL ? cwd : g_get_home_dir()
+            );
+        }
     }
 
     data = g_key_file_to_data(key_file, &data_length, error);

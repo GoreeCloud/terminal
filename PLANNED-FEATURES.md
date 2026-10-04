@@ -5,7 +5,7 @@ The following remain planned or materially incomplete:
 - complete command-boundary navigation across supported VTE baselines; bounded VTE 0.78+ protocol-derived command-start navigation is now implemented, while the VTE 0.76 compatibility path remains generic;
 - remaining profile options for startup behavior, shortcuts, remote/container purposes, and broader appearance settings; profile scrollback limits are now bounded and configurable;
 - complete shell integration across supported VTE baselines for command boundaries, process context, reliable CWD, and navigation; VTE 0.78+ lifecycle, exit-status, and bounded command-start navigation remain a Development slice rather than complete shell integration;
-- remaining restore work for split layouts, terminal content, long-running process continuity, clean-target migration, and broader recovery acceptance;
+- remaining restore work for terminal content, long-running process continuity, clean-target migration, export/portability, and broader recovery acceptance; nested split layout and active-pane restoration are now implemented with bounded schema-v2 persistence and version-1 migration;
 - general settings beyond onboarding, local profiles, and bounded tab restore;
 - SSH host profiles, host verification, reconnection, and secure key/credential handling;
 - remote/container and per-environment visual differentiation; local/elevated status is already surfaced in the Development shell;

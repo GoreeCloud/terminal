@@ -4,11 +4,14 @@
 
 G_BEGIN_DECLS
 
-#define GC_SESSION_STORE_VERSION 1
+#define GC_SESSION_STORE_VERSION 2
 
 typedef struct {
     char *profile_id;
     char *working_directory;
+    char *layout;
+    guint active_pane;
+    GPtrArray *pane_working_directories;
 } GcSessionStoreTab;
 
 typedef struct {
@@ -24,6 +27,13 @@ void gc_session_store_add_tab(
     GcSessionStore *state,
     const char *profile_id,
     const char *working_directory
+);
+void gc_session_store_add_tab_layout(
+    GcSessionStore *state,
+    const char *profile_id,
+    const char *layout,
+    GPtrArray *pane_working_directories,
+    guint active_pane
 );
 
 gboolean gc_session_store_load(

@@ -28,9 +28,10 @@ These entries establish Development source implementation only. They do not esta
 - Local launch profiles can be selected and reloaded from the sidebar.
 - Profile environment overrides are validated and merged into the inherited local process environment for newly launched tabs and panes.
 - Per-profile scrollback limits are configurable from 0 through 1,000,000 lines; the default remains 10,000 lines.
-- Top-level tabs restore their profile, working directory, and selected-tab position after restart.
+- Tabs restore their profile, nested split-pane layout, per-pane working directories, active-pane selection, and selected-tab position after restart.
+- Workspace persistence uses a versioned schema with bounded layout parsing (up to 16 panes and 8 split levels per tab); version-1 top-level-tab state is migrated into the current schema on load.
 - Each successful save preserves the previous valid workspace snapshot as a local backup; load falls back to that snapshot when the primary state is missing or malformed.
-- Split layout and terminal output remain outside this restore slice.
+- Terminal output, command history, and running-process continuity remain outside this restore slice.
 
 ## Scrollback Search
 

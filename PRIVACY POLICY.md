@@ -12,9 +12,9 @@ Detected link/path text is not persisted by GoreeCloud Terminal. Ctrl+click hand
 
 The first-run guide persists completion state and current step at `$XDG_CONFIG_HOME/goreecloud-terminal/state.ini`.
 
-User-authored local profiles are read from `$XDG_CONFIG_HOME/goreecloud-terminal/profiles.ini`. The current profile fields are profile identity/name, local shell path, working directory, terminal font, foreground color, background color, and environment overrides. Environment values remain local and are passed only to the local shell process launched for that profile.
+User-authored local profiles are read from `$XDG_CONFIG_HOME/goreecloud-terminal/profiles.ini`. The current profile fields are profile identity/name, local shell path, working directory, terminal font, foreground color, background color, environment overrides, and bounded scrollback. Environment values remain local and are passed only to the local shell process launched for that profile.
 
-Bounded tab-restore state is stored at `$XDG_STATE_HOME/goreecloud-terminal/workspace.ini`, with one previous valid snapshot retained at the adjacent `.bak` path for local recovery. Both contain only a format version, tab count, selected-tab position, profile identifiers, and working directories. They do not contain terminal output, command history, running-process state, clipboard content, or search content.
+Bounded workspace-restore state is stored at `$XDG_STATE_HOME/goreecloud-terminal/workspace.ini`, with one previous valid snapshot retained at the adjacent `.bak` path for local recovery. The current schema stores a format version, tab count, selected-tab position, profile identifiers, bounded nested split structure, active-pane selection, and per-pane working directories. Version-1 top-level-tab state is accepted and migrated into the current in-memory schema on load. The files do not contain terminal output, command history, command text, running-process state, clipboard content, search content, credentials, or remote identity.
 
 Future remote, synchronization, diagnostics, observability, or account-aware features require separate privacy review before activation.
 

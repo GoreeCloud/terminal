@@ -1,5 +1,7 @@
 #include "gc-workspace.h"
 
+#include "gc-workspace-layout.h"
+
 #include <pango/pango.h>
 
 typedef struct {
@@ -108,6 +110,124 @@ update_tab_label(GcWorkspacePage *page)
     title = gc_terminal_session_dup_display_title(page->active);
     gtk_label_set_text(page->tab_label, title);
     gtk_widget_set_tooltip_text(GTK_WIDGET(page->tab_label), title);
+}
+
+static void
+configure_paned(GtkPaned *paned)
+{
+    gtk_widget_set_hexpand(GTK_WIDGET(paned), TRUE);
+    gtk_widget_set_vexpand(GTK_WIDGET(paned), TRUE);
+    gtk_paned_set_wide_handle(paned, TRUE);
+    gtk_paned_set_resize_start_child(paned, TRUE);
+    gtk_paned_set_resize_end_child(paned, TRUE);
+    gtk_paned_set_shrink_start_child(paned, FALSE);
+    gtk_paned_set_shrink_end_child(paned, FALSE);
+}
+
+static gint
+session_index_for_widget(GcWorkspacePage *page, GtkWidget *widget)
+{
+    for (guint i = 0; i < page->sessions->len; i++) {
+        GcTerminalSession *session = g_ptr_array_index(page->sessions, i);
+
+        if (gc_terminal_session_get_widget(session) == widget) {
+            return (gint) i;
+        }
+    }
+
+    return -1;
+}
+
+static GcWorkspaceLayoutNode *
+layout_node_for_widget(GcWorkspacePage *page, GtkWidget *widget)
+{
+    if (GTK_IS_PANED(widget)) {
+        GtkPaned *paned = GTK_PANED(widget);
+        GcWorkspaceLayoutNode *start = layout_node_for_widget(
+            page,
+            gtk_paned_get_start_child(paned)
+        );
+        GcWorkspaceLayoutNode *end = layout_node_for_widget(
+            page,
+            gtk_paned_get_end_child(paned)
+        );
+        GcWorkspaceLayoutOrientation orientation =
+            gtk_orientable_get_orientation(GTK_ORIENTABLE(paned)) ==
+                GTK_ORIENTATION_HORIZONTAL
+                ? GC_WORKSPACE_LAYOUT_HORIZONTAL
+                : GC_WORKSPACE_LAYOUT_VERTICAL;
+
+        return gc_workspace_layout_split(orientation, start, end);
+    }
+
+    {
+        gint index = session_index_for_widget(page, widget);
+
+        return index >= 0
+            ? gc_workspace_layout_leaf((guint) index)
+            : NULL;
+    }
+}
+
+static guint
+layout_depth(GtkWidget *widget)
+{
+    if (!GTK_IS_PANED(widget)) {
+        return 0;
+    }
+
+    return 1 + MAX(
+        layout_depth(gtk_paned_get_start_child(GTK_PANED(widget))),
+        layout_depth(gtk_paned_get_end_child(GTK_PANED(widget)))
+    );
+}
+
+static GtkWidget *
+widget_for_layout_node(
+    GcWorkspacePage *page,
+    const GcWorkspaceLayoutNode *node
+)
+{
+    if (node->kind == GC_WORKSPACE_LAYOUT_LEAF) {
+        GcTerminalSession *session;
+
+        if (node->value.pane_index >= page->sessions->len) {
+            return NULL;
+        }
+
+        session = g_ptr_array_index(
+            page->sessions,
+            node->value.pane_index
+        );
+        return gc_terminal_session_get_widget(session);
+    }
+
+    {
+        GtkWidget *paned = gtk_paned_new(
+            node->value.split.orientation ==
+                GC_WORKSPACE_LAYOUT_HORIZONTAL
+                ? GTK_ORIENTATION_HORIZONTAL
+                : GTK_ORIENTATION_VERTICAL
+        );
+        GtkWidget *start = widget_for_layout_node(
+            page,
+            node->value.split.start
+        );
+        GtkWidget *end = widget_for_layout_node(
+            page,
+            node->value.split.end
+        );
+
+        if (start == NULL || end == NULL) {
+            g_object_unref(paned);
+            return NULL;
+        }
+
+        configure_paned(GTK_PANED(paned));
+        gtk_paned_set_start_child(GTK_PANED(paned), start);
+        gtk_paned_set_end_child(GTK_PANED(paned), end);
+        return paned;
+    }
 }
 
 static gboolean
@@ -377,35 +497,166 @@ gc_workspace_dup_tab_working_directory(GcWorkspace *workspace, guint index)
     return gc_terminal_session_dup_working_directory(page->active);
 }
 
-void
-gc_workspace_add_tab_with_profile(
+guint
+gc_workspace_get_tab_pane_count(
     GcWorkspace *workspace,
-    const GcProfile *profile,
-    const char *working_directory
+    guint index
 )
 {
-    GcWorkspacePage *page = g_new0(GcWorkspacePage, 1);
-    GcTerminalSession *session = gc_terminal_session_new_with_profile(
-        profile,
-        working_directory,
-        on_session_changed,
-        on_session_paste_requested,
-        on_session_open_requested,
-        workspace
+    GcWorkspacePage *page = page_at_index(workspace, index);
+
+    return page != NULL ? page->sessions->len : 0;
+}
+
+guint
+gc_workspace_get_tab_active_pane_index(
+    GcWorkspace *workspace,
+    guint index
+)
+{
+    GcWorkspacePage *page = page_at_index(workspace, index);
+
+    if (page == NULL || page->active == NULL) {
+        return 0;
+    }
+
+    for (guint i = 0; i < page->sessions->len; i++) {
+        if (g_ptr_array_index(page->sessions, i) == page->active) {
+            return i;
+        }
+    }
+
+    return 0;
+}
+
+char *
+gc_workspace_dup_tab_pane_working_directory(
+    GcWorkspace *workspace,
+    guint index,
+    guint pane_index
+)
+{
+    GcWorkspacePage *page = page_at_index(workspace, index);
+
+    if (page == NULL || pane_index >= page->sessions->len) {
+        return g_strdup(g_get_home_dir());
+    }
+
+    return gc_terminal_session_dup_working_directory(
+        g_ptr_array_index(page->sessions, pane_index)
     );
-    GtkWidget *root = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-    GtkWidget *tab = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
-    GtkWidget *icon = gtk_image_new_from_icon_name("utilities-terminal-symbolic");
-    GtkWidget *label = gtk_label_new("Terminal");
-    GtkWidget *close = gtk_button_new_from_icon_name("window-close-symbolic");
+}
+
+char *
+gc_workspace_dup_tab_layout(
+    GcWorkspace *workspace,
+    guint index
+)
+{
+    GcWorkspacePage *page = page_at_index(workspace, index);
+    GtkWidget *child;
+    GcWorkspaceLayoutNode *layout;
+    char *serialized;
+
+    if (page == NULL) {
+        return g_strdup("0");
+    }
+
+    child = gtk_widget_get_first_child(page->root);
+    if (child == NULL) {
+        return g_strdup("0");
+    }
+
+    layout = layout_node_for_widget(page, child);
+    if (layout == NULL) {
+        return g_strdup("0");
+    }
+
+    serialized = gc_workspace_layout_serialize(layout);
+    gc_workspace_layout_free(layout);
+    return serialized;
+}
+
+gboolean
+gc_workspace_add_tab_with_profile_layout(
+    GcWorkspace *workspace,
+    const GcProfile *profile,
+    const char *layout,
+    GPtrArray *pane_working_directories,
+    guint active_pane
+)
+{
+    GError *error = NULL;
+    GcWorkspaceLayoutNode *parsed;
+    GcWorkspacePage *page;
+    GtkWidget *root;
+    GtkWidget *layout_widget;
+    GtkWidget *tab;
+    GtkWidget *icon;
+    GtkWidget *label;
+    GtkWidget *close;
     gint page_num;
+
+    if (pane_working_directories == NULL ||
+        pane_working_directories->len == 0 ||
+        pane_working_directories->len > GC_WORKSPACE_LAYOUT_MAX_PANES ||
+        active_pane >= pane_working_directories->len) {
+        return FALSE;
+    }
+
+    parsed = gc_workspace_layout_parse(
+        layout,
+        pane_working_directories->len,
+        &error
+    );
+    if (parsed == NULL) {
+        g_warning(
+            "Refusing invalid restored workspace layout: %s",
+            error != NULL ? error->message : "invalid layout"
+        );
+        g_clear_error(&error);
+        return FALSE;
+    }
+
+    page = g_new0(GcWorkspacePage, 1);
+    root = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    tab = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
+    icon = gtk_image_new_from_icon_name("utilities-terminal-symbolic");
+    label = gtk_label_new("Terminal");
+    close = gtk_button_new_from_icon_name("window-close-symbolic");
 
     page->root = root;
     page->sessions = g_ptr_array_new();
-    page->active = session;
     page->profile = gc_profile_copy(profile);
     page->tab_label = GTK_LABEL(label);
-    g_ptr_array_add(page->sessions, session);
+
+    for (guint i = 0; i < pane_working_directories->len; i++) {
+        const char *cwd = g_ptr_array_index(
+            pane_working_directories,
+            i
+        );
+        GcTerminalSession *session = gc_terminal_session_new_with_profile(
+            profile,
+            cwd,
+            on_session_changed,
+            on_session_paste_requested,
+            on_session_open_requested,
+            workspace
+        );
+
+        g_ptr_array_add(page->sessions, session);
+    }
+
+    page->active = g_ptr_array_index(page->sessions, active_pane);
+    layout_widget = widget_for_layout_node(page, parsed);
+    gc_workspace_layout_free(parsed);
+
+    if (layout_widget == NULL) {
+        g_ptr_array_free(page->sessions, TRUE);
+        gc_profile_free(page->profile);
+        g_free(page);
+        return FALSE;
+    }
 
     g_object_set_data_full(
         G_OBJECT(root),
@@ -416,7 +667,7 @@ gc_workspace_add_tab_with_profile(
 
     gtk_widget_set_hexpand(root, TRUE);
     gtk_widget_set_vexpand(root, TRUE);
-    gtk_box_append(GTK_BOX(root), gc_terminal_session_get_widget(session));
+    gtk_box_append(GTK_BOX(root), layout_widget);
 
     gtk_widget_add_css_class(tab, "gc-tab-label");
     gtk_widget_add_css_class(icon, "gc-tab-icon");
@@ -444,8 +695,29 @@ gc_workspace_add_tab_with_profile(
     gtk_notebook_set_tab_reorderable(workspace->notebook, root, TRUE);
     update_tab_label(page);
     gtk_notebook_set_current_page(workspace->notebook, page_num);
-    gc_terminal_session_focus(session);
+    gc_terminal_session_focus(page->active);
     notify_changed(workspace);
+    return TRUE;
+}
+
+void
+gc_workspace_add_tab_with_profile(
+    GcWorkspace *workspace,
+    const GcProfile *profile,
+    const char *working_directory
+)
+{
+    GPtrArray *panes = g_ptr_array_new();
+
+    g_ptr_array_add(panes, (gpointer) working_directory);
+    gc_workspace_add_tab_with_profile_layout(
+        workspace,
+        profile,
+        "0",
+        panes,
+        0
+    );
+    g_ptr_array_unref(panes);
 }
 
 void
@@ -529,8 +801,18 @@ gc_workspace_split_current(
     GtkWidget *paned;
     g_autofree char *working_directory = NULL;
 
-    if (page == NULL || page->active == NULL) {
+    if (page == NULL || page->active == NULL ||
+        page->sessions->len >= GC_WORKSPACE_LAYOUT_MAX_PANES) {
         return FALSE;
+    }
+
+    {
+        GtkWidget *layout_root = gtk_widget_get_first_child(page->root);
+
+        if (layout_root != NULL &&
+            layout_depth(layout_root) >= GC_WORKSPACE_LAYOUT_MAX_DEPTH) {
+            return FALSE;
+        }
     }
 
     active = page->active;
@@ -547,13 +829,7 @@ gc_workspace_split_current(
     created_widget = gc_terminal_session_get_widget(created);
     paned = gtk_paned_new(orientation);
 
-    gtk_widget_set_hexpand(paned, TRUE);
-    gtk_widget_set_vexpand(paned, TRUE);
-    gtk_paned_set_wide_handle(GTK_PANED(paned), TRUE);
-    gtk_paned_set_resize_start_child(GTK_PANED(paned), TRUE);
-    gtk_paned_set_resize_end_child(GTK_PANED(paned), TRUE);
-    gtk_paned_set_shrink_start_child(GTK_PANED(paned), FALSE);
-    gtk_paned_set_shrink_end_child(GTK_PANED(paned), FALSE);
+    configure_paned(GTK_PANED(paned));
 
     g_object_ref(active_widget);
     if (!replace_layout_child(page, active_widget, paned)) {
