@@ -33,6 +33,7 @@ const char *gc_profile_get_id(const GcProfile *profile);
 const char *gc_profile_get_name(const GcProfile *profile);
 const char *gc_profile_get_shell(const GcProfile *profile);
 const char *gc_profile_get_working_directory(const GcProfile *profile);
+const char *gc_profile_get_startup_command(const GcProfile *profile);
 const char *gc_profile_get_font(const GcProfile *profile);
 const char *gc_profile_get_foreground(const GcProfile *profile);
 const char *gc_profile_get_background(const GcProfile *profile);

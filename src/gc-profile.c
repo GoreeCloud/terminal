@@ -5,12 +5,14 @@
 
 #define GC_PROFILE_DEFAULT_SCROLLBACK_LINES 10000
 #define GC_PROFILE_MAX_SCROLLBACK_LINES 1000000
+#define GC_PROFILE_MAX_STARTUP_COMMAND_LENGTH 4096
 
 struct _GcProfile {
     char *id;
     char *name;
     char *shell;
     char *working_directory;
+    char *startup_command;
     char *font;
     char *foreground;
     char *background;
@@ -193,6 +195,11 @@ load_profile_group(
         group,
         "working-directory"
     );
+    profile->startup_command = optional_key_string(
+        key_file,
+        group,
+        "startup-command"
+    );
     profile->font = optional_key_string(key_file, group, "font");
     profile->foreground = optional_key_string(key_file, group, "foreground");
     profile->background = optional_key_string(key_file, group, "background");
@@ -243,6 +250,21 @@ load_profile_group(
             3,
             "Profile %s shell must be an absolute path",
             id
+        );
+        gc_profile_free(profile);
+        return FALSE;
+    }
+
+    if (profile->startup_command != NULL &&
+        strlen(profile->startup_command) >
+            GC_PROFILE_MAX_STARTUP_COMMAND_LENGTH) {
+        g_set_error(
+            error,
+            profile_error_quark(),
+            8,
+            "Profile %s startup-command exceeds %d bytes",
+            id,
+            GC_PROFILE_MAX_STARTUP_COMMAND_LENGTH
         );
         gc_profile_free(profile);
         return FALSE;
@@ -435,6 +457,7 @@ gc_profile_copy(const GcProfile *profile)
     copy->name = g_strdup(profile->name);
     copy->shell = g_strdup(profile->shell);
     copy->working_directory = g_strdup(profile->working_directory);
+    copy->startup_command = g_strdup(profile->startup_command);
     copy->font = g_strdup(profile->font);
     copy->foreground = g_strdup(profile->foreground);
     copy->background = g_strdup(profile->background);
@@ -454,6 +477,7 @@ gc_profile_free(GcProfile *profile)
     g_free(profile->name);
     g_free(profile->shell);
     g_free(profile->working_directory);
+    g_free(profile->startup_command);
     g_free(profile->font);
     g_free(profile->foreground);
     g_free(profile->background);
@@ -483,6 +507,12 @@ const char *
 gc_profile_get_working_directory(const GcProfile *profile)
 {
     return profile != NULL ? profile->working_directory : NULL;
+}
+
+const char *
+gc_profile_get_startup_command(const GcProfile *profile)
+{
+    return profile != NULL ? profile->startup_command : NULL;
 }
 
 const char *
