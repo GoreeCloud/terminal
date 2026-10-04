@@ -25,6 +25,7 @@ The current source provides:
 - first-run onboarding with durable step progress and Help replay;
 - 10,000-line default scrollback per session;
 - a mockup-inspired deep-navy workspace shell with GoreeCloud branding, a truthful Local Shell sidebar, closable tabs, a + tab action, compact pane/search controls, and a persistent bottom execution-context/status bar;
+- the approved first-party GoreeCloud Terminal SVG from `GoreeCloud/branding-assets`, installed for the desktop entry and embedded for the native header;
 - Meson/Ninja build and install plumbing; and
 - GitHub Actions compile/test/install validation on Ubuntu 24.04 and Debian 13.
 

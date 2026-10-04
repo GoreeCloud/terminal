@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/com/goreecloud/Terminal">
+    <file alias="app-icon.svg">icons/hicolor/scalable/apps/com.goreecloud.Terminal.svg</file>
+  </gresource>
+</gresources>
