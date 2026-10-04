@@ -946,3 +946,70 @@ This event does not establish complete command-boundary navigation across every 
 
 Repository protection remains disabled and the GitHub Description remains blank; both remain unresolved governance defects tracked in issue #3.
 
+
+
+## 2026-10-04 — Repository Description and Canonical Index Reconciled
+
+### Event
+
+The live GitHub repository Description for `GoreeCloud/terminal` was set to **Native GTK 4 + VTE Linux terminal for GoreeCloud, currently in Development.** The wording identifies the repository role while preserving the current Development lifecycle boundary.
+
+### Verification Evidence
+
+- live repository Description readback confirmed the new value through the owner-designated GoreeCloud GitHub account;
+- authoritative repository remained public with default branch `main`;
+- `GoreeCloud/Sources/GitHub-Repository-Index.xlsx` was reconciled in place to v1.32 from the verified provider state; and
+- repository issue #3 remains open because branch protection is still not enabled.
+
+### Remaining Governance Boundary
+
+The Description defect is resolved. Branch protection remains unresolved: live `main` readback still reports `protected: false`, and repository rulesets remain empty. No protection control was simulated or represented as present.
+
+## 2026-10-04 — Bounded Nested Split-Layout Restoration Integrated
+
+### Event
+
+Pull request #28 extended local workspace persistence from top-level tab metadata to bounded nested split-pane restoration. The workspace now restores each tab's profile, horizontal/vertical split tree, per-pane working directories, active pane, and selected-tab position.
+
+### Exact Source Evidence
+
+- authoritative base: `8125e6cdbb6d19198bbd03a05349ab98ccc3c223`;
+- exact accepted candidate: `75054281c7e705d799b94c69bd80ad70b72129bf`;
+- pull request: #28, **Restore bounded nested split layouts**;
+- merge method: squash; and
+- authoritative merged commit: `1c1f88035eefb19850cf67df29a31c322e4592a4`.
+
+### Validation Evidence
+
+The exact accepted candidate passed:
+
+- Native Foundation run `37236936359` — push — success on both Ubuntu 24.04 and Debian 13 jobs; and
+- Native Foundation run `37237035209` — pull request — success on both Ubuntu 24.04 and Debian 13 jobs.
+
+After merge, authoritative `main` commit `1c1f88035eefb19850cf67df29a31c322e4592a4` passed:
+
+- Native Foundation run `37237138675` — push on `main` — success on both Ubuntu 24.04 and Debian 13 jobs.
+
+### Implemented Development Boundary
+
+Verified source now adds:
+
+- workspace state schema v2 for nested pane layout restoration;
+- migration of prior version-1 top-level-tab state into the current in-memory schema;
+- bounded layout parsing and serialization with a maximum of 16 panes and 8 split levels per tab;
+- persisted per-pane working directories and active-pane selection;
+- safe fallback when a stored working directory no longer exists;
+- preserved previous-valid-snapshot recovery for malformed or missing primary state;
+- fail-closed handling for unsupported future workspace schema versions;
+- focused unit and GTK/VTE integration coverage for layout round-trip, invalid layouts, depth bounds, migration, active-pane restoration, and per-pane working directories; and
+- synchronized README, onboarding, implemented/planned feature, changelog, user-manual, security, and privacy documentation.
+
+### Security and Privacy Boundary
+
+Workspace restore state remains local. It does not persist terminal output, command text, command history, clipboard content, credentials, search content, or running-process state. Restored profile IDs, layout structure, pane selection, and working directories are configuration/state metadata and are not authorization or identity evidence.
+
+### Remaining Product Boundary
+
+This event does not establish terminal-content restoration, long-running process continuity, clean-target restore acceptance, export/portability acceptance, SSH or remote administration, container workflows, complete cross-baseline shell integration, representative graphical desktop acceptance, complete Glaze consumer acceptance, production packaging, release qualification, deployment, production acceptance, or Stable/Anchor status.
+
+Repository protection remains disabled and is tracked separately in issue #3.
