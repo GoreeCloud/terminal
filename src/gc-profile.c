@@ -9,6 +9,7 @@
 #define GC_PROFILE_MAX_STARTUP_COMMAND_LENGTH 4096
 #define GC_PROFILE_MAX_KEYBINDINGS 32
 #define GC_PROFILE_MAX_KEYBINDING_LENGTH 192
+#define GC_PROFILE_MAX_NOTIFY_AFTER_SECONDS 604800
 
 struct _GcProfile {
     char *id;
@@ -22,6 +23,7 @@ struct _GcProfile {
     GcProfileCursorShape cursor_shape;
     GcProfileCursorBlink cursor_blink;
     gboolean bold_is_bright;
+    guint notify_after_seconds;
     gint64 scrollback_lines;
     char **environment;
     char **keybindings;
@@ -50,6 +52,7 @@ profile_new_default(void)
     profile->cursor_shape = GC_PROFILE_CURSOR_SHAPE_BLOCK;
     profile->cursor_blink = GC_PROFILE_CURSOR_BLINK_SYSTEM;
     profile->bold_is_bright = TRUE;
+    profile->notify_after_seconds = 0;
     profile->scrollback_lines = GC_PROFILE_DEFAULT_SCROLLBACK_LINES;
 
     return profile;
@@ -321,6 +324,7 @@ load_profile_group(
     profile->cursor_shape = GC_PROFILE_CURSOR_SHAPE_BLOCK;
     profile->cursor_blink = GC_PROFILE_CURSOR_BLINK_SYSTEM;
     profile->bold_is_bright = TRUE;
+    profile->notify_after_seconds = 0;
     profile->scrollback_lines = GC_PROFILE_DEFAULT_SCROLLBACK_LINES;
 
     {
@@ -381,6 +385,41 @@ load_profile_group(
             gc_profile_free(profile);
             return FALSE;
         }
+    }
+
+    if (g_key_file_has_key(
+            key_file,
+            group,
+            "notify-after-seconds",
+            NULL
+        )) {
+        GError *notify_error = NULL;
+        gint64 notify_after_seconds = g_key_file_get_int64(
+            key_file,
+            group,
+            "notify-after-seconds",
+            &notify_error
+        );
+
+        if (notify_error != NULL ||
+            notify_after_seconds < 0 ||
+            notify_after_seconds >
+                GC_PROFILE_MAX_NOTIFY_AFTER_SECONDS) {
+            g_clear_error(&notify_error);
+            g_set_error(
+                error,
+                profile_error_quark(),
+                14,
+                "Profile %s notify-after-seconds must be between 0 and %d",
+                id,
+                GC_PROFILE_MAX_NOTIFY_AFTER_SECONDS
+            );
+            gc_profile_free(profile);
+            return FALSE;
+        }
+
+        profile->notify_after_seconds =
+            (guint) notify_after_seconds;
     }
 
     if (g_key_file_has_key(key_file, group, "scrollback-lines", NULL)) {
@@ -682,6 +721,7 @@ gc_profile_copy(const GcProfile *profile)
     copy->cursor_shape = profile->cursor_shape;
     copy->cursor_blink = profile->cursor_blink;
     copy->bold_is_bright = profile->bold_is_bright;
+    copy->notify_after_seconds = profile->notify_after_seconds;
     copy->scrollback_lines = profile->scrollback_lines;
     copy->environment = g_strdupv(profile->environment);
     copy->keybindings = g_strdupv(profile->keybindings);
@@ -782,6 +822,12 @@ gboolean
 gc_profile_get_bold_is_bright(const GcProfile *profile)
 {
     return profile != NULL ? profile->bold_is_bright : TRUE;
+}
+
+guint
+gc_profile_get_notify_after_seconds(const GcProfile *profile)
+{
+    return profile != NULL ? profile->notify_after_seconds : 0;
 }
 
 gint64
