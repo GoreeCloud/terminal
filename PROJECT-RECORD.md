@@ -892,3 +892,57 @@ The upper bound prevents an unbounded profile value from requesting arbitrarily 
 
 Repository protection remains disabled and the GitHub Description remains blank; both remain unresolved governance defects tracked in issue #3.
 
+## 2026-10-04 — Protocol-Derived Command Start Navigation Integrated
+
+### Event
+
+Pull request #26 integrated bounded command-start navigation for local terminal sessions on the VTE 0.78+ shell-integration path. The implementation deliberately derives navigation markers only from protocol-reported pre-execution events and does not infer command boundaries from prompt text or arbitrary terminal output.
+
+### Exact Source Evidence
+
+- authoritative base: `97b2cb95912734730ba8d743543e03b281b79286`;
+- corrected exact accepted candidate: `3706ee9b957ba4ace36b92ca1001a04d1f93534e`;
+- pull request: #26, **Add protocol-derived command start navigation**;
+- merge method: squash; and
+- authoritative merged commit: `a9ad3661da8213d37ea79abd01eeeae161a86983`.
+
+### Corrective and Validation Evidence
+
+Earlier candidate revisions exposed a workspace-test linkage defect after the new command-boundary module was added. Native Foundation push runs `37220463403` and `37220691082` failed during workspace-test linking because `gc-command-boundaries.c` was not linked into that test target. The test was preserved and the target linkage was corrected rather than weakening coverage.
+
+The corrected exact accepted candidate then passed:
+
+- Native Foundation run `37220773879` — push — success on both Ubuntu 24.04 and Debian 13 jobs; and
+- Native Foundation run `37220874676` — pull request — success on both Ubuntu 24.04 and Debian 13 jobs.
+
+After merge, authoritative `main` commit `a9ad3661da8213d37ea79abd01eeeae161a86983` passed:
+
+- Native Foundation run `37221035126` — push on `main` — success on both Ubuntu 24.04 and Debian 13 jobs.
+
+### Implemented Development Boundary
+
+Verified source now adds:
+
+- a bounded 512-entry command-start row history per terminal session;
+- absolute cursor-row capture only when VTE 0.78+ reports a non-reset shell pre-execution term property;
+- duplicate suppression and pruning of rows that have left scrollback;
+- previous/next command-start navigation for the active pane;
+- header up/down symbolic-glyph controls;
+- `Alt+Up` and `Alt+Down` keyboard navigation;
+- disabled command-navigation actions until protocol-derived command metadata exists; and
+- focused unit coverage for navigation ordering, duplicate suppression, negative absolute rows, pruning, and history bounds.
+
+The VTE 0.76 compatibility path remains supported and generic. It does not expose command-start navigation because the required term-property path is unavailable there.
+
+### Security and Privacy Boundary
+
+The implementation stores row coordinates only. It does not persist command text, prompt text, terminal output, command history, or navigation markers. It does not parse spoofable prompt/output text to invent command boundaries.
+
+Shell lifecycle and command-start metadata remain advisory execution context. They are not proof of identity, privilege, authorization, remote-host identity, command safety, or policy state.
+
+### Remaining Product Boundary
+
+This event does not establish complete command-boundary navigation across every supported VTE baseline, foreground-process identity, complete shell integration, persistent command history, SSH/remote administration, container workflows, representative graphical desktop acceptance, complete Glaze consumer acceptance, production packaging, release qualification, deployment, production acceptance, or Stable/Anchor status.
+
+Repository protection remains disabled and the GitHub Description remains blank; both remain unresolved governance defects tracked in issue #3.
+
