@@ -408,10 +408,11 @@ gc_terminal_session_new_with_profile(
     const char *startup_command = gc_profile_get_startup_command(profile);
     const char *shell = gc_context_shell();
     g_autofree char *profile_directory = NULL;
+    g_autofree char *quoted_shell = NULL;
     g_autofree char *startup_script = NULL;
     const char *initial_directory;
     g_auto(GStrv) environment = NULL;
-    char *argv[5] = {0};
+    char *argv[4] = {0};
 
     if (configured_shell != NULL &&
         g_file_test(configured_shell, G_FILE_TEST_IS_EXECUTABLE)) {
@@ -435,14 +436,15 @@ gc_terminal_session_new_with_profile(
     argv[0] = (char *) shell;
 
     if (startup_command != NULL && *startup_command != '\0') {
+        quoted_shell = g_shell_quote(shell);
         startup_script = g_strdup_printf(
-            "%s\nexec \"$0\"",
-            startup_command
+            "%s\nexec %s",
+            startup_command,
+            quoted_shell
         );
         argv[1] = "-c";
         argv[2] = startup_script;
-        argv[3] = (char *) shell;
-        argv[4] = NULL;
+        argv[3] = NULL;
     } else {
         argv[1] = NULL;
     }
