@@ -278,16 +278,39 @@ save_workspace_now(TerminalWindowState *state)
     stored.current_tab = gc_workspace_get_current_index(state->workspace);
 
     for (guint i = 0; i < count; i++) {
-        g_autofree char *cwd = gc_workspace_dup_tab_working_directory(
+        guint pane_count = gc_workspace_get_tab_pane_count(
             state->workspace,
             i
         );
+        guint active_pane = gc_workspace_get_tab_active_pane_index(
+            state->workspace,
+            i
+        );
+        g_autofree char *layout = gc_workspace_dup_tab_layout(
+            state->workspace,
+            i
+        );
+        GPtrArray *panes = g_ptr_array_new_with_free_func(g_free);
 
-        gc_session_store_add_tab(
+        for (guint pane = 0; pane < pane_count; pane++) {
+            g_ptr_array_add(
+                panes,
+                gc_workspace_dup_tab_pane_working_directory(
+                    state->workspace,
+                    i,
+                    pane
+                )
+            );
+        }
+
+        gc_session_store_add_tab_layout(
             &stored,
             gc_workspace_get_tab_profile_id(state->workspace, i),
-            cwd
+            layout,
+            panes,
+            active_pane
         );
+        g_ptr_array_unref(panes);
     }
 
     saved = gc_session_store_save(
@@ -366,21 +389,53 @@ restore_workspace(TerminalWindowState *state)
             state->profiles,
             tab->profile_id
         );
-        const char *cwd = tab->working_directory;
+        GPtrArray *panes = g_ptr_array_new();
 
         if (profile == NULL) {
             profile = gc_profile_store_get_default(state->profiles);
         }
 
-        if (cwd == NULL || !g_file_test(cwd, G_FILE_TEST_IS_DIR)) {
-            cwd = NULL;
+        for (guint pane = 0;
+             pane < tab->pane_working_directories->len;
+             pane++) {
+            const char *cwd = g_ptr_array_index(
+                tab->pane_working_directories,
+                pane
+            );
+
+            g_ptr_array_add(
+                panes,
+                (gpointer) (
+                    cwd != NULL &&
+                    g_file_test(cwd, G_FILE_TEST_IS_DIR)
+                        ? cwd
+                        : NULL
+                )
+            );
         }
 
-        gc_workspace_add_tab_with_profile(
-            state->workspace,
-            profile,
-            cwd
-        );
+        if (!gc_workspace_add_tab_with_profile_layout(
+                state->workspace,
+                profile,
+                tab->layout,
+                panes,
+                tab->active_pane
+            )) {
+            const char *cwd = tab->working_directory;
+
+            if (cwd == NULL ||
+                !g_file_test(cwd, G_FILE_TEST_IS_DIR)) {
+                cwd = NULL;
+            }
+
+            gc_workspace_add_tab_with_profile(
+                state->workspace,
+                profile,
+                cwd
+            );
+        }
+
+        g_ptr_array_unref(panes);
     }
 
     if (gc_workspace_get_count(state->workspace) == 0) {
