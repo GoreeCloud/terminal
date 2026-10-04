@@ -233,8 +233,6 @@ load_profile_group(
     for (guint i = 0;
          profile->environment != NULL && profile->environment[i] != NULL;
          i++) {
-        g_strstrip(profile->environment[i]);
-
         if (!environment_entry_is_valid(profile->environment[i])) {
             g_set_error(
                 error,
