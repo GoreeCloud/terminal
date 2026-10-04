@@ -481,6 +481,37 @@ gc_profile_dup_environment(const GcProfile *profile)
     return profile != NULL ? g_strdupv(profile->environment) : NULL;
 }
 
+char **
+gc_profile_dup_spawn_environment(const GcProfile *profile)
+{
+    char **environment = g_get_environ();
+    g_auto(GStrv) overrides = gc_profile_dup_environment(profile);
+
+    for (guint i = 0;
+         overrides != NULL && overrides[i] != NULL;
+         i++) {
+        const char *equals = strchr(overrides[i], '=');
+        g_autofree char *name = NULL;
+
+        if (equals == NULL) {
+            continue;
+        }
+
+        name = g_strndup(
+            overrides[i],
+            (gsize) (equals - overrides[i])
+        );
+        environment = g_environ_setenv(
+            environment,
+            name,
+            equals + 1,
+            TRUE
+        );
+    }
+
+    return environment;
+}
+
 char *
 gc_profile_dup_effective_working_directory(
     const GcProfile *profile,
