@@ -294,6 +294,8 @@ gc_session_store_save(
     g_autofree char *data = NULL;
     gsize data_length = 0;
     g_autofree char *temporary_path = NULL;
+    g_autofree char *backup_path = NULL;
+    gboolean had_primary = FALSE;
     int saved_errno;
 
     if (path == NULL || state == NULL || state->tabs == NULL) {
@@ -361,6 +363,7 @@ gc_session_store_save(
         path,
         (guint) getpid()
     );
+    backup_path = session_store_backup_path(path);
     if (!g_file_set_contents(
             temporary_path,
             data,
@@ -383,9 +386,48 @@ gc_session_store_save(
         return FALSE;
     }
 
+    had_primary = g_file_test(path, G_FILE_TEST_EXISTS);
+    if (had_primary) {
+        if (g_unlink(backup_path) != 0 && errno != ENOENT) {
+            saved_errno = errno;
+            g_unlink(temporary_path);
+            g_set_error(
+                error,
+                G_FILE_ERROR,
+                g_file_error_from_errno(saved_errno),
+                "Unable to clear previous session backup: %s",
+                g_strerror(saved_errno)
+            );
+            return FALSE;
+        }
+
+        if (g_rename(path, backup_path) != 0) {
+            saved_errno = errno;
+            g_unlink(temporary_path);
+            g_set_error(
+                error,
+                G_FILE_ERROR,
+                g_file_error_from_errno(saved_errno),
+                "Unable to preserve previous session state: %s",
+                g_strerror(saved_errno)
+            );
+            return FALSE;
+        }
+    }
+
     if (g_rename(temporary_path, path) != 0) {
         saved_errno = errno;
         g_unlink(temporary_path);
+
+        if (had_primary) {
+            if (g_rename(backup_path, path) != 0) {
+                g_warning(
+                    "Unable to restore previous session state after replacement failure: %s",
+                    g_strerror(errno)
+                );
+            }
+        }
+
         g_set_error(
             error,
             G_FILE_ERROR,
