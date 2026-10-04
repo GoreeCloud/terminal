@@ -6,6 +6,14 @@
 #include <glib/gstdio.h>
 
 #define GC_SESSION_STORE_MAX_TABS 64
+#define GC_SESSION_STORE_ERROR_UNSUPPORTED_VERSION 1
+
+static GQuark
+session_store_error_quark(void)
+{
+    return g_quark_from_static_string("goreecloud-terminal-session-store-error");
+}
+
 
 static void
 tab_free(gpointer data)
@@ -145,8 +153,8 @@ session_store_load_file(
     if (version != GC_SESSION_STORE_VERSION) {
         g_set_error(
             error,
-            G_KEY_FILE_ERROR,
-            G_KEY_FILE_ERROR_INVALID_VALUE,
+            session_store_error_quark(),
+            GC_SESSION_STORE_ERROR_UNSUPPORTED_VERSION,
             "Unsupported session state version %d",
             version
         );
@@ -248,6 +256,16 @@ gc_session_store_load(
     if (g_file_test(path, G_FILE_TEST_EXISTS) &&
         session_store_load_file(path, state, &primary_error)) {
         return TRUE;
+    }
+
+    if (primary_error != NULL &&
+        g_error_matches(
+            primary_error,
+            session_store_error_quark(),
+            GC_SESSION_STORE_ERROR_UNSUPPORTED_VERSION
+        )) {
+        g_propagate_error(error, primary_error);
+        return FALSE;
     }
 
     if (g_file_test(backup_path, G_FILE_TEST_EXISTS) &&
