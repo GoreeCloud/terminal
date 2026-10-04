@@ -740,3 +740,50 @@ This event does not establish:
 
 Repository branch protection and the blank GitHub Description remain separately unresolved in issue #3.
 
+## 2026-10-03 — Local Profiles and Bounded Tab Restore Integrated
+
+### Event
+
+Pull request #20 integrated portable local launch profiles and versioned restoration of top-level local tab metadata. The Local Shell sidebar now exposes profile selection and reload, while tabs and split panes preserve the selected local profile context.
+
+### Exact Source Evidence
+
+- authoritative base: `ec3133d387e24408c0b1d921e3f852f204769225`;
+- first complete candidate: `26584d2f06e6ba97b7cbdd8a82af299303a4a629`;
+- exact accepted candidate: `4dc24292858b1d1925ca3a382a58b6fd3c0ac0dd`;
+- pull request: #20, **Add portable local profiles and tab restoration**;
+- merge method: squash; and
+- authoritative merged commit: `364cb900337bc94eae68fd3906bcc0136fc5c200`.
+
+### Validation Evidence
+
+The first complete candidate exposed a malformed profile-sidebar CSS string during Ubuntu compilation in Native Foundation run `37170205440`. The source literal was corrected without weakening the feature.
+
+The exact accepted candidate then passed:
+
+- Native Foundation run `37170294795` — push — success on both Ubuntu 24.04 and Debian 13 jobs; and
+- Native Foundation run `37170344252` — pull request — success on both Ubuntu 24.04 and Debian 13 jobs.
+
+After merge, authoritative `main` commit `364cb900337bc94eae68fd3906bcc0136fc5c200` passed:
+
+- Native Foundation run `37170410911` — push on `main` — success on both Ubuntu 24.04 and Debian 13 jobs.
+
+### Implemented Development Boundary
+
+Verified source now adds:
+
+- portable local profile loading and in-app profile reload;
+- profile-aware local tab creation and split inheritance;
+- configurable local shell path, working directory, terminal font, foreground, and background;
+- versioned local restoration of top-level tabs, profile identifiers, working directories, and selected-tab position;
+- safe fallback behavior for invalid profile and restore inputs; and
+- unit plus GTK/VTE integration coverage for the new behavior.
+
+Terminal output, command history, running-process continuity, and nested split layout are not restored by this slice.
+
+### Remaining Product Boundary
+
+This event does not establish advanced profile options, nested split-layout restore, process continuity across restarts, remote administration, container workflows, command-boundary navigation, complete Glaze consumer acceptance, production packaging, or Stable/Anchor status.
+
+Repository branch protection and the blank GitHub Description remain separately unresolved in issue #3.
+
