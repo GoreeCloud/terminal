@@ -7,6 +7,18 @@ G_BEGIN_DECLS
 typedef struct _GcProfile GcProfile;
 typedef struct _GcProfileStore GcProfileStore;
 
+typedef enum {
+    GC_PROFILE_CURSOR_SHAPE_BLOCK,
+    GC_PROFILE_CURSOR_SHAPE_IBEAM,
+    GC_PROFILE_CURSOR_SHAPE_UNDERLINE,
+} GcProfileCursorShape;
+
+typedef enum {
+    GC_PROFILE_CURSOR_BLINK_SYSTEM,
+    GC_PROFILE_CURSOR_BLINK_ON,
+    GC_PROFILE_CURSOR_BLINK_OFF,
+} GcProfileCursorBlink;
+
 GcProfileStore *gc_profile_store_new(void);
 void gc_profile_store_free(GcProfileStore *store);
 
@@ -37,6 +49,9 @@ const char *gc_profile_get_startup_command(const GcProfile *profile);
 const char *gc_profile_get_font(const GcProfile *profile);
 const char *gc_profile_get_foreground(const GcProfile *profile);
 const char *gc_profile_get_background(const GcProfile *profile);
+GcProfileCursorShape gc_profile_get_cursor_shape(const GcProfile *profile);
+GcProfileCursorBlink gc_profile_get_cursor_blink(const GcProfile *profile);
+gboolean gc_profile_get_bold_is_bright(const GcProfile *profile);
 gint64 gc_profile_get_scrollback_lines(const GcProfile *profile);
 char **gc_profile_dup_environment(const GcProfile *profile);
 char **gc_profile_dup_spawn_environment(const GcProfile *profile);
