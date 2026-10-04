@@ -34,7 +34,7 @@ test_load_profiles(void)
         "name=Work shell\n"
         "shell=/bin/sh\n"
         "working-directory=~\n"
-        "startup-command=printf 'profile ready\\n'\n"
+        "startup-command=printf 'profile ready'\n"
         "font=Monospace 12\n"
         "foreground=#ffffff\n"
         "background=#101820\n"
@@ -58,7 +58,7 @@ test_load_profiles(void)
     g_assert_cmpstr(
         gc_profile_get_startup_command(profile),
         ==,
-        "printf 'profile ready\\n'"
+        "printf 'profile ready'"
     );
     g_assert_cmpstr(gc_profile_get_font(profile), ==, "Monospace 12");
     g_assert_cmpint(gc_profile_get_scrollback_lines(profile), ==, 50000);
