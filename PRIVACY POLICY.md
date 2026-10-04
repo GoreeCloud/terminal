@@ -10,7 +10,11 @@ Search expressions are held in process memory for the active search interaction 
 
 Detected link/path text is not persisted by GoreeCloud Terminal. Ctrl+click hands a validated target to the desktop default handler. External applications may perform network or other activity according to their own behavior after the user explicitly requests the open.
 
-The first-run guide persists only two local onboarding fields — completion state and current step — at `$XDG_CONFIG_HOME/goreecloud-terminal/state.ini`. This file does not contain terminal content, command history, credentials, host secrets, remote identities, clipboard content, search content, or session-restore data.
+The first-run guide persists completion state and current step at `$XDG_CONFIG_HOME/goreecloud-terminal/state.ini`.
+
+User-authored local profiles are read from `$XDG_CONFIG_HOME/goreecloud-terminal/profiles.ini`. The current profile fields are profile identity/name, local shell path, working directory, terminal font, foreground color, and background color.
+
+Bounded tab-restore state is stored at `$XDG_STATE_HOME/goreecloud-terminal/workspace.ini`. It contains a format version, tab count, selected-tab position, profile identifiers, and working directories. It does not contain terminal output, command history, running-process state, clipboard content, or search content.
 
 Future remote, synchronization, diagnostics, observability, or account-aware features require separate privacy review before activation.
 

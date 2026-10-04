@@ -26,6 +26,12 @@ The first-run guide covers local-shell behavior, execution context, tabs, panes,
 
 New tabs and panes attempt to inherit the active pane's current working directory. Pane dividers can be dragged to resize them. Pane focus navigation currently cycles rather than performing geometric directional selection.
 
+## Local Profiles and Tab Restore
+
+The sidebar Profile selector chooses the local profile used for a new tab, and the adjacent reload control refreshes profile configuration without restarting the application. The current profile surface covers display name, local shell selection, working directory, terminal font, foreground color, and background color.
+
+After restart, GoreeCloud Terminal restores top-level tabs, each tab's profile and working directory, and the selected-tab position. Terminal output, command history, running processes, and split-pane layout are not restored by this Development slice.
+
 ## Search
 
 Press `Ctrl+Shift+F` to show search for the active pane.
@@ -69,4 +75,4 @@ The presentation does not imply remote connectivity, cloud-provider state, Kuber
 
 ## Current Limitations
 
-The Development build does not yet provide command-boundary navigation, SSH, profiles, workspace/session restoration, container workflows, or complete Glaze 1.6.0 consumer acceptance.
+The Development build does not yet provide command-boundary navigation, SSH, advanced profile options, split-layout or process restoration, container workflows, or complete Glaze 1.6.0 consumer acceptance.

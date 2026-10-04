@@ -21,13 +21,14 @@ The current source provides:
 - guarded clipboard and primary-selection paste review when pasted text contains line breaks;
 - explicit Ctrl+click opening for validated hyperlinks and existing local paths;
 - keyboard-driven tabs, panes, search, copy, paste, and link/path interaction;
+- local launch profiles with in-app selection/reload and bounded top-level tab restoration;
 - first-run onboarding with durable step progress and Help replay;
 - 10,000-line default scrollback per session;
 - a mockup-inspired deep-navy workspace shell with GoreeCloud branding, a truthful Local Shell sidebar, closable tabs, a + tab action, compact pane/search controls, and a persistent bottom execution-context/status bar;
 - Meson/Ninja build and install plumbing; and
 - GitHub Actions compile/test/install validation on Ubuntu 24.04 and Debian 13.
 
-This is Development source evidence only. Command-boundary navigation, complete cross-baseline shell integration, profiles, SSH, workspace/session persistence, containers, automation, protocol qualification, representative runtime acceptance, performance claims, full Glaze conformance, release qualification, and Stable/Anchor status remain incomplete.
+This is Development source evidence only. Local profiles and bounded top-level tab restore are implemented. Broader profile options, split-layout restore, process continuity, command-boundary navigation, complete cross-baseline shell integration, SSH, containers, automation, protocol qualification, representative runtime acceptance, performance claims, full Glaze conformance, release qualification, and Stable/Anchor status remain incomplete.
 
 On VTE 0.78+ (including Debian 13), compatible shell integration can drive advisory `Shell ready`, `Command running`, and last-exit-code status. Ubuntu 24.04's VTE 0.76 path retains generic session status. GoreeCloud Terminal does not infer command lifecycle from prompt text, and lifecycle metadata is not treated as a privilege or authorization signal.
 
