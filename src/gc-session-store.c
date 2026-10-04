@@ -6,6 +6,14 @@
 #include <glib/gstdio.h>
 
 #define GC_SESSION_STORE_MAX_TABS 64
+#define GC_SESSION_STORE_ERROR_UNSUPPORTED_VERSION 1
+
+static GQuark
+session_store_error_quark(void)
+{
+    return g_quark_from_static_string("goreecloud-terminal-session-store-error");
+}
+
 
 static void
 tab_free(gpointer data)
@@ -87,8 +95,14 @@ ensure_parent_directory(const char *path, GError **error)
     return TRUE;
 }
 
-gboolean
-gc_session_store_load(
+static char *
+session_store_backup_path(const char *path)
+{
+    return g_strdup_printf("%s.bak", path);
+}
+
+static gboolean
+session_store_load_file(
     const char *path,
     GcSessionStore *state,
     GError **error
@@ -102,13 +116,6 @@ gc_session_store_load(
     gint current_tab;
 
     gc_session_store_init(&loaded);
-
-    if (path == NULL || !g_file_test(path, G_FILE_TEST_EXISTS)) {
-        gc_session_store_clear(state);
-        *state = loaded;
-        g_key_file_unref(key_file);
-        return TRUE;
-    }
 
     if (!g_key_file_load_from_file(
             key_file,
@@ -146,8 +153,8 @@ gc_session_store_load(
     if (version != GC_SESSION_STORE_VERSION) {
         g_set_error(
             error,
-            G_KEY_FILE_ERROR,
-            G_KEY_FILE_ERROR_INVALID_VALUE,
+            session_store_error_quark(),
+            GC_SESSION_STORE_ERROR_UNSUPPORTED_VERSION,
             "Unsupported session state version %d",
             version
         );
@@ -228,6 +235,62 @@ gc_session_store_load(
 }
 
 gboolean
+gc_session_store_load(
+    const char *path,
+    GcSessionStore *state,
+    GError **error
+)
+{
+    g_autofree char *backup_path = NULL;
+    GError *primary_error = NULL;
+    GError *backup_error = NULL;
+
+    if (path == NULL) {
+        gc_session_store_clear(state);
+        gc_session_store_init(state);
+        return TRUE;
+    }
+
+    backup_path = session_store_backup_path(path);
+
+    if (g_file_test(path, G_FILE_TEST_EXISTS) &&
+        session_store_load_file(path, state, &primary_error)) {
+        return TRUE;
+    }
+
+    if (primary_error != NULL &&
+        g_error_matches(
+            primary_error,
+            session_store_error_quark(),
+            GC_SESSION_STORE_ERROR_UNSUPPORTED_VERSION
+        )) {
+        g_propagate_error(error, primary_error);
+        return FALSE;
+    }
+
+    if (g_file_test(backup_path, G_FILE_TEST_EXISTS) &&
+        session_store_load_file(backup_path, state, &backup_error)) {
+        g_clear_error(&primary_error);
+        return TRUE;
+    }
+
+    if (primary_error != NULL) {
+        g_propagate_error(error, primary_error);
+        g_clear_error(&backup_error);
+        return FALSE;
+    }
+
+    if (backup_error != NULL) {
+        g_propagate_error(error, backup_error);
+        return FALSE;
+    }
+
+    gc_session_store_clear(state);
+    gc_session_store_init(state);
+    return TRUE;
+}
+
+gboolean
 gc_session_store_save(
     const char *path,
     const GcSessionStore *state,
@@ -238,6 +301,8 @@ gc_session_store_save(
     g_autofree char *data = NULL;
     gsize data_length = 0;
     g_autofree char *temporary_path = NULL;
+    g_autofree char *backup_path = NULL;
+    gboolean had_primary = FALSE;
     int saved_errno;
 
     if (path == NULL || state == NULL || state->tabs == NULL) {
@@ -305,6 +370,7 @@ gc_session_store_save(
         path,
         (guint) getpid()
     );
+    backup_path = session_store_backup_path(path);
     if (!g_file_set_contents(
             temporary_path,
             data,
@@ -327,9 +393,48 @@ gc_session_store_save(
         return FALSE;
     }
 
+    had_primary = g_file_test(path, G_FILE_TEST_EXISTS);
+    if (had_primary) {
+        if (g_unlink(backup_path) != 0 && errno != ENOENT) {
+            saved_errno = errno;
+            g_unlink(temporary_path);
+            g_set_error(
+                error,
+                G_FILE_ERROR,
+                g_file_error_from_errno(saved_errno),
+                "Unable to clear previous session backup: %s",
+                g_strerror(saved_errno)
+            );
+            return FALSE;
+        }
+
+        if (g_rename(path, backup_path) != 0) {
+            saved_errno = errno;
+            g_unlink(temporary_path);
+            g_set_error(
+                error,
+                G_FILE_ERROR,
+                g_file_error_from_errno(saved_errno),
+                "Unable to preserve previous session state: %s",
+                g_strerror(saved_errno)
+            );
+            return FALSE;
+        }
+    }
+
     if (g_rename(temporary_path, path) != 0) {
         saved_errno = errno;
         g_unlink(temporary_path);
+
+        if (had_primary) {
+            if (g_rename(backup_path, path) != 0) {
+                g_warning(
+                    "Unable to restore previous session state after replacement failure: %s",
+                    g_strerror(errno)
+                );
+            }
+        }
+
         g_set_error(
             error,
             G_FILE_ERROR,
