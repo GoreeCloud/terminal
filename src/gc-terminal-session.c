@@ -498,8 +498,55 @@ gc_terminal_session_new_with_profile(
 #if VTE_CHECK_VERSION(0, 78, 0)
     vte_terminal_set_enable_legacy_osc777(session->terminal, TRUE);
 #endif
-    vte_terminal_set_bold_is_bright(session->terminal, TRUE);
-    vte_terminal_set_cursor_blink_mode(session->terminal, VTE_CURSOR_BLINK_SYSTEM);
+    vte_terminal_set_bold_is_bright(
+        session->terminal,
+        gc_profile_get_bold_is_bright(profile)
+    );
+
+    switch (gc_profile_get_cursor_shape(profile)) {
+    case GC_PROFILE_CURSOR_SHAPE_IBEAM:
+        vte_terminal_set_cursor_shape(
+            session->terminal,
+            VTE_CURSOR_SHAPE_IBEAM
+        );
+        break;
+    case GC_PROFILE_CURSOR_SHAPE_UNDERLINE:
+        vte_terminal_set_cursor_shape(
+            session->terminal,
+            VTE_CURSOR_SHAPE_UNDERLINE
+        );
+        break;
+    case GC_PROFILE_CURSOR_SHAPE_BLOCK:
+    default:
+        vte_terminal_set_cursor_shape(
+            session->terminal,
+            VTE_CURSOR_SHAPE_BLOCK
+        );
+        break;
+    }
+
+    switch (gc_profile_get_cursor_blink(profile)) {
+    case GC_PROFILE_CURSOR_BLINK_ON:
+        vte_terminal_set_cursor_blink_mode(
+            session->terminal,
+            VTE_CURSOR_BLINK_ON
+        );
+        break;
+    case GC_PROFILE_CURSOR_BLINK_OFF:
+        vte_terminal_set_cursor_blink_mode(
+            session->terminal,
+            VTE_CURSOR_BLINK_OFF
+        );
+        break;
+    case GC_PROFILE_CURSOR_BLINK_SYSTEM:
+    default:
+        vte_terminal_set_cursor_blink_mode(
+            session->terminal,
+            VTE_CURSOR_BLINK_SYSTEM
+        );
+        break;
+    }
+
     vte_terminal_search_set_wrap_around(session->terminal, TRUE);
 
     font = pango_font_description_from_string(gc_profile_get_font(profile));
