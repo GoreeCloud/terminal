@@ -1,6 +1,7 @@
 #include "gc-profile.h"
 
 #include <gio/gio.h>
+#include <string.h>
 
 struct _GcProfile {
     char *id;
