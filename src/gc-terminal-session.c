@@ -1,6 +1,7 @@
 #include "gc-terminal-session.h"
 
 #include "gc-command-boundaries.h"
+#include "gc-command-notification.h"
 #include "gc-context.h"
 #include "gc-shell-state.h"
 
@@ -25,6 +26,9 @@ struct _GcTerminalSession {
     gint url_match_tag;
     gint path_match_tag;
     guint notify_idle_id;
+    guint notify_after_seconds;
+    gint64 command_started_at_usec;
+    char *notification_id;
     gpointer user_data;
 };
 
@@ -62,6 +66,64 @@ queue_notify_changed(GcTerminalSession *session)
 }
 
 #if VTE_CHECK_VERSION(0, 78, 0)
+static void
+send_command_completion_notification(
+    GcTerminalSession *session,
+    gboolean has_exit_status,
+    guint64 exit_status
+)
+{
+    guint64 elapsed_seconds = 0;
+    GApplication *application;
+    g_autofree char *duration = NULL;
+    g_autofree char *body = NULL;
+    GNotification *notification;
+
+    if (!gc_command_notification_due(
+            session->notify_after_seconds,
+            session->command_started_at_usec,
+            g_get_monotonic_time(),
+            &elapsed_seconds
+        )) {
+        session->command_started_at_usec = 0;
+        return;
+    }
+
+    session->command_started_at_usec = 0;
+    application = g_application_get_default();
+    if (application == NULL || session->notification_id == NULL) {
+        return;
+    }
+
+    duration = gc_command_notification_format_duration(
+        elapsed_seconds
+    );
+
+    if (has_exit_status) {
+        body = g_strdup_printf(
+            "%s · exit %" G_GUINT64_FORMAT,
+            duration,
+            exit_status
+        );
+    } else {
+        body = g_strdup_printf(
+            "%s · exit status unavailable",
+            duration
+        );
+    }
+
+    notification = g_notification_new(
+        "Long-running command finished"
+    );
+    g_notification_set_body(notification, body);
+    g_application_send_notification(
+        application,
+        session->notification_id,
+        notification
+    );
+    g_object_unref(notification);
+}
+
 static void
 sync_shell_status(GcTerminalSession *session)
 {
@@ -191,21 +253,32 @@ on_termprop_changed(
                 &session->command_boundaries,
                 (gint64) row
             );
+            session->command_started_at_usec =
+                g_get_monotonic_time();
             gc_shell_state_mark_preexec(&session->shell_state);
             sync_shell_status(session);
         }
     } else if (g_strcmp0(property, VTE_TERMPROP_SHELL_POSTEXEC) == 0) {
-        guint64 exit_status = 0;
+        g_autoptr(GVariant) value =
+            vte_terminal_ref_termprop_variant(terminal, property);
 
-        if (vte_terminal_get_termprop_uint(
-                terminal,
-                property,
-                &exit_status
-            )) {
-            gboolean valid_exit_status = exit_status <= 255;
+        if (value != NULL) {
+            guint64 exit_status = 0;
+            gboolean valid_exit_status =
+                vte_terminal_get_termprop_uint(
+                    terminal,
+                    property,
+                    &exit_status
+                ) &&
+                exit_status <= 255;
 
             gc_shell_state_mark_postexec(
                 &session->shell_state,
+                valid_exit_status,
+                exit_status
+            );
+            send_command_completion_notification(
+                session,
                 valid_exit_status,
                 exit_status
             );
@@ -460,6 +533,7 @@ session_free(gpointer data)
     gc_command_boundaries_clear(&session->command_boundaries);
     g_free(session->working_directory);
     g_free(session->profile_id);
+    g_free(session->notification_id);
     g_free(session->title);
     g_free(session->status);
     g_free(session);
@@ -541,6 +615,13 @@ gc_terminal_session_new_with_profile(
     session->open_requested = open_requested;
     session->url_match_tag = -1;
     session->path_match_tag = -1;
+    session->notify_after_seconds =
+        gc_profile_get_notify_after_seconds(profile);
+    session->command_started_at_usec = 0;
+    session->notification_id = g_strdup_printf(
+        "command-finished-%p",
+        (void *) session
+    );
     session->user_data = user_data;
 
     g_object_set_data_full(
