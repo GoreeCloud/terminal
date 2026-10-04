@@ -13,6 +13,7 @@ struct _GcTerminalSession {
     GtkWidget *root;
     VteTerminal *terminal;
     char *working_directory;
+    char *profile_id;
     char *title;
     char *status;
     GcShellState shell_state;
@@ -366,13 +367,15 @@ session_free(gpointer data)
     }
 
     g_free(session->working_directory);
+    g_free(session->profile_id);
     g_free(session->title);
     g_free(session->status);
     g_free(session);
 }
 
 GcTerminalSession *
-gc_terminal_session_new(
+gc_terminal_session_new_with_profile(
+    const GcProfile *profile,
     const char *working_directory,
     GcTerminalSessionChangedFunc changed,
     GcTerminalSessionPasteRequestedFunc paste_requested,
@@ -386,16 +389,38 @@ gc_terminal_session_new(
     GdkRGBA foreground = {0};
     GdkRGBA background = {0};
     PangoFontDescription *font;
+    const char *configured_shell = gc_profile_get_shell(profile);
     const char *shell = gc_context_shell();
-    const char *initial_directory =
-        working_directory != NULL && *working_directory != '\0'
-            ? working_directory
-            : g_get_home_dir();
-    char *argv[] = {(char *) shell, NULL};
+    g_autofree char *profile_directory = NULL;
+    const char *initial_directory;
+    char *argv[2];
+
+    if (configured_shell != NULL &&
+        g_file_test(configured_shell, G_FILE_TEST_IS_EXECUTABLE)) {
+        shell = configured_shell;
+    } else if (configured_shell != NULL) {
+        g_warning(
+            "Profile shell is not executable, using the login shell instead: %s",
+            configured_shell
+        );
+    }
+
+    if (working_directory != NULL && *working_directory != '\0') {
+        profile_directory = g_strdup(working_directory);
+    } else {
+        profile_directory = gc_profile_dup_effective_working_directory(
+            profile,
+            g_get_home_dir()
+        );
+    }
+    initial_directory = profile_directory;
+    argv[0] = (char *) shell;
+    argv[1] = NULL;
 
     session->root = scroller;
     session->terminal = VTE_TERMINAL(terminal_widget);
     session->working_directory = g_strdup(initial_directory);
+    session->profile_id = g_strdup(gc_profile_get_id(profile));
     session->title = g_strdup("Terminal");
     session->status = g_strdup("Starting shell");
     gc_shell_state_init(&session->shell_state);
@@ -423,8 +448,12 @@ gc_terminal_session_new(
     gtk_widget_set_hexpand(scroller, TRUE);
     gtk_widget_set_vexpand(scroller, TRUE);
 
-    gdk_rgba_parse(&foreground, "#dceaff");
-    gdk_rgba_parse(&background, "#050d18");
+    if (!gdk_rgba_parse(&foreground, gc_profile_get_foreground(profile))) {
+        gdk_rgba_parse(&foreground, "#dceaff");
+    }
+    if (!gdk_rgba_parse(&background, gc_profile_get_background(profile))) {
+        gdk_rgba_parse(&background, "#050d18");
+    }
     vte_terminal_set_colors(session->terminal, &foreground, &background, NULL, 0);
     vte_terminal_set_scrollback_lines(session->terminal, 10000);
     vte_terminal_set_allow_hyperlink(session->terminal, TRUE);
@@ -435,7 +464,7 @@ gc_terminal_session_new(
     vte_terminal_set_cursor_blink_mode(session->terminal, VTE_CURSOR_BLINK_SYSTEM);
     vte_terminal_search_set_wrap_around(session->terminal, TRUE);
 
-    font = pango_font_description_from_string("Monospace 11");
+    font = pango_font_description_from_string(gc_profile_get_font(profile));
     vte_terminal_set_font(session->terminal, font);
     pango_font_description_free(font);
 
@@ -553,6 +582,25 @@ gc_terminal_session_new(
     return session;
 }
 
+GcTerminalSession *
+gc_terminal_session_new(
+    const char *working_directory,
+    GcTerminalSessionChangedFunc changed,
+    GcTerminalSessionPasteRequestedFunc paste_requested,
+    GcTerminalSessionOpenRequestedFunc open_requested,
+    gpointer user_data
+)
+{
+    return gc_terminal_session_new_with_profile(
+        NULL,
+        working_directory,
+        changed,
+        paste_requested,
+        open_requested,
+        user_data
+    );
+}
+
 GtkWidget *
 gc_terminal_session_get_widget(GcTerminalSession *session)
 {
@@ -592,6 +640,14 @@ gc_terminal_session_dup_display_title(GcTerminalSession *session)
 
     return g_strdup("Terminal");
 }
+const char *
+gc_terminal_session_get_profile_id(GcTerminalSession *session)
+{
+    return session != NULL && session->profile_id != NULL
+        ? session->profile_id
+        : "default";
+}
+
 
 gboolean
 gc_terminal_session_has_focus(GcTerminalSession *session)
