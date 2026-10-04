@@ -473,7 +473,10 @@ gc_terminal_session_new_with_profile(
         gdk_rgba_parse(&background, "#050d18");
     }
     vte_terminal_set_colors(session->terminal, &foreground, &background, NULL, 0);
-    vte_terminal_set_scrollback_lines(session->terminal, 10000);
+    vte_terminal_set_scrollback_lines(
+        session->terminal,
+        (glong) gc_profile_get_scrollback_lines(profile)
+    );
     vte_terminal_set_allow_hyperlink(session->terminal, TRUE);
 #if VTE_CHECK_VERSION(0, 78, 0)
     vte_terminal_set_enable_legacy_osc777(session->terminal, TRUE);

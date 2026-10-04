@@ -3,7 +3,7 @@
 The following remain planned or materially incomplete:
 
 - command-boundary navigation;
-- remaining profile options for startup behavior, shortcuts, remote/container purposes, and broader appearance settings;
+- remaining profile options for startup behavior, shortcuts, remote/container purposes, and broader appearance settings; profile scrollback limits are now bounded and configurable;
 - complete shell integration across supported VTE baselines for command boundaries, process context, reliable CWD, and navigation; VTE 0.78+ lifecycle/exit-status awareness is only a bounded Development prerequisite;
 - remaining restore work for split layouts, terminal content, long-running process continuity, clean-target migration, and broader recovery acceptance;
 - general settings beyond onboarding, local profiles, and bounded tab restore;
