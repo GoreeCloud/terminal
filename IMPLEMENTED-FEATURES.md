@@ -28,6 +28,7 @@ These entries establish Development source implementation only. They do not esta
 - Local launch profiles can be selected and reloaded from the sidebar.
 - Profile environment overrides are validated and merged into the inherited local process environment for newly launched tabs and panes.
 - Top-level tabs restore their profile, working directory, and selected-tab position after restart.
+- Each successful save preserves the previous valid workspace snapshot as a local backup; load falls back to that snapshot when the primary state is missing or malformed.
 - Split layout and terminal output remain outside this restore slice.
 
 ## Scrollback Search
