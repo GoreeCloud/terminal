@@ -53,7 +53,8 @@ test_load_profiles(void)
         "cursor-blink=off\n"
         "bold-is-bright=false\n"
         "scrollback-lines=50000\n"
-        "environment=TERM_PROGRAM=GoreeCloud Terminal;GC_TEST=value=with=equals;\n";
+        "environment=TERM_PROGRAM=GoreeCloud Terminal;GC_TEST=value=with=equals;\n"
+        "keybindings=search=<Control><Alt>f;split-horizontal=<Control><Alt>e;\n";
 
     g_assert_no_error(error);
     path = g_build_filename(directory, "profiles.ini", NULL);
@@ -87,6 +88,22 @@ test_load_profiles(void)
     );
     g_assert_false(gc_profile_get_bold_is_bright(profile));
     g_assert_cmpint(gc_profile_get_scrollback_lines(profile), ==, 50000);
+    {
+        g_auto(GStrv) keybindings = gc_profile_dup_keybindings(profile);
+
+        g_assert_nonnull(keybindings);
+        g_assert_cmpstr(
+            keybindings[0],
+            ==,
+            "search=<Control><Alt>f"
+        );
+        g_assert_cmpstr(
+            keybindings[1],
+            ==,
+            "split-horizontal=<Control><Alt>e"
+        );
+        g_assert_null(keybindings[2]);
+    }
     {
         g_auto(GStrv) environment = gc_profile_dup_environment(profile);
 
@@ -340,6 +357,64 @@ test_invalid_cursor_appearance_preserves_store(void)
 }
 
 static void
+test_invalid_keybindings_preserve_store(void)
+{
+    GError *error = NULL;
+    g_autofree char *directory = g_dir_make_tmp(
+        "goreecloud-terminal-profiles-keybindings-invalid-XXXXXX",
+        &error
+    );
+    g_autofree char *path = NULL;
+    GcProfileStore *store;
+    const char *valid_data =
+        "[profile work]\n"
+        "keybindings=search=<Control><Alt>f;\n";
+    const char *invalid_action =
+        "[profile bad]\n"
+        "keybindings=erase-system=<Control>x;\n";
+    const char *invalid_accelerator =
+        "[profile bad]\n"
+        "keybindings=search=not a shortcut;\n";
+
+    g_assert_no_error(error);
+    path = g_build_filename(directory, "profiles.ini", NULL);
+
+    store = gc_profile_store_new();
+    g_assert_true(g_file_set_contents(path, valid_data, -1, &error));
+    g_assert_no_error(error);
+    g_assert_true(gc_profile_store_load(store, path, &error));
+    g_assert_no_error(error);
+
+    g_assert_true(g_file_set_contents(path, invalid_action, -1, &error));
+    g_assert_no_error(error);
+    g_assert_false(gc_profile_store_load(store, path, &error));
+    g_assert_error(
+        error,
+        g_quark_from_static_string("goreecloud-terminal-profile-error"),
+        13
+    );
+    g_clear_error(&error);
+    g_assert_nonnull(gc_profile_store_lookup(store, "work"));
+
+    g_assert_true(
+        g_file_set_contents(path, invalid_accelerator, -1, &error)
+    );
+    g_assert_no_error(error);
+    g_assert_false(gc_profile_store_load(store, path, &error));
+    g_assert_error(
+        error,
+        g_quark_from_static_string("goreecloud-terminal-profile-error"),
+        13
+    );
+    g_clear_error(&error);
+    g_assert_nonnull(gc_profile_store_lookup(store, "work"));
+
+    gc_profile_store_free(store);
+    g_remove(path);
+    g_rmdir(directory);
+}
+
+static void
 test_invalid_scrollback_preserves_store(void)
 {
     GError *error = NULL;
@@ -404,6 +479,10 @@ main(int argc, char **argv)
     g_test_add_func(
         "/profiles/invalid-cursor-appearance-preserves-store",
         test_invalid_cursor_appearance_preserves_store
+    );
+    g_test_add_func(
+        "/profiles/invalid-keybindings-preserves-store",
+        test_invalid_keybindings_preserve_store
     );
     g_test_add_func(
         "/profiles/invalid-scrollback-preserves-store",
