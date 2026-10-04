@@ -27,7 +27,7 @@ The current source provides:
 - Meson/Ninja build and install plumbing; and
 - GitHub Actions compile/test/install validation on Ubuntu 24.04 and Debian 13.
 
-This is Development source evidence only. Command-boundary navigation, complete cross-baseline shell integration, profiles, SSH, workspace/session persistence, containers, automation, protocol qualification, representative runtime acceptance, performance claims, full Glaze conformance, release qualification, and Stable/Anchor status remain incomplete.
+This is Development source evidence only. Local profiles and bounded top-level tab restore are implemented. Broader profile options, split-layout restore, process continuity, command-boundary navigation, complete cross-baseline shell integration, SSH, containers, automation, protocol qualification, representative runtime acceptance, performance claims, full Glaze conformance, release qualification, and Stable/Anchor status remain incomplete.
 
 On VTE 0.78+ (including Debian 13), compatible shell integration can drive advisory `Shell ready`, `Command running`, and last-exit-code status. Ubuntu 24.04's VTE 0.76 path retains generic session status. GoreeCloud Terminal does not infer command lifecycle from prompt text, and lifecycle metadata is not treated as a privilege or authorization signal.
 
