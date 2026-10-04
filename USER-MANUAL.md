@@ -46,6 +46,12 @@ Press `Ctrl+Shift+F` to show search for the active pane.
 
 Invalid regular expressions are shown inline and are not applied.
 
+## Command Start Navigation
+
+On VTE 0.78+ with compatible shell integration, GoreeCloud Terminal records command-start rows only when the terminal protocol reports a pre-execution event. Use the header up/down glyphs or `Alt+Up` / `Alt+Down` to move to the previous or next recorded command start in the active pane. The controls stay disabled when protocol-derived command metadata is unavailable.
+
+This feature does not infer command boundaries from prompt text or arbitrary terminal output. The VTE 0.76 compatibility path does not provide command-start navigation.
+
 ## Links and Local Paths
 
 Ctrl+click a recognized target in the active pane to request opening it with the desktop default handler.
