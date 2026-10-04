@@ -54,6 +54,7 @@ GcProfileCursorBlink gc_profile_get_cursor_blink(const GcProfile *profile);
 gboolean gc_profile_get_bold_is_bright(const GcProfile *profile);
 gint64 gc_profile_get_scrollback_lines(const GcProfile *profile);
 char **gc_profile_dup_environment(const GcProfile *profile);
+char **gc_profile_dup_keybindings(const GcProfile *profile);
 char **gc_profile_dup_spawn_environment(const GcProfile *profile);
 
 char *gc_profile_dup_effective_working_directory(

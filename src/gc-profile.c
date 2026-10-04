@@ -1,11 +1,14 @@
 #include "gc-profile.h"
 
 #include <gio/gio.h>
+#include <gtk/gtk.h>
 #include <string.h>
 
 #define GC_PROFILE_DEFAULT_SCROLLBACK_LINES 10000
 #define GC_PROFILE_MAX_SCROLLBACK_LINES 1000000
 #define GC_PROFILE_MAX_STARTUP_COMMAND_LENGTH 4096
+#define GC_PROFILE_MAX_KEYBINDINGS 32
+#define GC_PROFILE_MAX_KEYBINDING_LENGTH 192
 
 struct _GcProfile {
     char *id;
@@ -21,6 +24,7 @@ struct _GcProfile {
     gboolean bold_is_bright;
     gint64 scrollback_lines;
     char **environment;
+    char **keybindings;
 };
 
 struct _GcProfileStore {
@@ -65,6 +69,69 @@ profile_id_is_valid(const char *id)
     }
 
     return TRUE;
+}
+
+static gboolean
+keybinding_action_is_supported(const char *action)
+{
+    static const char *supported[] = {
+        "new-tab",
+        "close-tab",
+        "split-horizontal",
+        "split-vertical",
+        "close-pane",
+        "next-pane",
+        "previous-pane",
+        "previous-command",
+        "next-command",
+        "next-tab",
+        "previous-tab",
+        "search",
+        "search-next",
+        "search-previous",
+        "search-close",
+        "copy",
+        "paste",
+        "help",
+    };
+
+    for (guint i = 0; i < G_N_ELEMENTS(supported); i++) {
+        if (g_strcmp0(action, supported[i]) == 0) {
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
+static gboolean
+keybinding_entry_is_valid(const char *entry)
+{
+    const char *equals;
+    g_autofree char *action = NULL;
+    guint keyval = 0;
+    GdkModifierType modifiers = 0;
+
+    if (entry == NULL || *entry == '\0' ||
+        strlen(entry) > GC_PROFILE_MAX_KEYBINDING_LENGTH) {
+        return FALSE;
+    }
+
+    equals = strchr(entry, '=');
+    if (equals == NULL || equals == entry || equals[1] == '\0') {
+        return FALSE;
+    }
+
+    action = g_strndup(entry, (gsize) (equals - entry));
+    if (!keybinding_action_is_supported(action)) {
+        return FALSE;
+    }
+
+    return gtk_accelerator_parse(
+        equals + 1,
+        &keyval,
+        &modifiers
+    ) && keyval != 0;
 }
 
 static gboolean
@@ -350,6 +417,46 @@ load_profile_group(
         NULL
     );
 
+    {
+        gsize keybinding_count = 0;
+
+        profile->keybindings = g_key_file_get_string_list(
+            key_file,
+            group,
+            "keybindings",
+            &keybinding_count,
+            NULL
+        );
+
+        if (keybinding_count > GC_PROFILE_MAX_KEYBINDINGS) {
+            g_set_error(
+                error,
+                profile_error_quark(),
+                12,
+                "Profile %s has too many keybindings (maximum %d)",
+                id,
+                GC_PROFILE_MAX_KEYBINDINGS
+            );
+            gc_profile_free(profile);
+            return FALSE;
+        }
+
+        for (gsize i = 0; i < keybinding_count; i++) {
+            if (!keybinding_entry_is_valid(profile->keybindings[i])) {
+                g_set_error(
+                    error,
+                    profile_error_quark(),
+                    13,
+                    "Profile %s has invalid keybinding entry: %s",
+                    id,
+                    profile->keybindings[i]
+                );
+                gc_profile_free(profile);
+                return FALSE;
+            }
+        }
+    }
+
     if (profile->name == NULL) {
         profile->name = g_strdup(id);
     }
@@ -577,6 +684,7 @@ gc_profile_copy(const GcProfile *profile)
     copy->bold_is_bright = profile->bold_is_bright;
     copy->scrollback_lines = profile->scrollback_lines;
     copy->environment = g_strdupv(profile->environment);
+    copy->keybindings = g_strdupv(profile->keybindings);
     return copy;
 }
 
@@ -596,6 +704,7 @@ gc_profile_free(GcProfile *profile)
     g_free(profile->foreground);
     g_free(profile->background);
     g_strfreev(profile->environment);
+    g_strfreev(profile->keybindings);
     g_free(profile);
 }
 
@@ -687,6 +796,12 @@ char **
 gc_profile_dup_environment(const GcProfile *profile)
 {
     return profile != NULL ? g_strdupv(profile->environment) : NULL;
+}
+
+char **
+gc_profile_dup_keybindings(const GcProfile *profile)
+{
+    return profile != NULL ? g_strdupv(profile->keybindings) : NULL;
 }
 
 char **

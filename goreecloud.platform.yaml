@@ -40,8 +40,8 @@ platform_systems:
   glaze_ui:
     result: applicable-blocked
     version: "1.6.0"
-    evidence: [src/gc-terminal-window.c, docs/glaze-ui-conformance.md]
-    notes: Source-side presentation and descriptive accessibility labels for icon/glyph controls exist; representative rendered, screen-reader/focus, large-text/reflow, high-contrast, adaptive, performance, identity, and application-specific Glaze acceptance remain incomplete.
+    evidence: [src/gc-terminal-window.c, BRANDING.md, docs/glaze-ui-conformance.md]
+    notes: Source-side presentation, descriptive accessibility labels for icon/glyph controls, and the approved canonical Terminal SVG identity are integrated; representative rendered, screen-reader/focus, large-text/reflow, high-contrast, adaptive, performance, Human Visual Excellence, and application-specific Glaze acceptance remain incomplete.
   mesh:
     result: applicable-blocked
     version: null
@@ -130,6 +130,8 @@ compatibility:
     - goreecloud-terminal-command-start-navigation-dev-v1
     - goreecloud-terminal-profile-startup-command-dev-v1
     - goreecloud-terminal-profile-cursor-appearance-dev-v1
+    - goreecloud-terminal-profile-keybindings-dev-v1
+    - goreecloud-terminal-canonical-branding-dev-v1
     - goreecloud-terminal-accessible-icon-labels-dev-v1
 
 evidence:
@@ -150,5 +152,5 @@ conformance:
   blockers:
     - Glaze UI 1.6.0 consumer acceptance is incomplete.
     - Privacy Shield, Wardveil, Everkeep, Manager, Mesh, Identity, Policy, and Observability integration/acceptance are not established.
-    - Complete cross-baseline command navigation, remote administration, remaining profile keybindings/purpose/appearance options, terminal/process continuity, clean-target/export recovery acceptance, containers, automation, protocol validation, performance validation, and representative Linux runtime acceptance remain incomplete.
+    - Complete cross-baseline command navigation, remote administration, remaining profile purpose/appearance options and richer keybinding replacement/disable semantics, terminal/process continuity, clean-target/export recovery acceptance, containers, automation, protocol validation, performance validation, and representative Linux runtime acceptance remain incomplete.
     - Production packaging, signed releases, rollback evidence, release approval, and lifecycle promotion remain incomplete.

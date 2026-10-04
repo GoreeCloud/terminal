@@ -372,6 +372,83 @@ on_spawn_finished(VteTerminal *terminal, GPid pid, GError *error, gpointer user_
 }
 
 static void
+install_profile_keybindings(
+    GcTerminalSession *session,
+    const GcProfile *profile
+)
+{
+    g_auto(GStrv) entries = gc_profile_dup_keybindings(profile);
+    GtkShortcutController *controller;
+    guint installed = 0;
+
+    if (entries == NULL || entries[0] == NULL) {
+        return;
+    }
+
+    controller = GTK_SHORTCUT_CONTROLLER(
+        gtk_shortcut_controller_new()
+    );
+    gtk_shortcut_controller_set_scope(
+        controller,
+        GTK_SHORTCUT_SCOPE_LOCAL
+    );
+
+    for (guint i = 0; entries[i] != NULL; i++) {
+        const char *equals = strchr(entries[i], '=');
+        g_autofree char *action_name = NULL;
+        g_autofree char *detailed_action = NULL;
+        guint keyval = 0;
+        GdkModifierType modifiers = 0;
+
+        if (equals == NULL || equals == entries[i] ||
+            equals[1] == '\0') {
+            continue;
+        }
+
+        action_name = g_strndup(
+            entries[i],
+            (gsize) (equals - entries[i])
+        );
+
+        if (!gtk_accelerator_parse(
+                equals + 1,
+                &keyval,
+                &modifiers
+            ) || keyval == 0) {
+            g_warning(
+                "Ignoring invalid profile keybinding accelerator: %s",
+                entries[i]
+            );
+            continue;
+        }
+
+        detailed_action = g_strdup_printf(
+            "win.%s",
+            action_name
+        );
+
+        gtk_shortcut_controller_add_shortcut(
+            controller,
+            gtk_shortcut_new(
+                gtk_keyval_trigger_new(keyval, modifiers),
+                gtk_named_action_new(detailed_action)
+            )
+        );
+        installed++;
+    }
+
+    if (installed == 0) {
+        g_object_unref(controller);
+        return;
+    }
+
+    gtk_widget_add_controller(
+        GTK_WIDGET(session->terminal),
+        GTK_EVENT_CONTROLLER(controller)
+    );
+}
+
+static void
 session_free(gpointer data)
 {
     GcTerminalSession *session = data;
@@ -552,6 +629,8 @@ gc_terminal_session_new_with_profile(
     font = pango_font_description_from_string(gc_profile_get_font(profile));
     vte_terminal_set_font(session->terminal, font);
     pango_font_description_free(font);
+
+    install_profile_keybindings(session, profile);
 
     session->url_match_tag = add_match_regex(
         session->terminal,
