@@ -137,6 +137,55 @@ test_restorable_tab_metadata(void)
 }
 
 static void
+test_restored_split_layout(void)
+{
+    GcWorkspace *workspace = gc_workspace_new(NULL, NULL, NULL, NULL);
+    GtkWidget *widget = gc_workspace_get_widget(workspace);
+    GcProfileStore *profiles = gc_profile_store_new();
+    const GcProfile *profile = gc_profile_store_get_default(profiles);
+    GPtrArray *panes = g_ptr_array_new();
+    g_autofree char *layout = NULL;
+    g_autofree char *cwd = NULL;
+
+    g_object_ref_sink(widget);
+    g_ptr_array_add(panes, (gpointer) "/tmp");
+    g_ptr_array_add(panes, (gpointer) "/");
+    g_ptr_array_add(panes, (gpointer) "/var");
+
+    g_assert_true(
+        gc_workspace_add_tab_with_profile_layout(
+            workspace,
+            profile,
+            "H(0,V(1,2))",
+            panes,
+            2
+        )
+    );
+    g_assert_cmpuint(gc_workspace_get_count(workspace), ==, 1);
+    g_assert_cmpuint(gc_workspace_get_current_pane_count(workspace), ==, 3);
+    g_assert_cmpuint(
+        gc_workspace_get_tab_active_pane_index(workspace, 0),
+        ==,
+        2
+    );
+
+    layout = gc_workspace_dup_tab_layout(workspace, 0);
+    g_assert_cmpstr(layout, ==, "H(0,V(1,2))");
+
+    cwd = gc_workspace_dup_tab_pane_working_directory(
+        workspace,
+        0,
+        2
+    );
+    g_assert_cmpstr(cwd, ==, "/var");
+
+    g_ptr_array_unref(panes);
+    gc_profile_store_free(profiles);
+    g_object_unref(widget);
+    gc_workspace_free(workspace);
+}
+
+static void
 test_split_and_close(void)
 {
     GcWorkspace *workspace = gc_workspace_new(NULL, NULL, NULL, NULL);
@@ -157,6 +206,17 @@ test_split_and_close(void)
         gc_workspace_split_current(workspace, GTK_ORIENTATION_VERTICAL)
     );
     g_assert_cmpuint(gc_workspace_get_current_pane_count(workspace), ==, 3);
+
+    {
+        g_autofree char *layout = gc_workspace_dup_tab_layout(workspace, 0);
+
+        g_assert_cmpstr(layout, ==, "H(0,V(1,2))");
+        g_assert_cmpuint(
+            gc_workspace_get_tab_active_pane_index(workspace, 0),
+            ==,
+            2
+        );
+    }
 
     gc_workspace_focus_relative_pane(workspace, -1);
     gc_workspace_focus_relative_pane(workspace, 1);
@@ -181,6 +241,10 @@ main(int argc, char **argv)
     g_test_add_func(
         "/workspace/restorable-tab-metadata",
         test_restorable_tab_metadata
+    );
+    g_test_add_func(
+        "/workspace/restored-split-layout",
+        test_restored_split_layout
     );
     g_test_add_func("/workspace/split-and-close", test_split_and_close);
     return g_test_run();
