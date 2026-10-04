@@ -194,29 +194,44 @@ test_rejects_unsupported_version(void)
         &error
     );
     g_autofree char *path = NULL;
+    g_autofree char *backup_path = NULL;
     GcSessionStore state;
     const char *data =
         "[workspace]\n"
         "version=99\n"
         "tab-count=0\n"
         "current-tab=0\n";
+    const char *backup_data =
+        "[workspace]\n"
+        "version=1\n"
+        "tab-count=1\n"
+        "current-tab=0\n"
+        "[tab 0]\n"
+        "profile=default\n"
+        "working-directory=/tmp\n";
 
     g_assert_no_error(error);
     path = g_build_filename(directory, "workspace.ini", NULL);
+    backup_path = g_strdup_printf("%s.bak", path);
     g_assert_true(g_file_set_contents(path, data, -1, &error));
+    g_assert_no_error(error);
+    g_assert_true(
+        g_file_set_contents(backup_path, backup_data, -1, &error)
+    );
     g_assert_no_error(error);
 
     gc_session_store_init(&state);
     g_assert_false(gc_session_store_load(path, &state, &error));
     g_assert_error(
         error,
-        G_KEY_FILE_ERROR,
-        G_KEY_FILE_ERROR_INVALID_VALUE
+        g_quark_from_static_string("goreecloud-terminal-session-store-error"),
+        1
     );
     g_clear_error(&error);
 
     gc_session_store_clear(&state);
     g_remove(path);
+    g_remove(backup_path);
     g_rmdir(directory);
 }
 
