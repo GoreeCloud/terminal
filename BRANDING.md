@@ -2,8 +2,14 @@
 
 **Product:** GoreeCloud Terminal
 
-A canonical first-party Terminal icon has not yet been verified in this repository or in the searched GoreeCloud branding-assets repository.
+The canonical first-party Terminal application icon is owned by `GoreeCloud/branding-assets` at:
 
-The Development desktop entry therefore uses the generic platform `utilities-terminal` icon temporarily. The mockup-inspired in-app titlebar also uses the platform terminal symbolic icon as a truthful temporary identifier. Neither is canonical GoreeCloud Terminal artwork, and both must be replaced by approved first-party Glaze-conformant identity assets.
+- canonical vector: `products/terminal/app-icon.svg`;
+- accepted branding blob: `fd28f49fc0dd67e2f3e31480942d555914e8fc5b`;
+- canonical consumer repository: `GoreeCloud/terminal`.
 
-The final identity should communicate command-line work, infrastructure administration, clarity, precision, and GoreeCloud family resemblance while preserving protected semantic colors.
+This repository vendors the exact approved SVG bytes at `data/icons/hicolor/scalable/apps/com.goreecloud.Terminal.svg` because the Linux desktop package and offline application runtime require a local derivative. The vendored SVG is not an independent branding authority and must remain synchronized with the canonical branding repository.
+
+The desktop entry uses the icon name `com.goreecloud.Terminal`, and the native header embeds the same approved SVG through a GLib resource so Development runs do not depend on the icon already being installed into the desktop theme.
+
+The current identity communicates command-line work and GoreeCloud product family membership. Branding does not imply remote connectivity, security acceptance, production readiness, or Stable/Anchor lifecycle state.
