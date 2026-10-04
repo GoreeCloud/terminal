@@ -58,6 +58,8 @@ Clipboard paste through GoreeCloud Terminal's paste action and VTE's Shift+Inser
 
 Ctrl+click may open explicit OSC 8 hyperlinks, detected HTTP/HTTPS/mailto/file targets, or existing absolute/`~/`/`./`/`../` local paths with the desktop default handler. URI schemes are allowlisted and local paths must exist; GoreeCloud Terminal does not execute detected text as a shell command.
 
+Profile `startup-command` values are user-authored local shell input. When configured, the command is run by the selected local shell before GoreeCloud Terminal replaces that command shell with the ordinary interactive shell. Keep credentials and other secrets out of startup commands and profile files.
+
 ## Build
 
 Ubuntu 24.04 or Debian 13 dependencies:
@@ -94,5 +96,3 @@ xvfb-run -a meson test -C build --print-errorlogs
 ## License
 
 AGPL-3.0-or-later is used as the current GoreeCloud fallback license pending any later documented project-specific licensing decision. See [LICENSE](LICENSE).
-
-Profile `startup-command` values are user-authored local shell input. When configured, the command is run by the selected local shell before GoreeCloud Terminal replaces that command shell with the ordinary interactive shell. Keep credentials and other secrets out of startup commands and profile files.
