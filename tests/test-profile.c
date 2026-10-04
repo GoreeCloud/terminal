@@ -34,6 +34,7 @@ test_load_profiles(void)
         "name=Work shell\n"
         "shell=/bin/sh\n"
         "working-directory=~\n"
+        "startup-command=printf 'profile ready\\n'\n"
         "font=Monospace 12\n"
         "foreground=#ffffff\n"
         "background=#101820\n"
@@ -54,6 +55,11 @@ test_load_profiles(void)
     g_assert_nonnull(profile);
     g_assert_cmpstr(gc_profile_get_name(profile), ==, "Work shell");
     g_assert_cmpstr(gc_profile_get_shell(profile), ==, "/bin/sh");
+    g_assert_cmpstr(
+        gc_profile_get_startup_command(profile),
+        ==,
+        "printf 'profile ready\\n'"
+    );
     g_assert_cmpstr(gc_profile_get_font(profile), ==, "Monospace 12");
     g_assert_cmpint(gc_profile_get_scrollback_lines(profile), ==, 50000);
     {
@@ -188,6 +194,55 @@ test_invalid_environment_preserves_store(void)
 }
 
 static void
+test_oversized_startup_command_preserves_store(void)
+{
+    GError *error = NULL;
+    g_autofree char *directory = g_dir_make_tmp(
+        "goreecloud-terminal-profiles-startup-invalid-XXXXXX",
+        &error
+    );
+    g_autofree char *path = NULL;
+    g_autofree char *oversized = NULL;
+    g_autofree char *invalid_data = NULL;
+    GcProfileStore *store;
+    const char *valid_data =
+        "[profile work]\n"
+        "startup-command=printf ready\n";
+
+    g_assert_no_error(error);
+    path = g_build_filename(directory, "profiles.ini", NULL);
+    oversized = g_strnfill(4097, 'x');
+    invalid_data = g_strdup_printf(
+        "[profile bad]\nstartup-command=%s\n",
+        oversized
+    );
+
+    store = gc_profile_store_new();
+    g_assert_true(g_file_set_contents(path, valid_data, -1, &error));
+    g_assert_no_error(error);
+    g_assert_true(gc_profile_store_load(store, path, &error));
+    g_assert_no_error(error);
+    g_assert_nonnull(gc_profile_store_lookup(store, "work"));
+
+    g_assert_true(g_file_set_contents(path, invalid_data, -1, &error));
+    g_assert_no_error(error);
+    g_assert_false(gc_profile_store_load(store, path, &error));
+    g_assert_error(
+        error,
+        g_quark_from_static_string("goreecloud-terminal-profile-error"),
+        8
+    );
+    g_clear_error(&error);
+
+    g_assert_nonnull(gc_profile_store_lookup(store, "work"));
+    g_assert_null(gc_profile_store_lookup(store, "bad"));
+
+    gc_profile_store_free(store);
+    g_remove(path);
+    g_rmdir(directory);
+}
+
+static void
 test_invalid_scrollback_preserves_store(void)
 {
     GError *error = NULL;
@@ -244,6 +299,10 @@ main(int argc, char **argv)
     g_test_add_func(
         "/profiles/invalid-environment-preserves-store",
         test_invalid_environment_preserves_store
+    );
+    g_test_add_func(
+        "/profiles/invalid-startup-command-preserves-store",
+        test_oversized_startup_command_preserves_store
     );
     g_test_add_func(
         "/profiles/invalid-scrollback-preserves-store",
