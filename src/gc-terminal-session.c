@@ -4,7 +4,6 @@
 #include "gc-shell-state.h"
 
 #include <pango/pango.h>
-#include <string.h>
 
 #define PCRE2_CODE_UNIT_WIDTH 8
 #include <pcre2.h>
@@ -26,37 +25,6 @@ struct _GcTerminalSession {
     guint notify_idle_id;
     gpointer user_data;
 };
-
-static char **
-build_spawn_environment(const GcProfile *profile)
-{
-    char **environment = g_get_environ();
-    g_auto(GStrv) overrides = gc_profile_dup_environment(profile);
-
-    for (guint i = 0;
-         overrides != NULL && overrides[i] != NULL;
-         i++) {
-        const char *equals = strchr(overrides[i], '=');
-        g_autofree char *name = NULL;
-
-        if (equals == NULL) {
-            continue;
-        }
-
-        name = g_strndup(
-            overrides[i],
-            (gsize) (equals - overrides[i])
-        );
-        environment = g_environ_setenv(
-            environment,
-            name,
-            equals + 1,
-            TRUE
-        );
-    }
-
-    return environment;
-}
 
 static void
 notify_changed(GcTerminalSession *session)
@@ -449,7 +417,7 @@ gc_terminal_session_new_with_profile(
     initial_directory = profile_directory;
     argv[0] = (char *) shell;
     argv[1] = NULL;
-    environment = build_spawn_environment(profile);
+    environment = gc_profile_dup_spawn_environment(profile);
 
     session->root = scroller;
     session->terminal = VTE_TERMINAL(terminal_widget);
