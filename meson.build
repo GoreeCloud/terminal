@@ -12,10 +12,29 @@ glib_dep = dependency('glib-2.0', version: '>=2.76')
 gio_dep = dependency('gio-2.0', version: '>=2.76')
 pcre2_dep = dependency('libpcre2-8')
 
+gnome = import('gnome')
+terminal_resources = gnome.compile_resources(
+  'goreecloud-terminal-resources',
+  'data/com.goreecloud.Terminal.gresource.xml',
+  source_dir: 'data',
+  c_name: 'goreecloud_terminal',
+)
+
 subdir('src')
 subdir('tests')
 
 install_data(
   'data/com.goreecloud.Terminal.desktop',
   install_dir: join_paths(get_option('datadir'), 'applications'),
+)
+
+install_data(
+  'data/icons/hicolor/scalable/apps/com.goreecloud.Terminal.svg',
+  install_dir: join_paths(
+    get_option('datadir'),
+    'icons',
+    'hicolor',
+    'scalable',
+    'apps',
+  ),
 )
