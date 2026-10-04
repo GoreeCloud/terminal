@@ -449,6 +449,8 @@ update_context(TerminalWindowState *state)
     if (session == NULL) {
         gtk_label_set_text(state->cwd_label, g_get_home_dir());
         gtk_label_set_text(state->session_label, "No active session");
+        set_window_action_enabled(state, "previous-command", FALSE);
+        set_window_action_enabled(state, "next-command", FALSE);
         gtk_window_set_title(state->window, "GoreeCloud Terminal");
         return;
     }
@@ -465,7 +467,20 @@ update_context(TerminalWindowState *state)
     );
 
     gtk_label_set_text(state->cwd_label, cwd);
-    gtk_label_set_text(state->session_label, gc_terminal_session_get_status(session));
+    gtk_label_set_text(
+        state->session_label,
+        gc_terminal_session_get_status(session)
+    );
+    set_window_action_enabled(
+        state,
+        "previous-command",
+        gc_terminal_session_has_command_navigation(session)
+    );
+    set_window_action_enabled(
+        state,
+        "next-command",
+        gc_terminal_session_has_command_navigation(session)
+    );
     gtk_label_set_text(state->subtitle_label, subtitle);
     gtk_window_set_title(state->window, window_title);
 }
