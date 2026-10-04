@@ -3,6 +3,7 @@ executable(
   [
     'main.c',
     'gc-context.c',
+    'gc-command-boundaries.c',
     'gc-profile.c',
     'gc-session-store.c',
     'gc-link-utils.c',
