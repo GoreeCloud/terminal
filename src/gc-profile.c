@@ -11,6 +11,7 @@ struct _GcProfile {
     char *font;
     char *foreground;
     char *background;
+    char **environment;
 };
 
 struct _GcProfileStore {
@@ -46,6 +47,35 @@ profile_id_is_valid(const char *id)
 
     for (const unsigned char *p = (const unsigned char *) id; *p != '\0'; p++) {
         if (!(g_ascii_isalnum(*p) || *p == '-' || *p == '_' || *p == '.')) {
+            return FALSE;
+        }
+    }
+
+    return TRUE;
+}
+
+static gboolean
+environment_entry_is_valid(const char *entry)
+{
+    const char *equals;
+    gsize name_length;
+
+    if (entry == NULL) {
+        return FALSE;
+    }
+
+    equals = strchr(entry, '=');
+    if (equals == NULL || equals == entry) {
+        return FALSE;
+    }
+
+    name_length = (gsize) (equals - entry);
+    if (!(g_ascii_isalpha(entry[0]) || entry[0] == '_')) {
+        return FALSE;
+    }
+
+    for (gsize i = 1; i < name_length; i++) {
+        if (!(g_ascii_isalnum(entry[i]) || entry[i] == '_')) {
             return FALSE;
         }
     }
@@ -161,6 +191,13 @@ load_profile_group(
     profile->font = optional_key_string(key_file, group, "font");
     profile->foreground = optional_key_string(key_file, group, "foreground");
     profile->background = optional_key_string(key_file, group, "background");
+    profile->environment = g_key_file_get_string_list(
+        key_file,
+        group,
+        "environment",
+        NULL,
+        NULL
+    );
 
     if (profile->name == NULL) {
         profile->name = g_strdup(id);
@@ -193,12 +230,29 @@ load_profile_group(
         return FALSE;
     }
 
+    for (guint i = 0;
+         profile->environment != NULL && profile->environment[i] != NULL;
+         i++) {
+        if (!environment_entry_is_valid(profile->environment[i])) {
+            g_set_error(
+                error,
+                profile_error_quark(),
+                5,
+                "Profile %s has invalid environment entry: %s",
+                id,
+                profile->environment[i]
+            );
+            gc_profile_free(profile);
+            return FALSE;
+        }
+    }
+
     if (!color_is_valid(profile->foreground) ||
         !color_is_valid(profile->background)) {
         g_set_error(
             error,
             profile_error_quark(),
-            5,
+            6,
             "Profile %s colors must use #RRGGBB or #RRGGBBAA",
             id
         );
@@ -351,6 +405,7 @@ gc_profile_copy(const GcProfile *profile)
     copy->font = g_strdup(profile->font);
     copy->foreground = g_strdup(profile->foreground);
     copy->background = g_strdup(profile->background);
+    copy->environment = g_strdupv(profile->environment);
     return copy;
 }
 
@@ -368,6 +423,7 @@ gc_profile_free(GcProfile *profile)
     g_free(profile->font);
     g_free(profile->foreground);
     g_free(profile->background);
+    g_strfreev(profile->environment);
     g_free(profile);
 }
 
@@ -417,6 +473,43 @@ gc_profile_get_background(const GcProfile *profile)
     return profile != NULL && profile->background != NULL
         ? profile->background
         : "#050d18";
+}
+
+char **
+gc_profile_dup_environment(const GcProfile *profile)
+{
+    return profile != NULL ? g_strdupv(profile->environment) : NULL;
+}
+
+char **
+gc_profile_dup_spawn_environment(const GcProfile *profile)
+{
+    char **environment = g_get_environ();
+    g_auto(GStrv) overrides = gc_profile_dup_environment(profile);
+
+    for (guint i = 0;
+         overrides != NULL && overrides[i] != NULL;
+         i++) {
+        const char *equals = strchr(overrides[i], '=');
+        g_autofree char *name = NULL;
+
+        if (equals == NULL) {
+            continue;
+        }
+
+        name = g_strndup(
+            overrides[i],
+            (gsize) (equals - overrides[i])
+        );
+        environment = g_environ_setenv(
+            environment,
+            name,
+            equals + 1,
+            TRUE
+        );
+    }
+
+    return environment;
 }
 
 char *

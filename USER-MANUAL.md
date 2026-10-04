@@ -28,7 +28,7 @@ New tabs and panes attempt to inherit the active pane's current working director
 
 ## Local Profiles and Tab Restore
 
-The sidebar Profile selector chooses the local profile used for a new tab, and the adjacent reload control refreshes profile configuration without restarting the application. The current profile surface covers display name, local shell selection, working directory, terminal font, foreground color, and background color.
+The sidebar Profile selector chooses the local profile used for a new tab, and the adjacent reload control refreshes profile configuration without restarting the application. The current profile surface covers display name, local shell selection, working directory, terminal font, foreground color, background color, and environment overrides. Environment entries use `NAME=value` list items and are merged over the inherited local environment for newly launched tabs and panes.
 
 After restart, GoreeCloud Terminal restores top-level tabs, each tab's profile and working directory, and the selected-tab position. Terminal output, command history, running processes, and split-pane layout are not restored by this Development slice.
 
