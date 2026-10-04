@@ -78,6 +78,7 @@ These entries establish Development source implementation only. They do not esta
 - Header up/down glyphs and `Alt+Up` / `Alt+Down` navigate to the previous/next recorded command start; the actions remain disabled until protocol-derived command metadata exists.
 - The Ubuntu 24.04 / VTE 0.76 compatibility path remains generic and does not expose command-start navigation.
 - Protocol-derived lifecycle and command-start metadata are advisory execution context, not authorization, privilege, or security-boundary signals.
+- On VTE 0.78+ only, profiles can opt into a bounded `notify-after-seconds` threshold (0 disables; maximum 604,800 seconds). A protocol-derived command completion that meets the threshold requests a local desktop notification containing only elapsed duration and validated exit status when available; command text, terminal output, working directory, hostname, and other session content are excluded. Representative desktop-notification delivery acceptance remains unverified.
 
 ## First-Run Onboarding
 
