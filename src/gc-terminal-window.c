@@ -4,6 +4,8 @@
 #include "gc-onboarding.h"
 #include "gc-link-utils.h"
 #include "gc-paste-safety.h"
+#include "gc-profile.h"
+#include "gc-session-store.h"
 #include "gc-workspace.h"
 
 #include <pango/pango.h>
@@ -11,6 +13,13 @@
 typedef struct {
     GtkWindow *window;
     GcWorkspace *workspace;
+    GcProfileStore *profiles;
+    GtkDropDown *profile_dropdown;
+    GtkLabel *profile_status;
+    char *profile_path;
+    char *session_store_path;
+    guint save_source_id;
+    gboolean restoring_workspace;
     GtkLabel *subtitle_label;
     GtkLabel *cwd_label;
     GtkLabel *session_label;
@@ -57,6 +66,10 @@ static const char *development_css =
     ".sidebar-action { color: #abc2df; background: transparent; border: 1px solid transparent; border-radius: 7px; padding: 7px 9px; }"
     ".sidebar-action:hover { color: #f2f7ff; background: #0a2037; border-color: #174b78; }"
     ".sidebar-footer { color: #6f8eb7; font-size: 0.84em; margin: 8px 6px 2px 6px; }"
+    ".profile-row { margin: 0 2px 4px 2px; }"
+    ".profile-dropdown { background: #081a2d; border: 1px solid #174b78; border-radius: 7px; }"
+    ".profile-status { color: #6f8eb7; font-size: 0.80em; margin: 0 6px 4px 6px; }"
+    ".profile-reload { min-width: 30px; min-height: 30px; padding: 2px; color: #9eb7d6; background: transparent; border: 1px solid #174b78; border-radius: 7px; }"
     ".gc-workspace { background: #050d18; }"
     ".gc-workspace > header { background: #06111f; border-bottom: 1px solid #0d3c63; padding: 0 8px; }"
     ".gc-workspace > header tabs tab { color: #8faaca; background: transparent; border-right: 1px solid #102f4e; padding: 8px 12px; min-width: 120px; }"
@@ -105,7 +118,14 @@ state_free(gpointer data)
 {
     TerminalWindowState *state = data;
 
+    if (state->save_source_id != 0) {
+        g_source_remove(state->save_source_id);
+    }
+
     gc_workspace_free(state->workspace);
+    gc_profile_store_free(state->profiles);
+    g_free(state->profile_path);
+    g_free(state->session_store_path);
     g_free(state);
 }
 
@@ -125,6 +145,278 @@ paste_review_free(gpointer data)
     g_clear_object(&review->session_widget);
     g_free(review->text);
     g_free(review);
+}
+
+static const GcProfile *
+selected_profile(TerminalWindowState *state)
+{
+    guint selected;
+
+    if (state->profiles == NULL || state->profile_dropdown == NULL) {
+        return state->profiles != NULL
+            ? gc_profile_store_get_default(state->profiles)
+            : NULL;
+    }
+
+    selected = gtk_drop_down_get_selected(state->profile_dropdown);
+    if (selected == GTK_INVALID_LIST_POSITION) {
+        return gc_profile_store_get_default(state->profiles);
+    }
+
+    return gc_profile_store_get(state->profiles, selected);
+}
+
+static guint
+profile_index_for_id(TerminalWindowState *state, const char *id)
+{
+    guint count = gc_profile_store_get_count(state->profiles);
+
+    for (guint i = 0; i < count; i++) {
+        const GcProfile *profile = gc_profile_store_get(state->profiles, i);
+
+        if (g_strcmp0(gc_profile_get_id(profile), id) == 0) {
+            return i;
+        }
+    }
+
+    return 0;
+}
+
+static void
+refresh_profile_dropdown(TerminalWindowState *state, const char *selected_id)
+{
+    GtkStringList *names;
+    guint count;
+
+    if (state->profile_dropdown == NULL) {
+        return;
+    }
+
+    count = gc_profile_store_get_count(state->profiles);
+    names = gtk_string_list_new(NULL);
+
+    for (guint i = 0; i < count; i++) {
+        const GcProfile *profile = gc_profile_store_get(state->profiles, i);
+
+        gtk_string_list_append(names, gc_profile_get_name(profile));
+    }
+
+    gtk_drop_down_set_model(
+        state->profile_dropdown,
+        G_LIST_MODEL(names)
+    );
+    gtk_drop_down_set_selected(
+        state->profile_dropdown,
+        profile_index_for_id(state, selected_id)
+    );
+    g_object_unref(names);
+
+    if (state->profile_status != NULL) {
+        g_autofree char *summary = NULL;
+
+        if (g_file_test(state->profile_path, G_FILE_TEST_EXISTS)) {
+            summary = g_strdup_printf(
+                "%u local profile%s loaded",
+                count,
+                count == 1 ? "" : "s"
+            );
+        } else {
+            summary = g_strdup("Default profile · profiles.ini not created yet");
+        }
+
+        gtk_label_set_text(state->profile_status, summary);
+    }
+}
+
+static void
+reload_profiles(TerminalWindowState *state)
+{
+    const GcProfile *selected = selected_profile(state);
+    g_autofree char *selected_id = g_strdup(
+        gc_profile_get_id(selected)
+    );
+    GError *error = NULL;
+
+    if (!gc_profile_store_load(
+            state->profiles,
+            state->profile_path,
+            &error
+        )) {
+        if (state->profile_status != NULL) {
+            gtk_label_set_text(
+                state->profile_status,
+                error != NULL ? error->message : "Unable to load profiles"
+            );
+        }
+        g_warning(
+            "Unable to reload terminal profiles: %s",
+            error != NULL ? error->message : "unknown error"
+        );
+        g_clear_error(&error);
+        return;
+    }
+
+    refresh_profile_dropdown(state, selected_id);
+}
+
+static void
+on_reload_profiles_clicked(GtkButton *button, gpointer user_data)
+{
+    (void) button;
+    reload_profiles(user_data);
+}
+
+static gboolean
+save_workspace_now(TerminalWindowState *state)
+{
+    GcSessionStore stored;
+    GError *error = NULL;
+    guint count = gc_workspace_get_count(state->workspace);
+    gboolean saved;
+
+    gc_session_store_init(&stored);
+    stored.current_tab = gc_workspace_get_current_index(state->workspace);
+
+    for (guint i = 0; i < count; i++) {
+        g_autofree char *cwd = gc_workspace_dup_tab_working_directory(
+            state->workspace,
+            i
+        );
+
+        gc_session_store_add_tab(
+            &stored,
+            gc_workspace_get_tab_profile_id(state->workspace, i),
+            cwd
+        );
+    }
+
+    saved = gc_session_store_save(
+        state->session_store_path,
+        &stored,
+        &error
+    );
+    if (!saved) {
+        g_warning(
+            "Unable to save terminal workspace state: %s",
+            error != NULL ? error->message : "unknown error"
+        );
+        g_clear_error(&error);
+    }
+
+    gc_session_store_clear(&stored);
+    return saved;
+}
+
+static gboolean
+save_workspace_timeout(gpointer user_data)
+{
+    TerminalWindowState *state = user_data;
+
+    state->save_source_id = 0;
+    save_workspace_now(state);
+    return G_SOURCE_REMOVE;
+}
+
+static void
+schedule_workspace_save(TerminalWindowState *state)
+{
+    if (state->restoring_workspace || state->save_source_id != 0) {
+        return;
+    }
+
+    state->save_source_id = g_timeout_add(
+        250,
+        save_workspace_timeout,
+        state
+    );
+}
+
+static void
+restore_workspace(TerminalWindowState *state)
+{
+    GcSessionStore stored;
+    GError *error = NULL;
+
+    gc_session_store_init(&stored);
+    state->restoring_workspace = TRUE;
+
+    if (!gc_session_store_load(
+            state->session_store_path,
+            &stored,
+            &error
+        )) {
+        g_warning(
+            "Unable to restore terminal workspace state: %s",
+            error != NULL ? error->message : "unknown error"
+        );
+        g_clear_error(&error);
+        gc_session_store_clear(&stored);
+        gc_workspace_add_tab_with_profile(
+            state->workspace,
+            gc_profile_store_get_default(state->profiles),
+            g_get_home_dir()
+        );
+        state->restoring_workspace = FALSE;
+        return;
+    }
+
+    for (guint i = 0; i < stored.tabs->len; i++) {
+        GcSessionStoreTab *tab = g_ptr_array_index(stored.tabs, i);
+        const GcProfile *profile = gc_profile_store_lookup(
+            state->profiles,
+            tab->profile_id
+        );
+        const char *cwd = tab->working_directory;
+
+        if (profile == NULL) {
+            profile = gc_profile_store_get_default(state->profiles);
+        }
+
+        if (cwd == NULL || !g_file_test(cwd, G_FILE_TEST_IS_DIR)) {
+            cwd = NULL;
+        }
+
+        gc_workspace_add_tab_with_profile(
+            state->workspace,
+            profile,
+            cwd
+        );
+    }
+
+    if (gc_workspace_get_count(state->workspace) == 0) {
+        gc_workspace_add_tab_with_profile(
+            state->workspace,
+            gc_profile_store_get_default(state->profiles),
+            g_get_home_dir()
+        );
+    } else {
+        gc_workspace_select_index(
+            state->workspace,
+            stored.current_tab
+        );
+    }
+
+    state->restoring_workspace = FALSE;
+    refresh_profile_dropdown(
+        state,
+        gc_workspace_get_current_profile_id(state->workspace)
+    );
+    gc_session_store_clear(&stored);
+}
+
+static gboolean
+on_window_close_request(GtkWindow *window, gpointer user_data)
+{
+    TerminalWindowState *state = user_data;
+    (void) window;
+
+    if (state->save_source_id != 0) {
+        g_source_remove(state->save_source_id);
+        state->save_source_id = 0;
+    }
+
+    save_workspace_now(state);
+    return FALSE;
 }
 
 static void
@@ -212,17 +504,26 @@ on_workspace_changed(GcWorkspace *workspace, gpointer user_data)
 
     update_context(state);
     apply_search(state, FALSE);
+    schedule_workspace_save(state);
 }
 
 static void
 new_tab_action(GSimpleAction *action, GVariant *parameter, gpointer user_data)
 {
     TerminalWindowState *state = user_data;
-    g_autofree char *cwd = gc_workspace_dup_current_working_directory(state->workspace);
+    const GcProfile *profile = selected_profile(state);
+    g_autofree char *current_cwd =
+        gc_workspace_dup_current_working_directory(state->workspace);
+    g_autofree char *launch_cwd =
+        gc_profile_dup_effective_working_directory(profile, current_cwd);
     (void) action;
     (void) parameter;
 
-    gc_workspace_add_tab(state->workspace, cwd);
+    gc_workspace_add_tab_with_profile(
+        state->workspace,
+        profile,
+        launch_cwd
+    );
 }
 
 static void
@@ -866,7 +1167,7 @@ build_context_bar(TerminalWindowState *state)
 }
 
 static GtkWidget *
-build_sidebar(void)
+build_sidebar(TerminalWindowState *state)
 {
     GtkWidget *sidebar = gtk_box_new(GTK_ORIENTATION_VERTICAL, 8);
     GtkWidget *workspace_heading = gtk_label_new("WORKSPACE");
@@ -876,6 +1177,11 @@ build_sidebar(void)
     GtkWidget *local_title = gtk_label_new("Local Shell");
     g_autofree char *identity = gc_context_identity();
     GtkWidget *local_detail = gtk_label_new(identity);
+    GtkWidget *profile_heading = gtk_label_new("PROFILE");
+    GtkWidget *profile_row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 6);
+    GtkWidget *profile_dropdown = gtk_drop_down_new(NULL, NULL);
+    GtkWidget *profile_reload = gtk_button_new_from_icon_name("view-refresh-symbolic");
+    GtkWidget *profile_status = gtk_label_new("");
     GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
     GtkWidget *actions_heading = gtk_label_new("QUICK ACTIONS");
     GtkWidget *new_tab = gtk_button_new_with_label("＋  New tab");
@@ -897,6 +1203,11 @@ build_sidebar(void)
     gtk_widget_add_css_class(local_dot, "sidebar-dot");
     gtk_widget_add_css_class(local_title, "sidebar-title");
     gtk_widget_add_css_class(local_detail, "sidebar-detail");
+    gtk_widget_add_css_class(profile_heading, "sidebar-heading");
+    gtk_widget_add_css_class(profile_row, "profile-row");
+    gtk_widget_add_css_class(profile_dropdown, "profile-dropdown");
+    gtk_widget_add_css_class(profile_reload, "profile-reload");
+    gtk_widget_add_css_class(profile_status, "profile-status");
     gtk_widget_add_css_class(actions_heading, "sidebar-heading");
     gtk_widget_add_css_class(footer, "sidebar-footer");
 
@@ -904,6 +1215,9 @@ build_sidebar(void)
     gtk_label_set_xalign(GTK_LABEL(local_title), 0.0f);
     gtk_label_set_xalign(GTK_LABEL(local_detail), 0.0f);
     gtk_label_set_ellipsize(GTK_LABEL(local_detail), PANGO_ELLIPSIZE_END);
+    gtk_label_set_xalign(GTK_LABEL(profile_heading), 0.0f);
+    gtk_label_set_xalign(GTK_LABEL(profile_status), 0.0f);
+    gtk_label_set_wrap(GTK_LABEL(profile_status), TRUE);
     gtk_label_set_xalign(GTK_LABEL(actions_heading), 0.0f);
     gtk_label_set_xalign(GTK_LABEL(footer), 0.0f);
 
@@ -911,6 +1225,28 @@ build_sidebar(void)
     gtk_box_append(GTK_BOX(local_row), local_title);
     gtk_box_append(GTK_BOX(local_card), local_row);
     gtk_box_append(GTK_BOX(local_card), local_detail);
+
+    state->profile_dropdown = GTK_DROP_DOWN(profile_dropdown);
+    state->profile_status = GTK_LABEL(profile_status);
+    gtk_widget_set_hexpand(profile_dropdown, TRUE);
+    gtk_drop_down_set_enable_search(state->profile_dropdown, TRUE);
+    gtk_widget_set_tooltip_text(
+        profile_dropdown,
+        "Profile used when opening a new local tab"
+    );
+    gtk_widget_set_tooltip_text(
+        profile_reload,
+        "Reload portable local profiles from profiles.ini"
+    );
+    g_signal_connect(
+        profile_reload,
+        "clicked",
+        G_CALLBACK(on_reload_profiles_clicked),
+        state
+    );
+    gtk_box_append(GTK_BOX(profile_row), profile_dropdown);
+    gtk_box_append(GTK_BOX(profile_row), profile_reload);
+    refresh_profile_dropdown(state, "default");
 
     for (guint i = 0; i < G_N_ELEMENTS(actions); i++) {
         gtk_widget_add_css_class(actions[i], "sidebar-action");
@@ -927,6 +1263,9 @@ build_sidebar(void)
 
     gtk_box_append(GTK_BOX(sidebar), workspace_heading);
     gtk_box_append(GTK_BOX(sidebar), local_card);
+    gtk_box_append(GTK_BOX(sidebar), profile_heading);
+    gtk_box_append(GTK_BOX(sidebar), profile_row);
+    gtk_box_append(GTK_BOX(sidebar), profile_status);
     gtk_box_append(GTK_BOX(sidebar), separator);
     gtk_box_append(GTK_BOX(sidebar), actions_heading);
     gtk_box_append(GTK_BOX(sidebar), new_tab);
@@ -1021,6 +1360,28 @@ gc_terminal_window_new(GtkApplication *application)
     GtkWidget *main_area = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
 
     state->window = GTK_WINDOW(window);
+    state->profiles = gc_profile_store_new();
+    state->profile_path = gc_profile_default_path();
+    state->session_store_path = gc_session_store_default_path();
+
+    {
+        GError *profile_error = NULL;
+
+        if (!gc_profile_store_load(
+                state->profiles,
+                state->profile_path,
+                &profile_error
+            )) {
+            g_warning(
+                "Unable to load terminal profiles at startup: %s",
+                profile_error != NULL
+                    ? profile_error->message
+                    : "unknown error"
+            );
+            g_clear_error(&profile_error);
+        }
+    }
+
     state->workspace = gc_workspace_new(
         on_workspace_changed,
         on_workspace_paste_requested,
@@ -1050,7 +1411,7 @@ gc_terminal_window_new(GtkApplication *application)
     gtk_box_append(GTK_BOX(main_area), build_search_bar(state));
     gtk_box_append(GTK_BOX(main_area), gc_workspace_get_widget(state->workspace));
 
-    gtk_box_append(GTK_BOX(content), build_sidebar());
+    gtk_box_append(GTK_BOX(content), build_sidebar(state));
     gtk_box_append(GTK_BOX(content), main_area);
     gtk_widget_set_hexpand(content, TRUE);
     gtk_widget_set_vexpand(content, TRUE);
@@ -1059,7 +1420,14 @@ gc_terminal_window_new(GtkApplication *application)
     gtk_box_append(GTK_BOX(root), build_context_bar(state));
     gtk_window_set_child(GTK_WINDOW(window), root);
 
-    gc_workspace_add_tab(state->workspace, g_get_home_dir());
+    g_signal_connect(
+        window,
+        "close-request",
+        G_CALLBACK(on_window_close_request),
+        state
+    );
+
+    restore_workspace(state);
     update_context(state);
 
     return GTK_WINDOW(window);

@@ -101,6 +101,42 @@ test_tab_chrome(void)
 }
 
 static void
+test_restorable_tab_metadata(void)
+{
+    GcWorkspace *workspace = gc_workspace_new(NULL, NULL, NULL, NULL);
+    GtkWidget *widget = gc_workspace_get_widget(workspace);
+    GcProfileStore *profiles = gc_profile_store_new();
+    const GcProfile *profile = gc_profile_store_get_default(profiles);
+    g_autofree char *cwd = NULL;
+
+    g_object_ref_sink(widget);
+
+    gc_workspace_add_tab_with_profile(workspace, profile, "/tmp");
+    gc_workspace_add_tab_with_profile(workspace, profile, "/");
+    g_assert_cmpuint(gc_workspace_get_count(workspace), ==, 2);
+    g_assert_cmpuint(gc_workspace_get_current_index(workspace), ==, 1);
+    g_assert_cmpstr(
+        gc_workspace_get_current_profile_id(workspace),
+        ==,
+        "default"
+    );
+
+    gc_workspace_select_index(workspace, 0);
+    g_assert_cmpuint(gc_workspace_get_current_index(workspace), ==, 0);
+    g_assert_cmpstr(
+        gc_workspace_get_tab_profile_id(workspace, 0),
+        ==,
+        "default"
+    );
+    cwd = gc_workspace_dup_tab_working_directory(workspace, 0);
+    g_assert_cmpstr(cwd, ==, "/tmp");
+
+    gc_profile_store_free(profiles);
+    g_object_unref(widget);
+    gc_workspace_free(workspace);
+}
+
+static void
 test_split_and_close(void)
 {
     GcWorkspace *workspace = gc_workspace_new(NULL, NULL, NULL, NULL);
@@ -142,6 +178,10 @@ main(int argc, char **argv)
     g_test_init(&argc, &argv, NULL);
     g_test_add_func("/workspace/paste-source-routing", test_paste_source_routing);
     g_test_add_func("/workspace/tab-chrome", test_tab_chrome);
+    g_test_add_func(
+        "/workspace/restorable-tab-metadata",
+        test_restorable_tab_metadata
+    );
     g_test_add_func("/workspace/split-and-close", test_split_and_close);
     return g_test_run();
 }

@@ -6,6 +6,7 @@ typedef struct {
     GtkWidget *root;
     GPtrArray *sessions;
     GcTerminalSession *active;
+    GcProfile *profile;
     GtkLabel *tab_label;
 } GcWorkspacePage;
 
@@ -31,6 +32,7 @@ page_free(gpointer data)
     GcWorkspacePage *page = data;
 
     g_ptr_array_free(page->sessions, TRUE);
+    gc_profile_free(page->profile);
     g_free(page);
 }
 
@@ -55,6 +57,18 @@ current_page(GcWorkspace *workspace)
 
     return page_for_widget(
         gtk_notebook_get_nth_page(workspace->notebook, page_num)
+    );
+}
+
+static GcWorkspacePage *
+page_at_index(GcWorkspace *workspace, guint index)
+{
+    if (index >= (guint) gtk_notebook_get_n_pages(workspace->notebook)) {
+        return NULL;
+    }
+
+    return page_for_widget(
+        gtk_notebook_get_nth_page(workspace->notebook, (gint) index)
     );
 }
 
@@ -319,11 +333,60 @@ gc_workspace_get_current_pane_count(GcWorkspace *workspace)
     return page != NULL ? page->sessions->len : 0;
 }
 
+guint
+gc_workspace_get_current_index(GcWorkspace *workspace)
+{
+    gint index = gtk_notebook_get_current_page(workspace->notebook);
+
+    return index >= 0 ? (guint) index : 0;
+}
+
+const char *
+gc_workspace_get_current_profile_id(GcWorkspace *workspace)
+{
+    GcWorkspacePage *page = current_page(workspace);
+
+    if (page == NULL || page->active == NULL) {
+        return "default";
+    }
+
+    return gc_terminal_session_get_profile_id(page->active);
+}
+
+const char *
+gc_workspace_get_tab_profile_id(GcWorkspace *workspace, guint index)
+{
+    GcWorkspacePage *page = page_at_index(workspace, index);
+
+    if (page == NULL || page->active == NULL) {
+        return "default";
+    }
+
+    return gc_terminal_session_get_profile_id(page->active);
+}
+
+char *
+gc_workspace_dup_tab_working_directory(GcWorkspace *workspace, guint index)
+{
+    GcWorkspacePage *page = page_at_index(workspace, index);
+
+    if (page == NULL || page->active == NULL) {
+        return g_strdup(g_get_home_dir());
+    }
+
+    return gc_terminal_session_dup_working_directory(page->active);
+}
+
 void
-gc_workspace_add_tab(GcWorkspace *workspace, const char *working_directory)
+gc_workspace_add_tab_with_profile(
+    GcWorkspace *workspace,
+    const GcProfile *profile,
+    const char *working_directory
+)
 {
     GcWorkspacePage *page = g_new0(GcWorkspacePage, 1);
-    GcTerminalSession *session = gc_terminal_session_new(
+    GcTerminalSession *session = gc_terminal_session_new_with_profile(
+        profile,
         working_directory,
         on_session_changed,
         on_session_paste_requested,
@@ -340,6 +403,7 @@ gc_workspace_add_tab(GcWorkspace *workspace, const char *working_directory)
     page->root = root;
     page->sessions = g_ptr_array_new();
     page->active = session;
+    page->profile = gc_profile_copy(profile);
     page->tab_label = GTK_LABEL(label);
     g_ptr_array_add(page->sessions, session);
 
@@ -384,6 +448,16 @@ gc_workspace_add_tab(GcWorkspace *workspace, const char *working_directory)
     notify_changed(workspace);
 }
 
+void
+gc_workspace_add_tab(GcWorkspace *workspace, const char *working_directory)
+{
+    gc_workspace_add_tab_with_profile(
+        workspace,
+        NULL,
+        working_directory
+    );
+}
+
 gboolean
 gc_workspace_close_current(GcWorkspace *workspace)
 {
@@ -415,6 +489,18 @@ gc_workspace_select_relative(GcWorkspace *workspace, gint delta)
     }
 
     gtk_notebook_set_current_page(workspace->notebook, next);
+}
+
+void
+gc_workspace_select_index(GcWorkspace *workspace, guint index)
+{
+    gint count = gtk_notebook_get_n_pages(workspace->notebook);
+
+    if (count <= 0 || index >= (guint) count) {
+        return;
+    }
+
+    gtk_notebook_set_current_page(workspace->notebook, (gint) index);
 }
 
 char *
@@ -450,7 +536,8 @@ gc_workspace_split_current(
     active = page->active;
     active_widget = gc_terminal_session_get_widget(active);
     working_directory = gc_terminal_session_dup_working_directory(active);
-    created = gc_terminal_session_new(
+    created = gc_terminal_session_new_with_profile(
+        page->profile,
         working_directory,
         on_session_changed,
         on_session_paste_requested,
