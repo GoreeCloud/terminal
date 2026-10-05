@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.goreecloud.Terminal</id>
+  <name>GoreeCloud Terminal</name>
+  <summary>Native GoreeCloud terminal for local shell workflows</summary>
+  <metadata_license>AGPL-3.0-or-later</metadata_license>
+  <project_license>AGPL-3.0-or-later</project_license>
+  <developer id="com.goreecloud">
+    <name>GoreeCloud</name>
+  </developer>
+  <description>
+    <p>
+      GoreeCloud Terminal is a native GTK 4 and VTE terminal application for Linux.
+      The current Development build provides local shell sessions, tabs, split panes,
+      searchable scrollback, guarded paste review, portable local profiles, and
+      versioned workspace restoration.
+    </p>
+    <p>
+      Remote administration, container workflows, production packaging, and Stable
+      lifecycle qualification remain outside the current Development acceptance boundary.
+    </p>
+  </description>
+  <launchable type="desktop-id">com.goreecloud.Terminal.desktop</launchable>
+  <provides>
+    <binary>goreecloud-terminal</binary>
+  </provides>
+  <categories>
+    <category>System</category>
+    <category>TerminalEmulator</category>
+  </categories>
+  <content_rating type="oars-1.1"/>
+</component>
