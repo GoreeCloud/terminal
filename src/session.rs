@@ -22,7 +22,14 @@ pub struct Session {
 }
 impl Session {
     pub fn resize(&self, rows: u16, cols: u16) -> Result<()> {
-        self.master.resize(PtySize { rows, cols, pixel_width: 0, pixel_height: 0 }).context("resize shell PTY")
+        self.master
+            .resize(PtySize {
+                rows,
+                cols,
+                pixel_width: 0,
+                pixel_height: 0,
+            })
+            .context("resize shell PTY")
     }
     pub fn send(&mut self, data: &[u8]) -> Result<()> {
         self.writer.write_all(data).context("write PTY")?;

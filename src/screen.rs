@@ -31,27 +31,42 @@ impl Screen {
     }
     /// Browse the local VT parser's bounded scrollback (not shell history).
     pub fn scroll_up(&mut self, lines: usize) {
-        if self.parser.screen().alternate_screen() { return; }
+        if self.parser.screen().alternate_screen() {
+            return;
+        }
         let current = self.parser.screen().scrollback();
-        self.parser.screen_mut().set_scrollback(current.saturating_add(lines));
+        self.parser
+            .screen_mut()
+            .set_scrollback(current.saturating_add(lines));
     }
     pub fn scroll_down(&mut self, lines: usize) {
         let current = self.parser.screen().scrollback();
-        self.parser.screen_mut().set_scrollback(current.saturating_sub(lines));
+        self.parser
+            .screen_mut()
+            .set_scrollback(current.saturating_sub(lines));
     }
-    pub fn scroll_to_bottom(&mut self) { self.parser.screen_mut().set_scrollback(0); }
-    pub fn scrollback_offset(&self) -> usize { self.parser.screen().scrollback() }
-    pub fn application_cursor(&self) -> bool { self.parser.screen().application_cursor() }
-    pub fn bracketed_paste(&self) -> bool { self.parser.screen().bracketed_paste() }
+    pub fn scroll_to_bottom(&mut self) {
+        self.parser.screen_mut().set_scrollback(0);
+    }
+    pub fn scrollback_offset(&self) -> usize {
+        self.parser.screen().scrollback()
+    }
+    pub fn application_cursor(&self) -> bool {
+        self.parser.screen().application_cursor()
+    }
+    pub fn bracketed_paste(&self) -> bool {
+        self.parser.screen().bracketed_paste()
+    }
     /// Plain text only, with no raw escape codes or UI cursor overlay.
-    pub fn copy_visible_text(&self) -> String { self.parser.screen().contents() }
+    pub fn copy_visible_text(&self) -> String {
+        self.parser.screen().contents()
+    }
     /// Approximate cells for the fixed 15px monospace font and current Slint chrome.
     pub fn grid_for_window(width: f32, height: f32) -> (u16, u16) {
         let cols = ((width.max(0.0) - 60.0) / 9.2).floor() as u16;
         let rows = ((height.max(0.0) - 216.0) / 22.0).floor() as u16;
         (rows.clamp(5, 200), cols.clamp(20, 320))
     }
-
 
     /// A bounded, UI-safe plain-text snapshot. ANSI is handled by the parser,
     /// never passed to the UI as markup.
@@ -65,7 +80,10 @@ impl Screen {
             .map(|(idx, raw)| {
                 let mut chars: Vec<char> = raw.chars().collect();
                 // The indicator is a preview fallback, not a fully correct grapheme-cell cursor.
-                if idx == usize::from(cursor_row) && !screen.hide_cursor() && screen.scrollback() == 0 {
+                if idx == usize::from(cursor_row)
+                    && !screen.hide_cursor()
+                    && screen.scrollback() == 0
+                {
                     let pos = usize::from(cursor_col).min(usize::from(self.cols.saturating_sub(1)));
                     let padding = pos.saturating_sub(chars.len()).min(self.cols as usize);
                     chars.extend(std::iter::repeat_n(' ', padding));
@@ -125,7 +143,9 @@ mod tests {
     #[test]
     fn scrollback_can_be_navigated_safely() {
         let mut screen = Screen::new();
-        for i in 0..100 { screen.process(format!("line {i}\r\n").as_bytes()); }
+        for i in 0..100 {
+            screen.process(format!("line {i}\r\n").as_bytes());
+        }
         screen.scroll_up(1000);
         assert!(screen.scrollback_offset() > 0);
         screen.scroll_down(1000);

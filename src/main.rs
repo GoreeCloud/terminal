@@ -116,17 +116,15 @@ impl State {
     }
 
     fn send_key(&mut self, text: &str, control: bool, alt: bool, shift: bool) -> Result<()> {
-        let tab = self.active_tab_mut().ok_or_else(|| anyhow!("No active shell"))?;
+        let tab = self
+            .active_tab_mut()
+            .ok_or_else(|| anyhow!("No active shell"))?;
         if tab.stopped {
             return Err(anyhow!("Shell has exited; open a new tab"));
         }
-        if let Some(bytes) = keys::encode_key_for_mode(
-            text,
-            control,
-            alt,
-            shift,
-            tab.screen.application_cursor(),
-        ) {
+        if let Some(bytes) =
+            keys::encode_key_for_mode(text, control, alt, shift, tab.screen.application_cursor())
+        {
             tab.screen.scroll_to_bottom();
             tab.session.send(&bytes)?;
         }
