@@ -45,7 +45,7 @@ impl Screen {
                 if idx == usize::from(cursor_row) && !screen.hide_cursor() {
                     let pos = usize::from(cursor_col).min(usize::from(self.cols.saturating_sub(1)));
                     let padding = pos.saturating_sub(chars.len()).min(self.cols as usize);
-                    chars.extend(std::iter::repeat(' ').take(padding));
+                    chars.extend(std::iter::repeat_n(' ', padding));
                     chars.insert(pos.min(chars.len()), '▌');
                 }
                 chars.into_iter().collect::<String>()

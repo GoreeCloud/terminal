@@ -8,7 +8,7 @@
 - GPLv3 license and upstream dependency documentation.
 
 ## Next engineering priorities (NOT implemented yet)
-1. **P0:** Get green `cargo fmt`, `cargo test`, `cargo clippy`, `cargo build` on GitHub Actions and at least one real Linux device; resolve all bugs; commit reproducible Cargo.lock.
+1. **P0:** Get green `cargo fmt`, `cargo test`, `cargo clippy`, `cargo build` on GitHub Actions and at least one real Linux device; resolve all bugs; verify the committed Cargo.lock remains reproducible.
 2. **P0:** Security review of dependencies and terminal escape handling, child lifecycle, input correctness, device availability, high-contrast and keyboard accessibility.
 3. **P1:** Real cell painting with foreground/background colors, cursor shape, bold/underline, wide characters, selection and clipboard.
 4. **P1:** PTY resize and window geometry updates; Wayland/X11 DPI qualification, font preferences, scrollback interactions.

@@ -13,7 +13,7 @@ A terminal is a local command-execution application. Once the user opens it, the
 
 ## Dependency/provenance policy
 
-Pinned top-level direct versions: Slint 1.19.0, portable-pty 0.9.0, vt100 0.18.1; other transitive dependencies are locked by Cargo.lock once dependency resolution is performed. Run `cargo audit` against the completed dependency graph, inspect advisories and licensing. Do not treat a passing security scanner as proof of safety.
+Pinned top-level direct versions: Slint 1.19.0, portable-pty 0.9.0, vt100 0.18.1; the generated Cargo.lock is now committed and captures the currently resolved transitive dependency graph. Run `cargo audit` against the completed dependency graph, inspect advisories and licensing. Do not treat a passing security scanner as proof of safety.
 
 ## Report issues
 
