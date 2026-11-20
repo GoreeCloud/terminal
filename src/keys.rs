@@ -6,21 +6,21 @@ pub fn encode_key(text: &str, control: bool, alt: bool, _shift: bool) -> Option<
         "\u{0008}" => vec![0x7f],
         "\u{0009}" => vec![b'\t'],
         "\u{001b}" => vec![0x1b],
-        "\u{f700}" => b"\x1b[A".to_vec(),  // Up
-        "\u{f701}" => b"\x1b[B".to_vec(),  // Down
-        "\u{f702}" => b"\x1b[D".to_vec(),  // Left
-        "\u{f703}" => b"\x1b[C".to_vec(),  // Right
-        "\u{007f}" => b"\x1b[3~".to_vec(), // Delete
-        "\u{f727}" => b"\x1b[2~".to_vec(), // Insert
-        "\u{f729}" => b"\x1b[H".to_vec(),  // Home
-        "\u{f72b}" => b"\x1b[F".to_vec(),  // End
-        "\u{f72c}" => b"\x1b[5~".to_vec(), // PageUp
-        "\u{f72d}" => b"\x1b[6~".to_vec(), // PageDown
-        "\u{0019}" => b"\x1b[Z".to_vec(), // Shift+Tab
-        "\u{f704}" => b"\x1bOP".to_vec(), // F1
-        "\u{f705}" => b"\x1bOQ".to_vec(), // F2
-        "\u{f706}" => b"\x1bOR".to_vec(), // F3
-        "\u{f707}" => b"\x1bOS".to_vec(), // F4
+        "\u{f700}" => b"\x1b[A".to_vec(),   // Up
+        "\u{f701}" => b"\x1b[B".to_vec(),   // Down
+        "\u{f702}" => b"\x1b[D".to_vec(),   // Left
+        "\u{f703}" => b"\x1b[C".to_vec(),   // Right
+        "\u{007f}" => b"\x1b[3~".to_vec(),  // Delete
+        "\u{f727}" => b"\x1b[2~".to_vec(),  // Insert
+        "\u{f729}" => b"\x1b[H".to_vec(),   // Home
+        "\u{f72b}" => b"\x1b[F".to_vec(),   // End
+        "\u{f72c}" => b"\x1b[5~".to_vec(),  // PageUp
+        "\u{f72d}" => b"\x1b[6~".to_vec(),  // PageDown
+        "\u{0019}" => b"\x1b[Z".to_vec(),   // Shift+Tab
+        "\u{f704}" => b"\x1bOP".to_vec(),   // F1
+        "\u{f705}" => b"\x1bOQ".to_vec(),   // F2
+        "\u{f706}" => b"\x1bOR".to_vec(),   // F3
+        "\u{f707}" => b"\x1bOS".to_vec(),   // F4
         "\u{f708}" => b"\x1b[15~".to_vec(), // F5
         "\u{f709}" => b"\x1b[17~".to_vec(), // F6
         "\u{f70a}" => b"\x1b[18~".to_vec(), // F7
@@ -99,13 +99,34 @@ mod tests {
         );
         assert_eq!(encode_key("\u{0008}", false, false, false), Some(vec![127]));
         assert_eq!(encode_key("\u{000a}", false, false, false), Some(vec![13]));
-        assert_eq!(encode_key("\u{f702}", false, false, false), Some(b"\x1b[D".to_vec()));
-        assert_eq!(encode_key("\u{f703}", false, false, false), Some(b"\x1b[C".to_vec()));
-        assert_eq!(encode_key("\u{007f}", false, false, false), Some(b"\x1b[3~".to_vec()));
-        assert_eq!(encode_key("\u{f727}", false, false, false), Some(b"\x1b[2~".to_vec()));
-        assert_eq!(encode_key("\u{f729}", false, false, false), Some(b"\x1b[H".to_vec()));
-        assert_eq!(encode_key("\u{f72b}", false, false, false), Some(b"\x1b[F".to_vec()));
-        assert_eq!(encode_key("\u{f70f}", false, false, false), Some(b"\x1b[24~".to_vec()));
+        assert_eq!(
+            encode_key("\u{f702}", false, false, false),
+            Some(b"\x1b[D".to_vec())
+        );
+        assert_eq!(
+            encode_key("\u{f703}", false, false, false),
+            Some(b"\x1b[C".to_vec())
+        );
+        assert_eq!(
+            encode_key("\u{007f}", false, false, false),
+            Some(b"\x1b[3~".to_vec())
+        );
+        assert_eq!(
+            encode_key("\u{f727}", false, false, false),
+            Some(b"\x1b[2~".to_vec())
+        );
+        assert_eq!(
+            encode_key("\u{f729}", false, false, false),
+            Some(b"\x1b[H".to_vec())
+        );
+        assert_eq!(
+            encode_key("\u{f72b}", false, false, false),
+            Some(b"\x1b[F".to_vec())
+        );
+        assert_eq!(
+            encode_key("\u{f70f}", false, false, false),
+            Some(b"\x1b[24~".to_vec())
+        );
         assert_eq!(encode_key("\u{f777}", false, false, false), None);
     }
 }
