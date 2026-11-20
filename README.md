@@ -28,7 +28,14 @@ cargo clippy --locked --all-targets -- -D warnings
 cargo run --locked
 ~~~
 
-The GitHub Actions workflow also uploads a **short-lived unsigned Linux preview binary and SHA-256 digest** on successful CI. Preview artifacts are for controlled testing only, not installed packages or signed releases. Weekly Dependabot review PRs are configured for Cargo dependencies and GitHub Actions; they do not auto-merge.
+To reproduce the isolated native X11 startup/window check (requires `xvfb-run`, `xauth`, `xwininfo`, `timeout` and software Mesa OpenGL):
+
+~~~bash
+cargo build --locked --release
+bash scripts/smoke-linux.sh target/release/goreecloud-terminal
+~~~
+
+The Linux CI workflow checks an actual native X11 window in isolated Xvfb before uploading a **short-lived unsigned Linux preview binary and SHA-256 digest** on success. Preview artifacts are for controlled testing only, not installed packages or signed releases. Weekly Dependabot review PRs are configured for Cargo dependencies and GitHub Actions; they do not auto-merge.
 
 Build a local desktop install (not a signed or audited release):
 
