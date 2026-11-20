@@ -74,7 +74,11 @@ impl Screen {
     /// Zoom-aware terminal geometry. UI and PTY use the same logical dimensions.
     /// Fixed metrics are an approximation until measured native font-cell sizing.
     pub fn grid_for_window_at_zoom(width: f32, height: f32, zoom: f32) -> (u16, u16) {
-        let zoom = if zoom.is_finite() { zoom.clamp(0.75, 1.75) } else { 1.0 };
+        let zoom = if zoom.is_finite() {
+            zoom.clamp(0.75, 1.75)
+        } else {
+            1.0
+        };
         let cols = ((width.max(0.0) - 60.0) / (9.2 * zoom)).floor() as u16;
         let rows = ((height.max(0.0) - 216.0) / (22.0 * zoom)).floor() as u16;
         (rows.clamp(5, 200), cols.clamp(20, 320))
