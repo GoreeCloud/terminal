@@ -1,6 +1,6 @@
-//! VT parser and bounded snapshot of the visible text grid.
-//! This first preview intentionally renders monochrome text. Truecolor, complex
-//! width/grapheme layout, mouse reporting, IME, and selection are roadmap work.
+//! VT state and bounded plain-text/colored-cell snapshots.
+//! Rendering uses the VT parser's actual cells, not plaintext char indexes.
+//! Mouse reporting, pixel-accurate font measurement and IME remain future work.
 use std::num::NonZeroU16;
 
 pub const ROWS: u16 = 24;
@@ -29,6 +29,11 @@ impl Screen {
     pub fn process(&mut self, bytes: &[u8]) {
         self.parser.process(bytes);
     }
+    /// Snapshot of visible VT cells including xterm colors, attributes and wide cell spans.
+    pub fn render_cells(&self) -> Vec<crate::render::RenderCell> {
+        crate::render::snapshot(self.parser.screen(), self.rows, self.cols)
+    }
+
     /// Browse the local VT parser's bounded scrollback (not shell history).
     pub fn scroll_up(&mut self, lines: usize) {
         if self.parser.screen().alternate_screen() {

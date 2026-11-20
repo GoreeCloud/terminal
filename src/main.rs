@@ -1,6 +1,6 @@
 use anyhow::{anyhow, Result};
 use goreecloud_terminal::{keys, paste, screen::Screen, session};
-use slint::{ComponentHandle, ModelRc, SharedString, Timer, TimerMode, VecModel};
+use slint::{Color, ComponentHandle, ModelRc, SharedString, Timer, TimerMode, VecModel};
 use std::{cell::RefCell, rc::Rc, sync::mpsc::TryRecvError, time::Duration};
 
 slint::include_modules!();
@@ -228,7 +228,7 @@ impl State {
         app.set_active_tab(self.active as i32);
 
         if let Some(tab) = self.active_tab() {
-            app.set_rows(rows_model(tab.screen.visible_rows()));
+            app.set_cells(cells_model(tab.screen.render_cells()));
             let (rows, cols) = tab.screen.dimensions();
             let status = if !self.notice.is_empty() {
                 self.notice.clone()
@@ -244,15 +244,36 @@ impl State {
             };
             app.set_status(status.into());
         } else {
-            app.set_rows(rows_model(Vec::new()));
+            app.set_cells(cells_model(Vec::new()));
             app.set_status(self.notice.clone().into());
         }
     }
 }
 
-fn rows_model(rows: Vec<String>) -> ModelRc<SharedString> {
+fn cells_model(cells: Vec<goreecloud_terminal::render::RenderCell>) -> ModelRc<TerminalCell> {
     ModelRc::new(VecModel::from(
-        rows.into_iter().map(SharedString::from).collect::<Vec<_>>(),
+        cells
+            .into_iter()
+            .map(|cell| TerminalCell {
+                text: cell.text.into(),
+                foreground: Color::from_rgb_u8(
+                    cell.foreground.r,
+                    cell.foreground.g,
+                    cell.foreground.b,
+                ),
+                background: Color::from_rgb_u8(
+                    cell.background.r,
+                    cell.background.g,
+                    cell.background.b,
+                ),
+                bold: cell.bold,
+                italic: cell.italic,
+                underline: cell.underline,
+                row: i32::from(cell.row),
+                column: i32::from(cell.column),
+                span: i32::from(cell.span),
+            })
+            .collect::<Vec<_>>(),
     ))
 }
 

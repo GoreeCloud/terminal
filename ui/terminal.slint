@@ -2,13 +2,28 @@
 // The OS provides window decoration; custom WCN chrome is not claimed yet.
 import { Button } from "std-widgets.slint";
 
+export struct TerminalCell {
+    text: string,
+    foreground: color,
+    background: color,
+    bold: bool,
+    italic: bool,
+    underline: bool,
+    row: int,
+    column: int,
+    span: int,
+}
+
 export component TerminalWindow inherits Window {
     title: "GoreeCloud Terminal";
     preferred-width: 1030px;
     preferred-height: 650px;
     background: #0D121D;
 
-    in-out property <[string]> rows: [];
+    // Only styled and occupied cells are materialized; blank rows use the pane background.
+    in-out property <[TerminalCell]> cells: [];
+    private property <length> cell-width: 9.2px;
+    private property <length> cell-height: 22px;
     in-out property <[string]> tabs: [];
     in-out property <int> active-tab: 0;
     in-out property <string> status: "Starting local shell…";
@@ -80,17 +95,41 @@ export component TerminalWindow inherits Window {
                 border-radius: 18px;
                 border-width: 1px;
                 border-color: #505B70;
-                VerticalLayout {
-                    padding: 18px;
-                    spacing: 0px;
-                    for line in root.rows: Text {
-                        text: line;
-                        font-family: "monospace";
-                        font-size: 15px;
-                        height: 22px;
-                        color: #F2F4FB;
-                        vertical-alignment: center;
-                        horizontal-alignment: left;
+                Rectangle {
+                    x: 18px;
+                    y: 18px;
+                    width: parent.width - 36px;
+                    height: parent.height - 36px;
+                    clip: true;
+                    background: #171D2A;
+
+                    for cell in root.cells: Rectangle {
+                        x: cell.column * root.cell-width;
+                        y: cell.row * root.cell-height;
+                        width: cell.span * root.cell-width;
+                        height: root.cell-height;
+                        background: cell.background;
+                        Text {
+                            text: cell.text;
+                            x: 0px;
+                            y: 0px;
+                            width: parent.width;
+                            height: parent.height;
+                            color: cell.foreground;
+                            font-family: "monospace";
+                            font-size: 15px;
+                            font-weight: cell.bold ? 700 : 400;
+                            font-italic: cell.italic;
+                            vertical-alignment: center;
+                            horizontal-alignment: left;
+                        }
+                        if cell.underline: Rectangle {
+                            x: 0px;
+                            y: parent.height - 2px;
+                            width: parent.width;
+                            height: 1px;
+                            background: cell.foreground;
+                        }
                     }
                 }
             }
