@@ -7,6 +7,7 @@
 - VT parser, application-cursor handling, bounded scrollback navigation, guarded clipboard access, and approximate PTY resize as the Slint window changes.
 - Development-stage native ANSI 16/256/RGB foreground/background colors, bold/italic/underline/inverse attributes, cursor inversion, and Unicode double-width cell placement from VT parser metadata. Font zoom (75%–175%) resizes PTY geometry using approximate metrics. All await real Linux visual validation.
 - Repository Dependabot alerts and weekly Cargo/GitHub Actions update proposal configuration; updates remain subject to PR and CI gates.
+- Rust CodeQL code scanning workflow on PRs, main, and a weekly schedule (separate from the Linux build gate; successful analysis not yet verified).
 - Bounded reader queues, explicit session teardown and no telemetry/network service.
 - Unit tests, Linux GitHub Actions CI, desktop entry, GPLv3 source license and attribution.
 

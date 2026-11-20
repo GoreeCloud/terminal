@@ -21,7 +21,7 @@ The Linux application has not completed independent security assessment and shou
 
 ## Repository security settings
 
-GitHub Dependabot vulnerability alerts were enabled and verified through the GitHub API on November 20, 2026. The initial alert list was empty; analysis and future alerts require independent monitoring. Weekly Dependabot update pull requests for Cargo and GitHub Actions are configured in `.github/dependabot.yml`. They are **not auto-merged**, and neither feature replaces a vulnerability/license audit. GitHub code scanning has no completed analysis yet.
+GitHub Dependabot vulnerability alerts were enabled and verified through the GitHub API on November 20, 2026. The initial alert list was empty; analysis and future alerts require independent monitoring. Weekly Dependabot update pull requests for Cargo and GitHub Actions are configured in `.github/dependabot.yml`. They are **not auto-merged**, and neither feature replaces a vulnerability/license audit. A Rust CodeQL security-analysis workflow is configured using GitHub's official CodeQL action and build-free Rust extraction; no passing CodeQL results have been verified at the time of this edit. CodeQL findings, when available, are additional signals rather than proof of safety.
 
 ## Dependency handling
 
