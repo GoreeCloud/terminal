@@ -8,7 +8,8 @@ fn shell_round_trip_over_real_pty() {
 
     let mut shell = session::spawn().expect("spawn current user's local shell");
     // The echoed input contains the format expression, never this rendered marker.
-    shell.send(b"printf 'GC_PTY_%s_READY' 7429\r")
+    shell
+        .send(b"printf 'GC_PTY_%s_READY' 7429\r")
         .expect("send fixed printf over PTY");
     let marker = b"GC_PTY_7429_READY";
     let mut output = Vec::new();
@@ -21,10 +22,15 @@ fn shell_round_trip_over_real_pty() {
                 if output.windows(marker.len()).any(|w| w == marker) {
                     return;
                 }
-                assert!(output.len() < 256 * 1024, "unexpected excessive shell output");
+                assert!(
+                    output.len() < 256 * 1024,
+                    "unexpected excessive shell output"
+                );
             }
             Ok(Output::Closed) => panic!("shell closed before receiving the known marker"),
-            Err(std::sync::mpsc::RecvTimeoutError::Disconnected) => panic!("PTY reader disconnected"),
+            Err(std::sync::mpsc::RecvTimeoutError::Disconnected) => {
+                panic!("PTY reader disconnected")
+            }
             Err(std::sync::mpsc::RecvTimeoutError::Timeout) => {}
         }
     }
