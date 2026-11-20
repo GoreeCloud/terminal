@@ -1,33 +1,36 @@
-# Architecture — GoreeCloud Terminal
+# Linux terminal architecture
 
-## Ownership and data flow
+## Local process model
 
-```
-Slint keyboard FocusScope -> validated key encoder -> PTY master writer -> user's shell
-                                                         |
-                                               Linux child + local TTY
-                                                         |
-Slint text rows <- bounded 30 fps snapshot <- vt100 parser <- PTY reader
-```
+~~~text
+Slint focus/click/shortcuts
+         |
+     Rust State (up to eight tabs)
+         |      \---- explicit arboard clipboard read/write
+    each Tab { vt100 Screen, portable-pty Session }
+         |                |
+      VT parser      PTY master <----> current user's shell
+         ^
+  bounded reader thread (128 × 8192 B maximum queued)
+~~~
 
-- A single Rust process owns the native Slint window. It does not serve HTTP.
-- `portable-pty` creates a real Unix PTY; the child shell runs as the current user, not root.
-- PTY reader thread sends 8 KiB chunks into a bounded 128-item in-process channel. The main loop reads at most 64 chunks per 33ms tick and applies escape processing in-process.
-- `vt100` 0.18.1 limits scrollback to 2,000 lines; the screen is initially 80×24.
-- The Slint render model is a safe plain-text snapshot and does not treat terminal text as code, rich text, SVG, HTML or markup.
-- The entire initial product is offline by construction. No backend, analytics, AI, account or remote APIs are required.
+- Each tab independently owns a shell child, PTY master/writer/reader and terminal parser; closing a tab drops and kills its direct child.
+- Window resize is polled on the 33ms UI tick. Approximate logical cell dimensions are calculated from the window scale factor and layout dimensions, and applied to both PTY and VT parser after the PTY resize succeeds.
+- All tabs' queues are drained with a per-tab budget to prevent background PTYs filling memory and starving the active tab.
+- VT parsing handles cursor, alternate-screen, application-cursor mode, bracketed paste and scrollback. The UI gets a plain-text snapshot; it never renders HTML or interprets escape sequences as actions.
+- Only explicit user actions access the clipboard. The clipboard is **not** a command history, a process log, remote integration or an OSC 52 service.
+- No server, external network API, login, synchronization service or daemon is created by the application.
 
-## Known preview limitations
+## Unimplemented architecture milestones
 
-This is a staged baseline, **not** feature parity with Ghostty or complete VT/terminal conformance:
-- Monochrome text rendering and fallback block cursor can misalign Unicode-wide graphemes or glyph clusters.
-- Screen and PTY remain 80×24 when the desktop window resizes. Fonts, fractional DPI and compositor metrics need measured native resize integration.
-- No alternate-screen visual qualification, mouse reporting, selection, copy/paste, OSC 8 hyperlink click, kitty graphics protocol, sixel, IME, accessibility screen-reader grid or GPU-optimized render pipeline.
-- Shell lifecycle, terminal output flood handling and PTY ioctl behavior need device/CI tests and deliberate cancellation semantics.
-- Native Window Command Nodes (Dismiss/Dock/Expand) need supported host window APIs and accessible qualification; no fake controls in the preview.
+The existing mono-glyph text model does not render individual cell colors, background, underline, inverse, full Unicode grapheme widths or text selection. It displays an approximate cursor marker. Dynamic font measurement, pixel-exact Unicode, GPU batching, paste confirmation UI, mouse tracking, IME, accessibility semantics, tabs with saved profiles and split panes require separate development and native tests.
 
-## Architecture decisions
+The application does **not** implement GoreeCloud UI's Window Command Nodes. The host window manager retains genuine close/minimize/maximize controls. The fixed dark palette is sourced from current [gc-ui](https://github.com/GoreeCloud/gc-ui) alpha tokens, but automatic token synchronization and founder visual acceptance are not established.
 
-`Slint` satisfies the currently authorized GoreeCloud native Linux UI frameworks; the widget backend is not a webview. `portable-pty` avoids writing bespoke unsafe fork/exec/termios code. `vt100` is an independent parser for escape and cursor state. The immature third-party `slint-term` alpha was researched but intentionally not incorporated before verified Linux and dependency acceptance.
+## Operational boundaries
 
-Future: separate rendering core (per-cell paint/semantic spans), PTY resizing based on measured font metrics, keyboard/mouse protocol fidelity, tabs/splits, session persistence only when explicitly opted in, accessibility and high-contrast fallback.
+- GoreeShield owns privacy: no shell output leaves the host automatically.
+- Wardveil owns cybersecurity: no privilege escalation or network-facing command service is introduced; untrusted terminal output remains a hostile input surface.
+- GoreeCloud Mesh owns optional future integrations; none are currently required or enabled.
+- GoreeCloud Identity has no network auth role in a local-shell application.
+- GitHub is code authority. Google Drive owns the canonical GoreeCloud project governance documentation.

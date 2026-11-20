@@ -1,48 +1,60 @@
 # GoreeCloud Terminal
 
-**Linux-first, native, local-first terminal emulator.** This repository now contains an initial **development preview** of a real shell/PTY terminal application, not a completed replacement for Ghostty or a production-certified release.
+**Linux-native, local-first terminal emulator — development preview.**
+
+This repository contains a Rust/Slint desktop application that runs ordinary local shells in pseudoterminals. The current branch implements a native window, independent shell tabs, basic VT escape parsing, input-mode-aware keyboard handling, scrollback navigation, explicit clipboard actions, and live PTY resizing. It is not a stable release or a feature-complete Ghostty substitute.
 
 ## Architecture
 
-- **Native GUI:** Slint 1.19, Rust and a real Linux desktop window; an approved GoreeCloud Linux UI toolkit.
-- **Process integration:** `portable-pty` (the WezTerm ecosystem) spawns the user's existing executable `$SHELL` in a local PTY. No shell text evaluation is used to start it.
-- **Terminal parser:** `vt100` 0.18 interprets incoming terminal control sequences in native Rust, separates process output from UI and keeps bounded scrollback.
-- **Rendering:** Slint monochrome text grid plus cursor preview. This milestone does **not yet** handle per-cell ANSI foreground/background colors, wide grapheme rendering, mouse/selection, IME, resizing, tabs, sessions or GPU-optimized cell rendering.
-- **Keyboard:** Unicode text, Enter, Tab, Backspace, Escape, arrows, common navigation keys and Ctrl/Alt escape sequences.
-- **Security/privacy:** Shell and PTY are local; no telemetry, remote account, cloud dependency, background daemon or automatic command execution beyond starting the selected shell. Running arbitrary commands typed in the terminal is intentionally privileged to the *user's own login account*.
+| Layer | Implementation | Status |
+| --- | --- | --- |
+| Native Linux interface | Slint 1.19.0 (Rust, Winit/FemtoVG) | Development source |
+| Shell/PTY | portable-pty 0.9.0 | Independent local shell per tab, bounded output channel |
+| Terminal-state parser | vt100 0.18.1 | ANSI/VT input, cursor, 2,000-row scrollback |
+| Clipboard | arboard 3.7.0 | Explicit Copy/Paste; X11/XWayland default |
+| Design foundation | [GoreeCloud UI](https://github.com/GoreeCloud/gc-ui) | Alpha dark semantic palette; native WCN acceptance pending |
 
-The architecture uses original GoreeCloud glue/code with attributed third-party crates. It does not copy Ghostty's code, UI or branding.
+Slint is one of GoreeCloud's approved native Linux frameworks. This is a real Linux GUI, not a browser wrapper. All terminal output stays on the local machine. No telemetry, cloud account, Mesh service, or background server is required.
 
-## Build and run (Linux)
+## Build and run
 
-Install an up-to-date Rust toolchain (at least 1.88), C/C++ build tools, and the packages required by Slint's Winit + FemtoVG Linux backend (graphics stack, Wayland/X11 as appropriate).
+Requirements: Linux graphical desktop, Rust >= 1.88, C/C++ toolchain and Slint/Winit/FemtoVG Linux libraries (fontconfig, X11/Wayland, EGL/OpenGL, pkg-config).
 
-```bash
-cargo build
-cargo run
-cargo test
-cargo fmt --all -- --check
-```
+~~~bash
+cargo build --locked
+cargo test --locked --all-targets
+cargo clippy --locked --all-targets -- -D warnings
+cargo run --locked
+~~~
 
-The application starts in a normal, resizable non-maximized desktop window. The current initial viewport is 80 columns × 24 rows; resizing the desktop window is **not yet** synchronized with PTY dimensions. While typing, click the terminal surface to restore keyboard focus. `$SHELL` must point to an absolute executable path; the app otherwise falls back to `/bin/sh`.
+Build a local desktop install (not a signed or audited release):
 
-## Desktop integration
-
-```bash
-cargo build --release
+~~~bash
+cargo build --locked --release
 install -Dm755 target/release/goreecloud-terminal ~/.local/bin/goreecloud-terminal
 install -Dm644 packaging/linux/goreecloud-terminal.desktop ~/.local/share/applications/goreecloud-terminal.desktop
-```
+~~~
 
-This is a developer-local installation recipe, not a signed distributable. Do not use the preview as your sole production terminal.
+## Keyboard and shell navigation
 
-## Governance
+- Type directly into the terminal pane; Escape, Enter, Tab, arrows, navigation and F1–F12 are encoded as PTY input.
+- **Ctrl+Shift+T:** open a shell tab (maximum eight).
+- **Ctrl+Shift+W:** close the active tab and terminate its direct shell child.
+- **Ctrl+Shift+C:** copy the visible screen as plain text to the system clipboard.
+- **Ctrl+Shift+V:** paste the system clipboard. Multiline paste is blocked unless the terminal application has enabled bracketed-paste mode. Control characters and oversized pastes are blocked.
+- **Ctrl+Shift+PageUp/PageDown:** navigate bounded scrollback; the same actions are available through toolbar buttons.
+- Use native tab controls for switching sessions. The application also has a status line for shell exits, resize/paste errors and scrollback state.
 
-- **GoreeCloud UI:** Uses the currently verified alpha semantic dark colors, materials and spacing from [gc-ui](https://github.com/GoreeCloud/gc-ui); platform-native window chrome remains OS owned. Native Window Command Nodes and full color/token synchronization remain outstanding and must not be presented as implemented.
-- **GoreeShield:** no application telemetry, no shell output collection/upload.
-- **Wardveil:** no privileged daemon, sandbox escape mechanism or unverified shell startup substitutions; terminal command execution remains the user's responsibility.
-- **GoreeCloud Mesh/Identity:** no network or identity integration is needed for an offline shell. Future opt-in integrations need explicit data-flow, auth and threat-model review.
+**Important limitations:** The current renderer is monochrome text, with approximate character width/height; it is not an accurate per-cell truecolor renderer. Resizing uses estimated cell metrics, not measured font glyphs. Copy currently copies the visible screen, not a drag selection. Mouse tracking, IME, hyperlink activation, Kitty graphics, splits, persistent profiles and full screen-reader acceptance are not implemented.
 
-Read [architecture](docs/ARCHITECTURE.md), [security](docs/SECURITY.md), [third-party notices](docs/THIRD_PARTY.md), and [roadmap](docs/ROADMAP.md) before proposing extensions.
+On pure Wayland without XWayland, arboard's default clipboard backend may not work. There is no fallback command invoking untrusted external helpers. Use a genuine supported desktop session when validating the native GUI.
 
-**License:** GPL-3.0-only for this repository's original implementation, selected for the open-source Slint GPLv3 route; see [LICENSE](LICENSE). Third-party code retains its own copyright/license. The dependency ecosystem and production distribution require independent ongoing review.
+## Development, security and governance
+
+- [Architecture](docs/ARCHITECTURE.md)
+- [Security and privacy](docs/SECURITY.md)
+- [Third-party licensing](docs/THIRD_PARTY.md)
+- [Delivery roadmap and acceptance](docs/ROADMAP.md)
+- [Main-branch rule configuration](config/main-protection.json) — snapshot of active GitHub ruleset; GitHub is authoritative.
+
+**License:** GPL-3.0-only for original GoreeCloud code. Third-party libraries retain their own licenses. This distribution model uses Slint's GPLv3 path. Full dependency and native-device security acceptance remain outstanding; do not use the preview as your sole trusted terminal.

@@ -1,20 +1,24 @@
-# Delivery roadmap (evidence-based)
+# Delivery roadmap and evidence gates
 
-## Implemented in this preview source
-- Rust package and native Slint window; no web runtime or server.
-- Linux PTY shell creation, terminal screen parser, basic keyboard translation.
-- Bounded output queue, capped scrollback, live text grid, status row.
-- Unit tests, GitHub Actions Linux CI workflow, application desktop entry.
-- GPLv3 license and upstream dependency documentation.
+## Currently committed development source
 
-## Next engineering priorities (NOT implemented yet)
-1. **P0:** Get green `cargo fmt`, `cargo test`, `cargo clippy`, `cargo build` on GitHub Actions and at least one real Linux device; resolve all bugs; verify the committed Cargo.lock remains reproducible.
-2. **P0:** Security review of dependencies and terminal escape handling, child lifecycle, input correctness, device availability, high-contrast and keyboard accessibility.
-3. **P1:** Real cell painting with foreground/background colors, cursor shape, bold/underline, wide characters, selection and clipboard.
-4. **P1:** PTY resize and window geometry updates; Wayland/X11 DPI qualification, font preferences, scrollback interactions.
-5. **P1:** Tabs, splits, search, command palette, copy/paste, configurable shell and persistent profiles.
-6. **P2:** Mouse reporting, bracketed paste, IME, hyperlinks with consent, Kitty keyboard/graphics compatibility, GPU performance profiling.
-7. **P2:** GoreeCloud UI native Window Command Nodes implementation with verified minimize/maximize/close semantics and founder visual acceptance.
-8. **P2:** Packaging (Flatpak/AppImage/distro formats), SBOM, secure update checks, release signing and supported-desktop acceptance.
+- Native Slint Linux window with optional GTK-independent graphics stack.
+- Local shell PTY, independent tabs (maximum eight), client-side tab controls and shell-exit feedback.
+- VT parser, application-cursor handling, bounded scrollback navigation, guarded clipboard access, and approximate PTY resize as the Slint window changes.
+- Bounded reader queues, explicit session teardown and no telemetry/network service.
+- Unit tests, Linux GitHub Actions CI, desktop entry, GPLv3 source license and attribution.
 
-**Release gates:** build + real device test + accessibility review + licensing/provenance + branch protection + dependency audit + founder visual approval. A merged PR is not a release or deployment.
+## Next acceptance priorities
+
+1. **P0:** Keep CI (format, locked unit/integration tests, strict Clippy, release build) green, and validate real Linux graphical runtime on Wayland/X11 without consuming the user's production shell state.
+2. **P0:** Verify branch protection/review gates, security, shell-group lifecycle, license notices, dependency advisories and offline operation.
+3. **P1:** Replace approximate monochrome rows with a correct cell painter: ANSI 16/256/24-bit fg/bg colors, bold/underline/inverse, Unicode double-width/grapheme alignment, supported cursor shapes and measurable redraw performance.
+4. **P1:** Measure actual monospaced font metrics for PTY resizing on varying DPI, font and desktop layouts; qualify scrollback mouse/trackpad behavior and copy/selection boundaries.
+5. **P1:** Add genuine accessible selection, search, clipboard paste confirmation, configurable profiles/fonts and tab-management ergonomics; then splits and session recovery controls.
+6. **P2:** Mouse/SGR reporting, IME, clipboard ownership across Wayland compositors, controlled hyperlinks, Kitty keyboard/graphics support and GPU render batching.
+7. **P2:** Wire native GoreeCloud UI Window Command Nodes to real window operations and qualify visual/keyboard/screen-reader behavior with founder acceptance.
+8. **P2:** Signed distribution packages (Flatpak/AppImage/distro packages), SBOM, upgrade/recovery policy, reproducibility and release notes.
+
+## Release criteria
+
+No Stable or production claims until passing CI **on the exact release commit**, manual native Linux shell/clipboard/resize interaction, device/accessibility qualification, complete license/advisory review, applicable GitHub branch protections, and founder design acceptance. A clean PR is not a release.

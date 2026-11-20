@@ -1,20 +1,24 @@
-# Security, privacy and threat boundaries
+# Security and privacy boundaries
 
-## Operating model
+A terminal runs commands with the user's own operating-system privileges. **It is not a sandbox.** Do not run code you have not reviewed. The app does not attempt to scan or block arbitrary user-entered shell commands.
 
-A terminal is a local command-execution application. Once the user opens it, the shell and programs they run have the **same OS permissions as that user**. This program does not promise to sandbox commands, malware, scripts, build tools or terminal content. Never execute untrusted scripts without an independent review.
+## Current controls
 
-- Startup selects an absolute, executable `$SHELL` or falls back to `/bin/sh`; it does not launch via `sh -c`.
-- Remote shell output is parsed as untrusted bytes by `vt100`; the UI receives only text rows and never executes or resolves links in the preview.
-- OSC 52 clipboard access and URL auto-opening are **not implemented**. Keyboard paste, copy/selection and clipboard integration remain out of scope until threat review.
-- No telemetry, uploads, central session logs, shell command history database, remote AI assistance or automatic cloud backup of terminal content.
-- 128×8192 bytes maximum queued reader-chunk payloads; process-output and scrollback sizes bounded. This cannot prevent every denial-of-service (CPU, graphics, extremely long escape streams).
-- Do not run the UI as root; never grant a network-facing API or unattended privileged control as an implicit integration.
+- The shell starts by absolute executable path via portable-pty, not by shell-string evaluation.
+- Each tab owns an independent local PTY. Dropping a tab kills its direct shell child, but independent grandchildren may survive; full process-group cleanup needs verification.
+- Shell output is parsed by vt100 and rendered as plain-text rows; raw terminal content cannot become executable Slint/HTML markup.
+- Reader channels are bounded (128 × 8 KiB chunks per tab); scrollback is limited to 2,000 rows. Up to eight tabs are supported. A noisy child can still consume significant CPU; memory caps are not complete denial-of-service protection.
+- Clipboard access is explicit (Ctrl+Shift+C, Ctrl+Shift+V or buttons). Copy is limited to 128 KiB of visible text. Paste is limited to 32 KiB, denies terminal control characters, and blocks unbracketed multiline input to reduce accidental command injection.
+- Shell-enabled bracketed paste surrounds sanitized content with the conventional delimiters. Users must still inspect pasted commands.
+- No OSC 52 clipboard handling, hyperlink opening, telemetry, session upload, automatic shell-history recording, remote command service, or cloud synchronization.
+- No default privileged service, sandbox-bypass mechanism or user data upload.
 
-## Dependency/provenance policy
+## Current limitations and follow-up
 
-Pinned top-level direct versions: Slint 1.19.0, portable-pty 0.9.0, vt100 0.18.1; the generated Cargo.lock is now committed and captures the currently resolved transitive dependency graph. Run `cargo audit` against the completed dependency graph, inspect advisories and licensing. Do not treat a passing security scanner as proof of safety.
+Pure Wayland without XWayland may not support the default arboard backend. No unsafe helper shell commands are run as fallback. Test native shell invocation, kill behavior, clipboard ownership, font-scale geometry, scrolling and color escape handling on real hardware. Add fuzz tests for VT streams and dependency vulnerability screening before stable acceptance.
 
-## Report issues
+The Linux application has not completed independent security assessment and should not be used as the sole terminal for sensitive credentials. Never share real shell history, environment variables, private keys, clipboard secrets or unredacted terminal screenshots in public issues.
 
-Use [GitHub issues](https://github.com/GoreeCloud/terminal/issues) for non-sensitive bugs. Avoid posting credentials, shell history, keys, environment values or exploit details publicly. For critical vulnerabilities, request a private disclosure channel rather than attaching secrets to an issue.
+## Dependency handling
+
+Top-level dependencies are pinned where possible, and Cargo.lock is committed. See [third-party notices](THIRD_PARTY.md). This is not proof that every transitive package is vulnerability-free. Run a verified advisory and license scanner during a release candidate, without automatically executing unreviewed third-party scripts.

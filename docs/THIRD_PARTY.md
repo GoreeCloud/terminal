@@ -1,12 +1,15 @@
-# Dependencies, licenses and provenance
+# Third-party sources, licenses and provenance
 
-This repo contains original GoreeCloud Rust/Slint application source. Third-party code remains referenced as dependencies, **not copied or relicensed as GoreeCloud-owned source**.
+GoreeCloud Terminal contains original Rust/Slint application code; it references third-party crates via Cargo. It does not copy Ghostty source or claim ownership of upstream components.
 
-| Dependency | Source | Purpose | License / review |
+| Library | Version | Origin / function | License |
 | --- | --- | --- | --- |
-| Slint 1.19.0 | https://github.com/slint-ui/slint | Native Linux UI, compiled Slint markup | Used under GPL-3.0-only (repository distributed under GPL-3.0-only). |
-| portable-pty 0.9.0 | https://github.com/wez/wezterm (now maintained as independent crate) | Unix PTY process I/O | MIT; verify resolved source and transitive licenses before release. |
-| vt100 0.18.1 | https://github.com/doy/vt100-rust | Escape parser, visible cell state, scrollback | MIT; verify resolved source and transitive licenses before release. |
-| anyhow 1.x | https://github.com/dtolnay/anyhow | Error context | MIT OR Apache-2.0. |
+| [Slint](https://github.com/slint-ui/slint) | 1.19.0 | Native desktop UI, Winit/FemtoVG rendering | GPL-3.0-only usage path; GoreeCloud Terminal source is GPL-3.0-only |
+| [portable-pty](https://github.com/wez/wezterm) | 0.9.0 | Unix pseudoterminal sessions | MIT (verify packaged notices) |
+| [vt100](https://github.com/doy/vt100-rust) | 0.18.1 | VT screen/escape-state parser | MIT (verify packaged notices) |
+| [arboard](https://github.com/1Password/arboard) | 3.7.0 | User-initiated system clipboard operations | MIT OR Apache-2.0 |
+| [anyhow](https://github.com/dtolnay/anyhow) | 1.x | Rust error context | MIT OR Apache-2.0 |
 
-Slint has GPL-3.0-only, royalty-free and commercial options; this free/open-source application intentionally selects GPLv3. These findings are initial public-source licensing research and are **not** a third-party code audit, dependency scan, license opinion or security certification. Upstream notices and attribution must remain correct for packaged outputs.
+The standard library and Cargo-resolved transitive dependencies remain bound by their individual licenses. Cargo.lock records resolved versions, not legal clearance, a supply-chain scan or malware certification. Slint supports multiple licensing paths; this repository intentionally uses the GPLv3 path and includes the full LICENSE. Do not relicense vendored upstream code as original GoreeCloud work.
+
+Prior to stable distribution: audit full dependency tree, package appropriate third-party notices, check security advisories, verify exact dependency source and provenance, and validate compatible license obligations.
