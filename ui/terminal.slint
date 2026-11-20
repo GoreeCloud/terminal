@@ -1,0 +1,169 @@
+// Slint-native preview with GoreeCloud UI alpha dark semantic palette.
+// The OS provides window decoration; custom WCN chrome is not claimed yet.
+import { Button, Palette } from "std-widgets.slint";
+
+export struct TerminalCell {
+    text: string,
+    foreground: color,
+    background: color,
+    bold: bool,
+    italic: bool,
+    underline: bool,
+    row: int,
+    column: int,
+    span: int,
+}
+
+export component TerminalWindow inherits Window {
+    title: "GoreeCloud Terminal";
+    preferred-width: 1030px;
+    preferred-height: 650px;
+    background: #0D121D;
+
+    // GoreeCloud UI alpha uses a dark surface; keep native widgets legible
+    // regardless of the host desktop's global light/dark preference.
+    init => { Palette.color-scheme = ColorScheme.dark; }
+
+    // Only styled and occupied cells are materialized; blank rows use the pane background.
+    in-out property <[TerminalCell]> cells: [];
+    in-out property <float> zoom: 1.0;
+    private property <length> cell-width: 9.2px * root.zoom;
+    private property <length> cell-height: 22px * root.zoom;
+    in-out property <[string]> tabs: [];
+    in-out property <int> active-tab: 0;
+    in-out property <string> status: "Starting local shell…";
+    callback typed(string, bool, bool, bool);
+    callback new-tab();
+    callback close-tab();
+    callback select-tab(int);
+    callback scroll(int);
+    callback copy-visible();
+    callback paste();
+    callback zoom-in();
+    callback zoom-out();
+    forward-focus: keys;
+
+    VerticalLayout {
+        padding: 12px;
+        spacing: 10px;
+
+        Rectangle {
+            height: 52px;
+            background: #171D2A;
+            border-radius: 18px;
+            HorizontalLayout {
+                padding-left: 20px;
+                padding-right: 20px;
+                alignment: start;
+                spacing: 12px;
+                Text {
+                    text: "GOREECLOUD / TERMINAL";
+                    color: #F2F4FB;
+                    font-size: 16px;
+                    font-weight: 650;
+                    vertical-alignment: center;
+                }
+                Rectangle {
+                    background: transparent;
+                    horizontal-stretch: 1;
+                }
+                Text {
+                    text: "LOCAL • OFFLINE";
+                    color: #95E0BB;
+                    font-size: 12px;
+                    vertical-alignment: center;
+                }
+            }
+        }
+
+        Rectangle {
+            height: 44px;
+            background: #252D3D;
+            border-radius: 12px;
+            HorizontalLayout {
+                padding-left: 8px;
+                padding-right: 8px;
+                spacing: 5px;
+                for tab[index] in root.tabs: Button {
+                    text: root.active-tab == index ? "● " + tab : tab;
+                    clicked => { root.select-tab(index); keys.focus(); }
+                }
+                Button { text: "New"; clicked => { root.new-tab(); keys.focus(); } }
+                Button { text: "Close"; clicked => { root.close-tab(); keys.focus(); } }
+                Button { text: "↑"; accessible-label: "Scroll up ten lines"; clicked => { root.scroll(-10); keys.focus(); } }
+                Button { text: "↓"; accessible-label: "Scroll down ten lines"; clicked => { root.scroll(10); keys.focus(); } }
+                Button { text: "Copy"; clicked => { root.copy-visible(); keys.focus(); } }
+                Button { text: "Paste"; clicked => { root.paste(); keys.focus(); } }
+                Button { text: "A−"; accessible-label: "Decrease terminal font size"; clicked => { root.zoom-out(); keys.focus(); } }
+                Button { text: "A+"; accessible-label: "Increase terminal font size"; clicked => { root.zoom-in(); keys.focus(); } }
+            }
+        }
+
+        keys := FocusScope {
+            vertical-stretch: 1;
+            key-pressed(event) => {
+                root.typed(event.text, event.modifiers.control, event.modifiers.alt, event.modifiers.shift);
+                accept
+            }
+            Rectangle {
+                background: #171D2A;
+                border-radius: 18px;
+                border-width: 1px;
+                border-color: #505B70;
+                Rectangle {
+                    x: 18px;
+                    y: 18px;
+                    width: parent.width - 36px;
+                    height: parent.height - 36px;
+                    clip: true;
+                    background: #171D2A;
+
+                    for cell in root.cells: Rectangle {
+                        x: cell.column * root.cell-width;
+                        y: cell.row * root.cell-height;
+                        width: cell.span * root.cell-width;
+                        height: root.cell-height;
+                        background: cell.background;
+                        Text {
+                            text: cell.text;
+                            x: 0px;
+                            y: 0px;
+                            width: parent.width;
+                            height: parent.height;
+                            color: cell.foreground;
+                            font-family: "monospace";
+                            font-size: 15px * root.zoom;
+                            font-weight: cell.bold ? 700 : 400;
+                            font-italic: cell.italic;
+                            vertical-alignment: center;
+                            horizontal-alignment: left;
+                        }
+                        if cell.underline: Rectangle {
+                            x: 0px;
+                            y: parent.height - 2px;
+                            width: parent.width;
+                            height: 1px;
+                            background: cell.foreground;
+                        }
+                    }
+                }
+            }
+        }
+
+        Rectangle {
+            height: 34px;
+            background: #252D3D;
+            border-radius: 12px;
+            HorizontalLayout {
+                padding-left: 14px;
+                padding-right: 14px;
+                Text {
+                    text: root.status;
+                    color: #CED5E5;
+                    font-size: 12px;
+                    vertical-alignment: center;
+                }
+            }
+        }
+    }
+}
