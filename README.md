@@ -11,6 +11,7 @@ This repository contains a Rust/Slint desktop application that runs ordinary loc
 | Native Linux interface | Slint 1.19.0 (Rust, Winit/FemtoVG) | Development source |
 | Shell/PTY | portable-pty 0.9.0 | Independent local shell per tab, bounded output channel |
 | Terminal-state parser | vt100 0.18.1 | ANSI/VT input, cursor, 2,000-row scrollback |
+| Native display painter | Rust VT cell snapshot + Slint | Development-stage ANSI 16/256/RGB fg/bg, bold/italic/underline, inverse cursor and wide-character cell spans |
 | Clipboard | arboard 3.7.0 | Explicit Copy/Paste; X11/XWayland default |
 | Design foundation | [GoreeCloud UI](https://github.com/GoreeCloud/gc-ui) | Alpha dark semantic palette; native WCN acceptance pending |
 
@@ -26,6 +27,8 @@ cargo test --locked --all-targets
 cargo clippy --locked --all-targets -- -D warnings
 cargo run --locked
 ~~~
+
+The GitHub Actions workflow also uploads a **short-lived unsigned Linux preview binary and SHA-256 digest** on successful CI. Preview artifacts are for controlled testing only, not installed packages or signed releases.
 
 Build a local desktop install (not a signed or audited release):
 
@@ -45,7 +48,7 @@ install -Dm644 packaging/linux/goreecloud-terminal.desktop ~/.local/share/applic
 - **Ctrl+Shift+PageUp/PageDown:** navigate bounded scrollback; the same actions are available through toolbar buttons.
 - Use native tab controls for switching sessions. The application also has a status line for shell exits, resize/paste errors and scrollback state.
 
-**Important limitations:** The current renderer is monochrome text, with approximate character width/height; it is not an accurate per-cell truecolor renderer. Resizing uses estimated cell metrics, not measured font glyphs. Copy currently copies the visible screen, not a drag selection. Mouse tracking, IME, hyperlink activation, Kitty graphics, splits, persistent profiles and full screen-reader acceptance are not implemented.
+**Important limitations:** A new native Slint cell painter renders 16/256/RGB colors and basic ANSI text attributes, with VT parser wide-glyph spans. It is **not yet visually accepted** on a real Linux display and uses approximate fixed cell/font metrics; complex Unicode shaping and font fallback remain unqualified. Resizing uses estimated cell dimensions rather than measured glyph metrics. Copy currently copies the visible screen, not a drag selection. Mouse tracking, IME, hyperlink activation, Kitty graphics, splits, persistent profiles and full screen-reader acceptance are not implemented.
 
 On pure Wayland without XWayland, arboard's default clipboard backend may not work. There is no fallback command invoking untrusted external helpers. Use a genuine supported desktop session when validating the native GUI.
 

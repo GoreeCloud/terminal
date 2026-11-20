@@ -33,3 +33,14 @@ jobs:
         run: cargo clippy --locked --all-targets -- -D warnings
       - name: Compile release configuration
         run: cargo build --locked --release
+      - name: Compute preview checksum
+        run: sha256sum target/release/goreecloud-terminal > target/release/goreecloud-terminal.sha256
+      - name: Upload unsigned Linux preview for device testing
+        uses: actions/upload-artifact@v4
+        with:
+          name: goreecloud-terminal-preview-linux-x86_64
+          path: |
+            target/release/goreecloud-terminal
+            target/release/goreecloud-terminal.sha256
+          if-no-files-found: error
+          retention-days: 7

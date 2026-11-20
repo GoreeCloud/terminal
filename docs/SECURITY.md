@@ -6,7 +6,7 @@ A terminal runs commands with the user's own operating-system privileges. **It i
 
 - The shell starts by absolute executable path via portable-pty, not by shell-string evaluation.
 - Each tab owns an independent local PTY. Dropping a tab kills its direct shell child, but independent grandchildren may survive; full process-group cleanup needs verification.
-- Shell output is parsed by vt100 and rendered as plain-text rows; raw terminal content cannot become executable Slint/HTML markup.
+- Shell output is parsed by vt100 into bounded native display cells. The renderer resolves only cell colors/text/style and never executes shell output as markup, callback code, hyperlink actions or clipboard instructions. VT parser data remains an untrusted input surface.
 - Reader channels are bounded (128 × 8 KiB chunks per tab); scrollback is limited to 2,000 rows. Up to eight tabs are supported. A noisy child can still consume significant CPU; memory caps are not complete denial-of-service protection.
 - Clipboard access is explicit (Ctrl+Shift+C, Ctrl+Shift+V or buttons). Copy is limited to 128 KiB of visible text. Paste is limited to 32 KiB, denies terminal control characters, and blocks unbracketed multiline input to reduce accidental command injection.
 - Shell-enabled bracketed paste surrounds sanitized content with the conventional delimiters. Users must still inspect pasted commands.
