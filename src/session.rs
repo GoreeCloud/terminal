@@ -100,5 +100,3 @@ mod tests {
         assert!(default_shell().exists());
     }
 }
-
-[executed on device: personal-laptop-ideapad3-01 (f760ad53-00b1-412e-9f38-92d15b9aa95c)]

@@ -84,5 +84,3 @@ mod tests {
         assert_eq!(screen.dimensions(), (5, 320));
     }
 }
-
-[executed on device: personal-laptop-ideapad3-01 (f760ad53-00b1-412e-9f38-92d15b9aa95c)]

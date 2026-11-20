@@ -73,5 +73,3 @@ fn rows_model(rows: Vec<String>) -> ModelRc<SharedString> {
     let strings = rows.into_iter().map(SharedString::from).collect::<Vec<_>>();
     ModelRc::new(VecModel::from(strings))
 }
-
-[executed on device: personal-laptop-ideapad3-01 (f760ad53-00b1-412e-9f38-92d15b9aa95c)]

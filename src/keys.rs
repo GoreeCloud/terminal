@@ -88,5 +88,3 @@ mod tests {
         assert_eq!(encode_key("\u{f777}", false, false, false), None);
     }
 }
-
-[executed on device: personal-laptop-ideapad3-01 (f760ad53-00b1-412e-9f38-92d15b9aa95c)]
