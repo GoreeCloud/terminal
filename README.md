@@ -28,7 +28,7 @@ cargo clippy --locked --all-targets -- -D warnings
 cargo run --locked
 ~~~
 
-The GitHub Actions workflow also uploads a **short-lived unsigned Linux preview binary and SHA-256 digest** on successful CI. Preview artifacts are for controlled testing only, not installed packages or signed releases.
+The GitHub Actions workflow also uploads a **short-lived unsigned Linux preview binary and SHA-256 digest** on successful CI. Preview artifacts are for controlled testing only, not installed packages or signed releases. Weekly Dependabot review PRs are configured for Cargo dependencies and GitHub Actions; they do not auto-merge.
 
 Build a local desktop install (not a signed or audited release):
 
@@ -46,7 +46,7 @@ install -Dm644 packaging/linux/goreecloud-terminal.desktop ~/.local/share/applic
 - **Ctrl+Shift+C:** copy the visible screen as plain text to the system clipboard.
 - **Ctrl+Shift+V:** paste the system clipboard. Multiline paste is blocked unless the terminal application has enabled bracketed-paste mode. Control characters and oversized pastes are blocked.
 - **Ctrl+Shift+PageUp/PageDown:** navigate bounded scrollback; the same actions are available through toolbar buttons.
-- Use native tab controls for switching sessions. The application also has a status line for shell exits, resize/paste errors and scrollback state.
+- Use native tab controls for switching sessions. The **A− / A+** controls change the terminal text zoom (75%–175%) and update PTY row/column geometry. The application also has a status line for shell exits, resize/paste errors and scrollback state.
 
 **Important limitations:** A new native Slint cell painter renders 16/256/RGB colors and basic ANSI text attributes, with VT parser wide-glyph spans. It is **not yet visually accepted** on a real Linux display and uses approximate fixed cell/font metrics; complex Unicode shaping and font fallback remain unqualified. Resizing uses estimated cell dimensions rather than measured glyph metrics. Copy currently copies the visible screen, not a drag selection. Mouse tracking, IME, hyperlink activation, Kitty graphics, splits, persistent profiles and full screen-reader acceptance are not implemented.
 

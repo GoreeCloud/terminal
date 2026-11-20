@@ -68,8 +68,15 @@ impl Screen {
     }
     /// Approximate cells for the fixed 15px monospace font and current Slint chrome.
     pub fn grid_for_window(width: f32, height: f32) -> (u16, u16) {
-        let cols = ((width.max(0.0) - 60.0) / 9.2).floor() as u16;
-        let rows = ((height.max(0.0) - 216.0) / 22.0).floor() as u16;
+        Self::grid_for_window_at_zoom(width, height, 1.0)
+    }
+
+    /// Zoom-aware terminal geometry. UI and PTY use the same logical dimensions.
+    /// Fixed metrics are an approximation until measured native font-cell sizing.
+    pub fn grid_for_window_at_zoom(width: f32, height: f32, zoom: f32) -> (u16, u16) {
+        let zoom = if zoom.is_finite() { zoom.clamp(0.75, 1.75) } else { 1.0 };
+        let cols = ((width.max(0.0) - 60.0) / (9.2 * zoom)).floor() as u16;
+        let rows = ((height.max(0.0) - 216.0) / (22.0 * zoom)).floor() as u16;
         (rows.clamp(5, 200), cols.clamp(20, 320))
     }
 
@@ -144,6 +151,18 @@ mod tests {
         let (rows, cols) = Screen::grid_for_window(1030.0, 650.0);
         assert!(rows >= 18 && cols >= 100);
         assert_eq!(Screen::grid_for_window(99999.0, 99999.0), (200, 320));
+    }
+    #[test]
+    fn zoom_adjusts_pty_grid_with_safe_limits() {
+        let original = Screen::grid_for_window(1030.0, 650.0);
+        let larger = Screen::grid_for_window_at_zoom(1030.0, 650.0, 1.5);
+        let smaller = Screen::grid_for_window_at_zoom(1030.0, 650.0, 0.75);
+        assert!(larger.0 < original.0 && larger.1 < original.1);
+        assert!(smaller.0 > original.0 && smaller.1 > original.1);
+        assert_eq!(
+            Screen::grid_for_window_at_zoom(1030.0, 650.0, f32::NAN),
+            original,
+        );
     }
     #[test]
     fn scrollback_can_be_navigated_safely() {

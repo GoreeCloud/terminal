@@ -19,6 +19,10 @@ Pure Wayland without XWayland may not support the default arboard backend. No un
 
 The Linux application has not completed independent security assessment and should not be used as the sole terminal for sensitive credentials. Never share real shell history, environment variables, private keys, clipboard secrets or unredacted terminal screenshots in public issues.
 
+## Repository security settings
+
+GitHub Dependabot vulnerability alerts were enabled and verified through the GitHub API on November 20, 2026. The initial alert list was empty; analysis and future alerts require independent monitoring. Weekly Dependabot update pull requests for Cargo and GitHub Actions are configured in `.github/dependabot.yml`. They are **not auto-merged**, and neither feature replaces a vulnerability/license audit. GitHub code scanning has no completed analysis yet.
+
 ## Dependency handling
 
 Top-level dependencies are pinned where possible, and Cargo.lock is committed. See [third-party notices](THIRD_PARTY.md). This is not proof that every transitive package is vulnerability-free. Run a verified advisory and license scanner during a release candidate, without automatically executing unreviewed third-party scripts.

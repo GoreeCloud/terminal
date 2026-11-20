@@ -378,6 +378,20 @@ fn main() -> Result<()> {
         }
     });
 
+    let zoom_in_ui = app.as_weak();
+    app.on_zoom_in(move || {
+        if let Some(ui) = zoom_in_ui.upgrade() {
+            ui.set_zoom((ui.get_zoom() + 0.1).min(1.75));
+        }
+    });
+
+    let zoom_out_ui = app.as_weak();
+    app.on_zoom_out(move || {
+        if let Some(ui) = zoom_out_ui.upgrade() {
+            ui.set_zoom((ui.get_zoom() - 0.1).max(0.75));
+        }
+    });
+
     let tick_state = Rc::clone(&state);
     let weak = app.as_weak();
     let timer = Timer::default();
@@ -388,8 +402,11 @@ fn main() -> Result<()> {
             if size.width < 100 || size.height < 100 {
                 return;
             }
-            let (rows, cols) =
-                Screen::grid_for_window(size.width as f32 / scale, size.height as f32 / scale);
+            let (rows, cols) = Screen::grid_for_window_at_zoom(
+                size.width as f32 / scale,
+                size.height as f32 / scale,
+                ui.get_zoom(),
+            );
             let changed = tick_state.borrow_mut().poll(rows, cols);
             if changed {
                 tick_state.borrow().update_view(&ui);

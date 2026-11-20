@@ -22,8 +22,9 @@ export component TerminalWindow inherits Window {
 
     // Only styled and occupied cells are materialized; blank rows use the pane background.
     in-out property <[TerminalCell]> cells: [];
-    private property <length> cell-width: 9.2px;
-    private property <length> cell-height: 22px;
+    in-out property <float> zoom: 1.0;
+    private property <length> cell-width: 9.2px * root.zoom;
+    private property <length> cell-height: 22px * root.zoom;
     in-out property <[string]> tabs: [];
     in-out property <int> active-tab: 0;
     in-out property <string> status: "Starting local shell…";
@@ -34,6 +35,8 @@ export component TerminalWindow inherits Window {
     callback scroll(int);
     callback copy-visible();
     callback paste();
+    callback zoom-in();
+    callback zoom-out();
     forward-focus: keys;
 
     VerticalLayout {
@@ -81,6 +84,8 @@ export component TerminalWindow inherits Window {
                 Button { text: "↓"; clicked => { root.scroll(10); keys.focus(); } }
                 Button { text: "Copy"; clicked => { root.copy-visible(); keys.focus(); } }
                 Button { text: "Paste"; clicked => { root.paste(); keys.focus(); } }
+                Button { text: "A−"; clicked => { root.zoom-out(); keys.focus(); } }
+                Button { text: "A+"; clicked => { root.zoom-in(); keys.focus(); } }
             }
         }
 
@@ -117,7 +122,7 @@ export component TerminalWindow inherits Window {
                             height: parent.height;
                             color: cell.foreground;
                             font-family: "monospace";
-                            font-size: 15px;
+                            font-size: 15px * root.zoom;
                             font-weight: cell.bold ? 700 : 400;
                             font-italic: cell.italic;
                             vertical-alignment: center;
