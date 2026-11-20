@@ -1,5 +1,7 @@
-// Native Linux UI based on GoreeCloud UI's alpha dark semantic roles.
-// The host OS owns window chrome; unimplemented Window Command Nodes are not faked.
+// Slint-native preview with GoreeCloud UI alpha dark semantic palette.
+// The OS provides window decoration; custom WCN chrome is not claimed yet.
+import { Button } from "std-widgets.slint";
+
 export component TerminalWindow inherits Window {
     title: "GoreeCloud Terminal";
     preferred-width: 1030px;
@@ -7,8 +9,16 @@ export component TerminalWindow inherits Window {
     background: #0D121D;
 
     in-out property <[string]> rows: [];
+    in-out property <[string]> tabs: [];
+    in-out property <int> active-tab: 0;
     in-out property <string> status: "Starting local shell…";
     callback typed(string, bool, bool, bool);
+    callback new-tab();
+    callback close-tab();
+    callback select-tab(int);
+    callback scroll(int);
+    callback copy-visible();
+    callback paste();
     forward-focus: keys;
 
     VerticalLayout {
@@ -24,17 +34,38 @@ export component TerminalWindow inherits Window {
                 padding-right: 20px;
                 alignment: center;
                 Text {
-                    text: "GOREECLOUD  /  TERMINAL";
+                    text: "GOREECLOUD / TERMINAL";
                     color: #F2F4FB;
                     font-size: 16px;
                     font-weight: 650;
                     horizontal-stretch: 1;
                 }
                 Text {
-                    text: "LOCAL FIRST";
+                    text: "LOCAL • OFFLINE";
                     color: #95E0BB;
                     font-size: 12px;
                 }
+            }
+        }
+
+        Rectangle {
+            height: 44px;
+            background: #252D3D;
+            border-radius: 12px;
+            HorizontalLayout {
+                padding-left: 8px;
+                padding-right: 8px;
+                spacing: 5px;
+                for tab[index] in root.tabs: Button {
+                    text: root.active-tab == index ? "● " + tab : tab;
+                    clicked => { root.select-tab(index); keys.focus(); }
+                }
+                Button { text: "New"; clicked => { root.new-tab(); keys.focus(); } }
+                Button { text: "Close"; clicked => { root.close-tab(); keys.focus(); } }
+                Button { text: "↑"; clicked => { root.scroll(-10); keys.focus(); } }
+                Button { text: "↓"; clicked => { root.scroll(10); keys.focus(); } }
+                Button { text: "Copy"; clicked => { root.copy-visible(); keys.focus(); } }
+                Button { text: "Paste"; clicked => { root.paste(); keys.focus(); } }
             }
         }
 
