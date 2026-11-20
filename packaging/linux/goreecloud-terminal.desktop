@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=GoreeCloud Terminal
+GenericName=Terminal Emulator
+Comment=Local-first Linux terminal
+TryExec=goreecloud-terminal
+Exec=goreecloud-terminal
+Icon=utilities-terminal
+Terminal=false
+Categories=System;TerminalEmulator;
+StartupNotify=true

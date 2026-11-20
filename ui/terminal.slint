@@ -1,0 +1,84 @@
+// Native Linux UI based on GoreeCloud UI's alpha dark semantic roles.
+// The host OS owns window chrome; unimplemented Window Command Nodes are not faked.
+export component TerminalWindow inherits Window {
+    title: "GoreeCloud Terminal";
+    preferred-width: 1030px;
+    preferred-height: 650px;
+    background: #0D121D;
+
+    in-out property <[string]> rows: [];
+    in-out property <string> status: "Starting local shell…";
+    callback typed(string, bool, bool, bool);
+    forward-focus: keys;
+
+    VerticalLayout {
+        padding: 12px;
+        spacing: 10px;
+
+        Rectangle {
+            height: 52px;
+            background: #171D2A;
+            border-radius: 18px;
+            HorizontalLayout {
+                padding-left: 20px;
+                padding-right: 20px;
+                alignment: center;
+                Text {
+                    text: "GOREECLOUD  /  TERMINAL";
+                    color: #F2F4FB;
+                    font-size: 16px;
+                    font-weight: 650;
+                    horizontal-stretch: 1;
+                }
+                Text {
+                    text: "LOCAL FIRST";
+                    color: #95E0BB;
+                    font-size: 12px;
+                }
+            }
+        }
+
+        keys := FocusScope {
+            vertical-stretch: 1;
+            key-pressed(event) => {
+                root.typed(event.text, event.modifiers.control, event.modifiers.alt, event.modifiers.shift);
+                accept
+            }
+            Rectangle {
+                background: #171D2A;
+                border-radius: 18px;
+                border-width: 1px;
+                border-color: #505B70;
+                VerticalLayout {
+                    padding: 18px;
+                    spacing: 0px;
+                    for line in root.rows: Text {
+                        text: line;
+                        font-family: "monospace";
+                        font-size: 15px;
+                        height: 22px;
+                        color: #F2F4FB;
+                        vertical-alignment: center;
+                        horizontal-alignment: left;
+                    }
+                }
+            }
+        }
+
+        Rectangle {
+            height: 34px;
+            background: #252D3D;
+            border-radius: 12px;
+            HorizontalLayout {
+                padding-left: 14px;
+                padding-right: 14px;
+                Text {
+                    text: root.status;
+                    color: #CED5E5;
+                    font-size: 12px;
+                    vertical-alignment: center;
+                }
+            }
+        }
+    }
+}
