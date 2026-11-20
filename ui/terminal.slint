@@ -1,6 +1,6 @@
 // Slint-native preview with GoreeCloud UI alpha dark semantic palette.
 // The OS provides window decoration; custom WCN chrome is not claimed yet.
-import { Button } from "std-widgets.slint";
+import { Button, Palette } from "std-widgets.slint";
 
 export struct TerminalCell {
     text: string,
@@ -19,6 +19,10 @@ export component TerminalWindow inherits Window {
     preferred-width: 1030px;
     preferred-height: 650px;
     background: #0D121D;
+
+    // GoreeCloud UI alpha uses a dark surface; keep native widgets legible
+    // regardless of the host desktop's global light/dark preference.
+    init => { Palette.color-scheme = ColorScheme.dark; }
 
     // Only styled and occupied cells are materialized; blank rows use the pane background.
     in-out property <[TerminalCell]> cells: [];
@@ -50,18 +54,24 @@ export component TerminalWindow inherits Window {
             HorizontalLayout {
                 padding-left: 20px;
                 padding-right: 20px;
-                alignment: center;
+                alignment: start;
+                spacing: 12px;
                 Text {
                     text: "GOREECLOUD / TERMINAL";
                     color: #F2F4FB;
                     font-size: 16px;
                     font-weight: 650;
+                    vertical-alignment: center;
+                }
+                Rectangle {
+                    background: transparent;
                     horizontal-stretch: 1;
                 }
                 Text {
                     text: "LOCAL • OFFLINE";
                     color: #95E0BB;
                     font-size: 12px;
+                    vertical-alignment: center;
                 }
             }
         }
@@ -80,12 +90,12 @@ export component TerminalWindow inherits Window {
                 }
                 Button { text: "New"; clicked => { root.new-tab(); keys.focus(); } }
                 Button { text: "Close"; clicked => { root.close-tab(); keys.focus(); } }
-                Button { text: "↑"; clicked => { root.scroll(-10); keys.focus(); } }
-                Button { text: "↓"; clicked => { root.scroll(10); keys.focus(); } }
+                Button { text: "↑"; accessible-label: "Scroll up ten lines"; clicked => { root.scroll(-10); keys.focus(); } }
+                Button { text: "↓"; accessible-label: "Scroll down ten lines"; clicked => { root.scroll(10); keys.focus(); } }
                 Button { text: "Copy"; clicked => { root.copy-visible(); keys.focus(); } }
                 Button { text: "Paste"; clicked => { root.paste(); keys.focus(); } }
-                Button { text: "A−"; clicked => { root.zoom-out(); keys.focus(); } }
-                Button { text: "A+"; clicked => { root.zoom-in(); keys.focus(); } }
+                Button { text: "A−"; accessible-label: "Decrease terminal font size"; clicked => { root.zoom-out(); keys.focus(); } }
+                Button { text: "A+"; accessible-label: "Increase terminal font size"; clicked => { root.zoom-in(); keys.focus(); } }
             }
         }
 
