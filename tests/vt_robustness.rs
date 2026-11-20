@@ -17,7 +17,8 @@ fn arbitrary_bounded_pty_streams_are_safe_to_snapshot() {
                 *byte = state as u8;
             }
             if block % 7 == 0 {
-                bytes[..14].copy_from_slice(b"\x1b[?1049h\x1b[31m");
+                let prefix = b"\x1b[?1049h\x1b[31m";
+                bytes[..prefix.len()].copy_from_slice(prefix);
             }
             screen.process(&bytes);
             let cells = screen.render_cells();
