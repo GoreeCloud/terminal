@@ -1,6 +1,8 @@
 //! VT parser and bounded snapshot of the visible text grid.
 //! This first preview intentionally renders monochrome text. Truecolor, complex
 //! width/grapheme layout, mouse reporting, IME, and selection are roadmap work.
+use std::num::NonZeroU16;
+
 pub const ROWS: u16 = 24;
 pub const COLS: u16 = 80;
 const SCROLLBACK: usize = 2_000;
@@ -14,7 +16,11 @@ pub struct Screen {
 impl Screen {
     pub fn new() -> Self {
         Self {
-            parser: vt100::Parser::new(ROWS, COLS, SCROLLBACK),
+            parser: vt100::Parser::new(
+                NonZeroU16::new(ROWS).expect("terminal rows nonzero"),
+                NonZeroU16::new(COLS).expect("terminal columns nonzero"),
+                SCROLLBACK,
+            ),
             rows: ROWS,
             cols: COLS,
         }
@@ -53,7 +59,10 @@ impl Screen {
     pub fn resize(&mut self, rows: u16, cols: u16) {
         let rows = rows.clamp(5, 200);
         let cols = cols.clamp(20, 320);
-        self.parser.set_size(rows, cols);
+        self.parser.set_size(
+            NonZeroU16::new(rows).expect("clamped rows nonzero"),
+            NonZeroU16::new(cols).expect("clamped columns nonzero"),
+        );
         self.rows = rows;
         self.cols = cols;
     }

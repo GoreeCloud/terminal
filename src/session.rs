@@ -1,6 +1,6 @@
 //! Local shell startup with a real Linux PTY. No shell string evaluation.
 use anyhow::{anyhow, Context, Result};
-use portable_pty::{native_pty_system, CommandBuilder, MasterPty, PtySize, PtySystem};
+use portable_pty::{native_pty_system, CommandBuilder, MasterPty, PtySize};
 use std::{
     io::{Read, Write},
     path::PathBuf,
@@ -37,7 +37,7 @@ pub fn default_shell() -> PathBuf {
 }
 
 pub fn spawn() -> Result<Session> {
-    let mut pair = native_pty_system()
+    let pair = native_pty_system()
         .openpty(PtySize {
             rows: crate::screen::ROWS,
             cols: crate::screen::COLS,
