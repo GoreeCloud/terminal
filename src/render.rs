@@ -164,10 +164,19 @@ mod tests {
         assert_eq!(resolve_color(Color::Idx(16), true), Rgb::new(0, 0, 0));
         assert_eq!(resolve_color(Color::Idx(21), true), Rgb::new(0, 0, 255));
         assert_eq!(resolve_color(Color::Idx(196), true), Rgb::new(255, 0, 0));
-        assert_eq!(resolve_color(Color::Idx(231), true), Rgb::new(255, 255, 255));
+        assert_eq!(
+            resolve_color(Color::Idx(231), true),
+            Rgb::new(255, 255, 255)
+        );
         assert_eq!(resolve_color(Color::Idx(232), true), Rgb::new(8, 8, 8));
-        assert_eq!(resolve_color(Color::Idx(255), true), Rgb::new(238, 238, 238));
-        assert_eq!(resolve_color(Color::Rgb(10, 20, 30), true), Rgb::new(10, 20, 30));
+        assert_eq!(
+            resolve_color(Color::Idx(255), true),
+            Rgb::new(238, 238, 238)
+        );
+        assert_eq!(
+            resolve_color(Color::Rgb(10, 20, 30), true),
+            Rgb::new(10, 20, 30)
+        );
         assert_eq!(resolve_color(Color::Default, true), DEFAULT_FOREGROUND);
         assert_eq!(resolve_color(Color::Default, false), DEFAULT_BACKGROUND);
     }
