@@ -1,7 +1,13 @@
 use anyhow::Result;
 use goreecloud_terminal::{keys, screen::Screen, session};
 use slint::{ComponentHandle, ModelRc, SharedString, Timer, TimerMode, VecModel};
-use std::{cell::RefCell, io::Write, rc::Rc, sync::{Arc, Mutex}, time::Duration};
+use std::{
+    cell::RefCell,
+    io::Write,
+    rc::Rc,
+    sync::{Arc, Mutex},
+    time::Duration,
+};
 
 slint::include_modules!();
 
@@ -39,13 +45,20 @@ fn main() -> Result<()> {
                     changed = true;
                     count += 1;
                 }
-                Ok(session::Output::Closed) => { closed = true; break; }
+                Ok(session::Output::Closed) => {
+                    closed = true;
+                    break;
+                }
                 Err(_) => break,
             }
         }
         if let Some(app) = weak.upgrade() {
-            if changed { app.set_rows(rows_model(parser.borrow().visible_rows())); }
-            if closed { app.set_status("SHELL EXITED · Close this window".into()); }
+            if changed {
+                app.set_rows(rows_model(parser.borrow().visible_rows()));
+            }
+            if closed {
+                app.set_status("SHELL EXITED · Close this window".into());
+            }
         }
     });
 
@@ -60,3 +73,5 @@ fn rows_model(rows: Vec<String>) -> ModelRc<SharedString> {
     let strings = rows.into_iter().map(SharedString::from).collect::<Vec<_>>();
     ModelRc::new(VecModel::from(strings))
 }
+
+[executed on device: personal-laptop-ideapad3-01 (f760ad53-00b1-412e-9f38-92d15b9aa95c)]

@@ -13,7 +13,11 @@ pub struct Screen {
 
 impl Screen {
     pub fn new() -> Self {
-        Self { parser: vt100::Parser::new(ROWS, COLS, SCROLLBACK), rows: ROWS, cols: COLS }
+        Self {
+            parser: vt100::Parser::new(ROWS, COLS, SCROLLBACK),
+            rows: ROWS,
+            cols: COLS,
+        }
     }
 
     pub fn process(&mut self, bytes: &[u8]) {
@@ -25,7 +29,10 @@ impl Screen {
     pub fn visible_rows(&self) -> Vec<String> {
         let screen = self.parser.screen();
         let (cursor_row, cursor_col) = screen.cursor_position();
-        screen.rows(0, self.cols).enumerate().take(self.rows as usize)
+        screen
+            .rows(0, self.cols)
+            .enumerate()
+            .take(self.rows as usize)
             .map(|(idx, raw)| {
                 let mut chars: Vec<char> = raw.chars().collect();
                 // The indicator is a preview fallback, not a fully correct grapheme-cell cursor.
@@ -36,10 +43,13 @@ impl Screen {
                     chars.insert(pos.min(chars.len()), '▌');
                 }
                 chars.into_iter().collect::<String>()
-            }).collect()
+            })
+            .collect()
     }
 
-    pub fn dimensions(&self) -> (u16, u16) { (self.rows, self.cols) }
+    pub fn dimensions(&self) -> (u16, u16) {
+        (self.rows, self.cols)
+    }
     pub fn resize(&mut self, rows: u16, cols: u16) {
         let rows = rows.clamp(5, 200);
         let cols = cols.clamp(20, 320);
@@ -49,24 +59,30 @@ impl Screen {
     }
 }
 
-impl Default for Screen { fn default() -> Self { Self::new() } }
+impl Default for Screen {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 #[cfg(test)]
 mod tests {
     use super::*;
     #[test]
     fn ansi_codes_not_visible_as_raw_escape_text() {
-        let mut screen=Screen::new();
+        let mut screen = Screen::new();
         screen.process(b"\x1b[31mhello\x1b[0m\r\nworld");
-        let view=screen.visible_rows().join("\n");
+        let view = screen.visible_rows().join("\n");
         assert!(view.contains("hello"));
         assert!(view.contains("world"));
         assert!(!view.contains("\x1b"));
     }
     #[test]
     fn bounded_resize() {
-        let mut screen=Screen::new();
+        let mut screen = Screen::new();
         screen.resize(0, 65535);
         assert_eq!(screen.dimensions(), (5, 320));
     }
 }
+
+[executed on device: personal-laptop-ideapad3-01 (f760ad53-00b1-412e-9f38-92d15b9aa95c)]
