@@ -20,6 +20,21 @@ pub struct Session {
     // Keep the child alive until the UI closes.
     pub _child: Box<dyn portable_pty::Child + Send + Sync>,
 }
+impl Session {
+    pub fn resize(&self, rows: u16, cols: u16) -> Result<()> {
+        self.master.resize(PtySize { rows, cols, pixel_width: 0, pixel_height: 0 }).context("resize shell PTY")
+    }
+    pub fn send(&mut self, data: &[u8]) -> Result<()> {
+        self.writer.write_all(data).context("write PTY")?;
+        self.writer.flush().context("flush PTY")
+    }
+}
+impl Drop for Session {
+    fn drop(&mut self) {
+        // A closed tab must not orphan its direct shell child.
+        let _ = self._child.kill();
+    }
+}
 
 pub fn default_shell() -> PathBuf {
     #[cfg(unix)]
@@ -52,7 +67,7 @@ pub fn spawn() -> Result<Session> {
     }
     let mut command = CommandBuilder::new(shell.as_os_str());
     command.env("TERM", "xterm-256color");
-    command.env("COLORTERM", "truecolor");
+    // Omit COLORTERM=truecolor until the native cell renderer supports it.
     let child = pair
         .slave
         .spawn_command(command)

@@ -1,7 +1,14 @@
 //! Translate logical Slint key events to bytes for the shell's PTY.
 //! Does not interpret or execute shell commands.
 pub fn encode_key(text: &str, control: bool, alt: bool, _shift: bool) -> Option<Vec<u8>> {
+    encode_key_for_mode(text, control, alt, _shift, false)
+}
+pub fn encode_key_for_mode(text: &str, control: bool, alt: bool, _shift: bool, app_cursor: bool) -> Option<Vec<u8>> {
     let mut input = match text {
+        "\u{f700}" if app_cursor => b"\x1bOA".to_vec(),
+        "\u{f701}" if app_cursor => b"\x1bOB".to_vec(),
+        "\u{f702}" if app_cursor => b"\x1bOD".to_vec(),
+        "\u{f703}" if app_cursor => b"\x1bOC".to_vec(),
         "\u{000a}" | "\u{000d}" => vec![b'\r'],
         "\u{0008}" => vec![0x7f],
         "\u{0009}" => vec![b'\t'],
@@ -86,6 +93,11 @@ mod tests {
         assert_eq!(encode_key("C", true, false, true), Some(vec![3]));
         assert_eq!(encode_key(" ", true, false, false), Some(vec![0]));
         assert_eq!(encode_key("!", true, false, false), None);
+    }
+    #[test]
+    fn application_cursor_mode() {
+        assert_eq!(encode_key_for_mode("\u{f700}", false, false, false, true), Some(b"\x1bOA".to_vec()));
+        assert_eq!(encode_key_for_mode("\u{f702}", false, false, false, true), Some(b"\x1bOD".to_vec()));
     }
     #[test]
     fn escape_and_cursor_keys() {

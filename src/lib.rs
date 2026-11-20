@@ -2,3 +2,4 @@
 pub mod keys;
 pub mod screen;
 pub mod session;
+pub mod paste;
